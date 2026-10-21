@@ -50,7 +50,7 @@ Thứ tư, quản lý phiên đăng nhập và quyền truy cập. Hệ thống 
 3. Sơ đồ luồng điều hướng
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/38e4162d-47e9-4966-93c3-41e60d28b3b0" />
 
-Hình 1. Sơ đồ luồng điều hướng dự kiến của hệ thống StudentHub.
+ Sơ đồ luồng điều hướng dự kiến của hệ thống StudentHub.
 Sơ đồ thể hiện quá trình xử lý từ trang đăng nhập, kiểm tra thông tin, xác minh vai trò đến hướng điều hướng tương ứng với từng nhóm người dùng. Nếu đăng nhập thất bại, hệ thống hiển thị thông báo lỗi và quay lại trang đăng nhập. Ngoài ra, sơ đồ thể hiện yêu cầu kiểm tra quyền truy cập và đăng xuất nhằm bảo đảm quá trình sử dụng hệ thống được thực hiện theo đúng quyền hạn.
 
 4. Kết quả thực hiện
