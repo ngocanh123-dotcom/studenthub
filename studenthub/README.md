@@ -52,6 +52,7 @@ Thứ tư, quản lý phiên đăng nhập và quyền truy cập. Hệ thống 
 
 Hình 1. Sơ đồ luồng điều hướng dự kiến của hệ thống StudentHub.
 Sơ đồ thể hiện quá trình xử lý từ trang đăng nhập, kiểm tra thông tin, xác minh vai trò đến hướng điều hướng tương ứng với từng nhóm người dùng. Nếu đăng nhập thất bại, hệ thống hiển thị thông báo lỗi và quay lại trang đăng nhập. Ngoài ra, sơ đồ thể hiện yêu cầu kiểm tra quyền truy cập và đăng xuất nhằm bảo đảm quá trình sử dụng hệ thống được thực hiện theo đúng quyền hạn.
+
 4. Kết quả thực hiện
 Ở giai đoạn hiện tại, thành viên 3 đã xác định luồng điều hướng dự kiến cho ba vai trò người dùng và bổ sung phần xác định đường dẫn tương ứng theo vai trò trong mã nguồn PHP của trang đăng nhập. Phần demo hiện có thể kiểm tra thông tin đăng nhập, hiển thị thông báo thành công hoặc thất bại và lưu thông tin phiên đăng nhập bằng Session.
 Do các trang chức năng dành cho Sinh viên, Giảng viên và Quản trị viên chưa được xây dựng, việc chuyển hướng đến các trang đích chưa được triển khai hoàn chỉnh. Chức năng kiểm tra quyền truy cập và đăng xuất cũng cần được hoàn thiện trong giai đoạn phát triển tiếp theo.
