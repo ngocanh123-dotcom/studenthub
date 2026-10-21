@@ -39,18 +39,23 @@ Kết quả cần đạt là giao diện rõ ràng, dễ sử dụng, thống nh
 
 III. Thành viên 3 – Luồng điều hướng - Lê Khánh Ly
 1. Nhiệm vụ được phân công
-Thành viên 3 phụ trách xác định và xây dựng luồng điều hướng của hệ thống StudentHub sau khi người dùng đăng nhập. Nội dung tập trung vào việc xác định hướng điều hướng tương ứng với từng vai trò, bao gồm Sinh viên, Giảng viên và Quản trị viên, đồng thời xác định cách xử lý khi đăng nhập thành công, đăng nhập thất bại và đăng xuất khỏi hệ thống.
+Thành viên 3 phụ trách xác định luồng điều hướng của hệ thống StudentHub, bao gồm luồng xử lý sau khi đăng nhập thành công, đăng nhập thất bại và hướng điều hướng dự kiến theo từng vai trò người dùng. Ba vai trò được xác định trong hệ thống gồm Sinh viên, Giảng viên và Quản trị viên.
+Nhiệm vụ này nhằm làm rõ cách hệ thống xử lý thông tin đăng nhập, xác minh vai trò và xác định khu vực chức năng tương ứng, làm cơ sở cho việc xây dựng và hoàn thiện các chức năng của hệ thống trong những giai đoạn tiếp theo.
 2. Mô tả luồng điều hướng
-Sinh viên: Sau khi đăng nhập thành công và được hệ thống xác minh quyền truy cập, người dùng được điều hướng đến khu vực chức năng dành cho sinh viên.
-Giảng viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực chức năng dành cho giảng viên.
-Quản trị viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực quản trị hệ thống.
-Đăng nhập thất bại: Hệ thống giữ người dùng tại trang đăng nhập và hiển thị thông báo khi tài khoản, mật khẩu không chính xác hoặc thông tin nhập vào chưa đầy đủ.
-Đăng xuất: Hệ thống kết thúc phiên đăng nhập và đưa người dùng trở về trang đăng nhập.
-Truy cập không hợp lệ: Hệ thống kiểm tra trạng thái đăng nhập và quyền của người dùng trước khi cho phép truy cập các khu vực chức năng, tránh việc truy cập trái phép.
-3. Kết quả cần đạt
-Xác định rõ luồng di chuyển giữa màn hình đăng nhập và các khu vực chức năng theo từng vai trò, tạo cơ sở cho việc triển khai lập trình và kiểm thử hệ thống. Việc điều hướng phải dựa trên vai trò đã được xác minh ở phía máy chủ, kết hợp với cơ chế quản lý phiên đăng nhập và kiểm tra quyền truy cập.
-Ở giai đoạn demo hiện tại, thành viên 3 thực hiện xác định luồng điều hướng dự kiến theo ba vai trò. Việc chuyển đến các trang chức năng cụ thể sẽ được hoàn thiện khi các trang đích của hệ thống được xây dựng.
-<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/b0e7a6a6-c3da-4ae5-a3f9-87758fff6bae" />
+Luồng điều hướng của hệ thống StudentHub được mô tả qua các bước sau:
+Thứ nhất, tiếp nhận thông tin đăng nhập. Người dùng truy cập trang đăng nhập, lựa chọn vai trò và nhập tên đăng nhập, mật khẩu. Sau đó, hệ thống tiếp nhận thông tin để thực hiện kiểm tra.
+Thứ hai, kiểm tra thông tin đăng nhập. Hệ thống kiểm tra tính hợp lệ của tên đăng nhập và mật khẩu. Nếu thông tin không chính xác hoặc còn thiếu, hệ thống hiển thị thông báo lỗi và cho phép người dùng nhập lại.
+Thứ ba, xác minh vai trò và xác định hướng điều hướng. Khi thông tin đăng nhập hợp lệ, hệ thống cần xác minh vai trò và quyền truy cập ở phía máy chủ. Dựa trên vai trò đã được xác minh, hệ thống xác định hướng điều hướng tương ứng với Sinh viên, Giảng viên hoặc Quản trị viên.
+Thứ tư, quản lý phiên đăng nhập và quyền truy cập. Hệ thống cần duy trì trạng thái đăng nhập trong phiên làm việc, kiểm tra quyền trước khi cho phép người dùng truy cập các khu vực chức năng và kết thúc phiên khi người dùng đăng xuất.
+3. Sơ đồ luồng điều hướng
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/38e4162d-47e9-4966-93c3-41e60d28b3b0" />
+
+Hình 1. Sơ đồ luồng điều hướng dự kiến của hệ thống StudentHub.
+Sơ đồ thể hiện quá trình xử lý từ trang đăng nhập, kiểm tra thông tin, xác minh vai trò đến hướng điều hướng tương ứng với từng nhóm người dùng. Nếu đăng nhập thất bại, hệ thống hiển thị thông báo lỗi và quay lại trang đăng nhập. Ngoài ra, sơ đồ thể hiện yêu cầu kiểm tra quyền truy cập và đăng xuất nhằm bảo đảm quá trình sử dụng hệ thống được thực hiện theo đúng quyền hạn.
+4. Kết quả thực hiện
+Ở giai đoạn hiện tại, thành viên 3 đã xác định luồng điều hướng dự kiến cho ba vai trò người dùng và bổ sung phần xác định đường dẫn tương ứng theo vai trò trong mã nguồn PHP của trang đăng nhập. Phần demo hiện có thể kiểm tra thông tin đăng nhập, hiển thị thông báo thành công hoặc thất bại và lưu thông tin phiên đăng nhập bằng Session.
+Do các trang chức năng dành cho Sinh viên, Giảng viên và Quản trị viên chưa được xây dựng, việc chuyển hướng đến các trang đích chưa được triển khai hoàn chỉnh. Chức năng kiểm tra quyền truy cập và đăng xuất cũng cần được hoàn thiện trong giai đoạn phát triển tiếp theo.
+
 IV. Thành viên 4 — Validation đăng nhập
 - Xác định các trường bắt buộc trên form đăng nhập: Vai trò đăng nhập, Tên đăng nhập và Mật khẩu.
 - Quy định thông báo lỗi chi tiết khi người dùng bỏ trống hoặc nhập sai định dạng:
