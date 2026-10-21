@@ -82,7 +82,7 @@ IV. Thành viên 4 — Validation đăng nhập
 <img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
 
 V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰNG FILE README & LẬP KẾ HOẠCH KIỂM THỬ HỆ THỐNG 
-1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), với vai trò là Thành viên 5,
+1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
    - tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là cầu nối tổng hợp toàn bộ các kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác, chuyển hóa thành bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
 2. Các nhiệm vụ cụ thể được phân công và triển khai
    a) Xây dựng tài liệu kỹ thuật cốt lõi (README.md):
@@ -93,8 +93,10 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
       +  Sinh viên: sv01 / password123 (Trạng thái: Đã kích hoạt)
       +  Giảng viên: gv01 / password123 (Trạng thái: Đã phân công lớp)
       +  Quản trị viên: admin01 / admin123 (Quyền quản trị toàn hệ thống)
-  -  ổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập, kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
+  -  Tổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập,
+    + kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
     b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm:
+
     - Đồng bộ hóa đặc tả kỹ thuật: Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên khác:
     -  Kế thừa quy tắc Validation từ Thành viên 2 & 4 (ràng buộc độ dài, ký tự đặc biệt, kiểm tra rỗng, mã hóa lỗi).
     -  Kế thừa Sơ đồ luồng điều hướng (Route System) từ Thành viên 3 (điều hướng Sinh viên, Giảng viên, Admin, xử lý Đăng xuất và Truy cập trái phép).
