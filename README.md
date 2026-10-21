@@ -11,7 +11,8 @@
 - Thành viên 3: Module Giảng viên
 - Thành viên 4: UI
 - Thành viên 5: Fetch API & UI
-Thành viên 4:
+
+Thành viên 4: UI
 1. Thiết lập Bộ quy chuẩn thiết kế dùng chung (Design Tokens)
 Xây dựng bảng màu chuẩn (Color Palette):
 
