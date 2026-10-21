@@ -36,5 +36,30 @@ Thành viên 1 phụ trách thiết kế wireframe cho màn hình đăng nhập 
 Luồng đăng nhập được chia thành hai trường hợp. Khi thông tin hợp lệ, hệ thống xác thực tài khoản, tạo phiên đăng nhập và điều hướng người dùng đến trang chức năng phù hợp với vai trò đã được xác minh. Khi thông tin không hợp lệ hoặc còn thiếu, hệ thống hiển thị thông báo lỗi và cho phép người dùng nhập lại.
 Kết quả cần đạt là giao diện rõ ràng, dễ sử dụng, thống nhất về bố cục và xác định được các luồng xử lý thành công, thất bại để làm cơ sở cho việc lập trình và kiểm thử.
 
+IV. Thành viên 4 — Validation đăng nhập
+- Xác định các trường bắt buộc trên form đăng nhập: Vai trò đăng nhập, Tên đăng nhập và Mật khẩu.
+- Quy định thông báo lỗi chi tiết khi người dùng bỏ trống hoặc nhập sai định dạng:
+  + Bỏ trống tên đăng nhập hoặc mật khẩu: Hiển thị thông báo *"Vui lòng nhập tên đăng nhập/mật khẩu"* và đánh viền đỏ trường dữ liệu.
+  + Tên đăng nhập không đúng định dạng: Kiểm tra độ dài (3-30 ký tự) và ký tự hợp lệ.
+  + Mật khẩu không đạt yêu cầu: Yêu cầu tối thiểu 6 ký tự.
+- Xác định cơ chế kiểm tra chéo vai trò và tài khoản ở cả phía Client (JavaScript) và Server (PHP):
+  + Đối chiếu tên đăng nhập và mật khẩu với cơ sở dữ liệu/danh sách demo (hỗ trợ Sinh viên, Giảng viên và 3 tài khoản Quản trị viên).
+  + Kiểm tra tính khớp lệnh giữa vai trò người dùng chọn trên giao diện và phân quyền thực tế của tài khoản đó trong hệ thống.
+- Lập bảng các trường hợp kiểm thử (Test Cases) cho chức năng đăng nhập:
+  + TC01: Bỏ trống toàn bộ các trường bắt buộc.
+  <img width="292" height="404" alt="image" src="https://github.com/user-attachments/assets/7df1f1c9-ae76-4596-995e-5343b54b3d1e" />
+
+  + TC02: Nhập sai định dạng tên đăng nhập hoặc mật khẩu quá ngắn (<6 ký tự).
+  <img width="285" height="410" alt="image" src="https://github.com/user-attachments/assets/d6703b0c-6615-4392-8e5c-d71502bbf4ab" />
+
+  + TC03: Sai thông tin tài khoản hoặc mật khẩu.
+<img width="284" height="401" alt="image" src="https://github.com/user-attachments/assets/af7f9e6c-81fc-4639-bab4-160ba43e2978" />
+
+  + TC04: Chọn đúng tài khoản nhưng chọn sai vai trò đăng nhập.
+<img width="287" height="390" alt="image" src="https://github.com/user-attachments/assets/3099c351-3a0b-4f1c-854b-a672a787ff41" />
+
+  + TC05: Đăng nhập thành công với phân quyền hợp lệ (Sinh viên, Giảng viên, Quản trị viên).
+<img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
+
 
 
