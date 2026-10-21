@@ -35,7 +35,9 @@ I. Nhóm trưởng: Thành viên 1 - Phạm Ngọc Anh — Form đăng nhập
 Thành viên 1 phụ trách thiết kế wireframe cho màn hình đăng nhập của hệ thống StudentHub. Giao diện gồm ba vai trò: Sinh viên, Giảng viên và Quản trị viên; trường nhập tên đăng nhập, mật khẩu và nút Đăng nhập. Ngoài ra, giao diện có thể bổ sung chức năng hiện/ẩn mật khẩu, ghi nhớ tên đăng nhập và hỗ trợ khi quên mật khẩu.
 Luồng đăng nhập được chia thành hai trường hợp. Khi thông tin hợp lệ, hệ thống xác thực tài khoản, tạo phiên đăng nhập và điều hướng người dùng đến trang chức năng phù hợp với vai trò đã được xác minh. Khi thông tin không hợp lệ hoặc còn thiếu, hệ thống hiển thị thông báo lỗi và cho phép người dùng nhập lại.
 Kết quả cần đạt là giao diện rõ ràng, dễ sử dụng, thống nhất về bố cục và xác định được các luồng xử lý thành công, thất bại để làm cơ sở cho việc lập trình và kiểm thử.
-III. Thành viên 3 – Luồng điều hướng
+
+
+III. Thành viên 3 – Luồng điều hướng - Lê Khánh Ly
 1. Nhiệm vụ được phân công
 Thành viên 3 phụ trách xác định và xây dựng luồng điều hướng của hệ thống StudentHub sau khi người dùng đăng nhập. Nội dung tập trung vào việc xác định hướng điều hướng tương ứng với từng vai trò, bao gồm Sinh viên, Giảng viên và Quản trị viên, đồng thời xác định cách xử lý khi đăng nhập thành công, đăng nhập thất bại và đăng xuất khỏi hệ thống.
 2. Mô tả luồng điều hướng
