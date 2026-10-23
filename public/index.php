@@ -10,6 +10,7 @@ $taiKhoanDemo = [
     'admin2' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên 2'],
     'admin3' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên 3']
 ];
+<---! vai trò đăng nhập hợp lệ -->
 
 $tenVaiTroMap = [
     'sinhvien' => 'Sinh viên',
