@@ -92,3 +92,5 @@ Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ 
 Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
 
 Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
+
+update
