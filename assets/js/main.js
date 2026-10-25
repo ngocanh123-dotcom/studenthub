@@ -159,17 +159,26 @@ form.addEventListener("submit", event => {
     }
   } catch (e) {}
 
-  // 6. Hiệu ứng phản hồi thành công
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `<span>Đang xác thực hệ thống...</span>`;
   
-  showMessage(`Đăng nhập thành công! Xin chào ${account.tenVaiTro}.`, "success");
+  // 6. Hiệu ứng phản hồi thành công và chuyển trang
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span>Đang chuyển đến hệ thống...</span>`;
+
+  showMessage(
+    `Đăng nhập thành công! Xin chào ${account.tenVaiTro}.`,
+    "success"
+  );
 
   setTimeout(() => {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `<span>ĐĂNG NHẬP VÀO HỆ THỐNG</span>`;
-  }, 1200);
-});
+    // Chuyển đến trang theo vai trò
+    if (account.role === "giangvien") {
+      window.location.href = "../app/views/giangvien/index.php";
+    } else if (account.role === "sinhvien") {
+      window.location.href = "../app/views/sinhvien/index.php";
+    } else if (account.role === "quantri") {
+      window.location.href = "../app/views/quantri/index.php";
+    }
+  }, 800);
 
 // Xử lý quên mật khẩu
 document.getElementById("forgotLink").addEventListener("click", event => {
