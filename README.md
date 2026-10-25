@@ -236,3 +236,39 @@ V. Thành viên 5 - Nguyễn Thị Kim Anh
      - File README.md hoàn chỉnh: Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc.
      -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
      -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
+
+     5. Cơ sở dữ liệu (Database)
+5.1. Mô tả các bảng
+![alt text][def]
+5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
+
+Khóa chính (PK): Xác định duy nhất mỗi bản ghi trong một bảng.
+
+Khóa ngoại (FK): Liên kết dữ liệu giữa các bảng và bảo đảm tính toàn vẹn tham chiếu.
+
+UNIQUE: Ngăn dữ liệu bị trùng tại các trường hoặc nhóm trường được quy định.
+
+Các mối quan hệ dự kiến:
+
+nguoi_dung – dang_ky_hoc: Một sinh viên có thể đăng ký nhiều lớp học phần.
+
+hoc_phan – lop_hoc_phan: Một học phần có thể được tổ chức thành nhiều lớp học phần.
+
+hoc_ky – lop_hoc_phan: Một học kỳ có thể có nhiều lớp học phần.
+
+nguoi_dung – lop_hoc_phan: Một giảng viên có thể phụ trách nhiều lớp học phần.
+
+lop_hoc_phan – dang_ky_hoc: Một lớp học phần có thể có nhiều lượt đăng ký.
+
+Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng ký và lớp học phần. Nên có ràng buộc UNIQUE trên cặp khóa ngoại này để ngăn một sinh viên đăng ký trùng cùng một lớp học phần.
+
+Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
+
+5.3. Sơ đồ ERD
+![alt text][def]
+[def]: image-1.png
+5.4. Chi tiết bảng nguoi_dung
+Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
+![alt text][def2]
+
+[def2]: image-2.png
