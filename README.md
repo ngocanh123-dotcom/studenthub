@@ -1,6 +1,6 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
-<<<<<<< HEAD
+
 Thành viên 4: Quy chuẩn giao diện (UI/UX)
 
 ### 3.1. Hình ảnh thực tế giao diện hệ thống
@@ -331,3 +331,6 @@ Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm ng
 
 [def2]: image-2.png
 >>>>>>> 9da7f54b0bacf099bab91b1af33f8757f3f87b82
+5.5 Chi tiết bảng lop_hoc_phan
+Mô tả: Bảng lop_hoc_phan lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ, liên kết trực tiếp với các bảng hoc_phan (môn học), hoc_ky, nguoi_dung (giảng viên) và quản lý sĩ số giới hạn để phục vụ quá trình tra cứu và đăng ký tín chỉ của sinh viên.
+<img width="619" height="162" alt="image" src="https://github.com/user-attachments/assets/384863a9-3c7b-406d-9c88-6a0b5926d699" />
