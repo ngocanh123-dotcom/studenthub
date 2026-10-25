@@ -263,3 +263,11 @@ Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm ng
 
 [def2]: image-2.png
 >>>>>>> 9da7f54b0bacf099bab91b1af33f8757f3f87b82
+
+5.5 Chi tiết bảng dang_ky_hoc
+<img width="397" height="79" alt="Ảnh chụp màn hình 2026-10-25 225003" src="https://github.com/user-attachments/assets/62ed0d6d-9f82-401b-bce7-b28ebfa8f498" />
+
+Đây là bảng đăng ký học trong hệ thống StudentHub, có chức năng lưu trữ thông tin đăng ký lớp học phần của sinh viên.
+Về các ràng buộc dữ liệu, bảng sử dụng khóa chính id để tránh trùng định danh bản ghi. Hai trường sinh_vien_id và lop_hoc_phan_id được kết hợp thành một ràng buộc UNIQUE nhằm ngăn sinh viên đăng ký trùng một lớp học phần. Ngoài ra, các khóa ngoại giúp liên kết dữ liệu đăng ký với sinh viên và lớp học phần, bảo đảm tính toàn vẹn tham chiếu.
+
+Như vậy, bảng dang_ky_hoc đóng vai trò quan trọng trong việc quản lý quá trình sinh viên đăng ký lớp học phần trên hệ thống StudentHub.
