@@ -237,7 +237,9 @@ V. Thành viên 5 - Nguyễn Thị Kim Anh
      -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
      -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
 
-     5. Cơ sở dữ liệu (Database)
+
+5. Cơ sở dữ liệu (Database)
+
 5.1. Mô tả các bảng
 <img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
 
