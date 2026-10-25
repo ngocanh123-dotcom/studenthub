@@ -121,6 +121,8 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
 
   + TC05: Đăng nhập thành công với phân quyền hợp lệ (Sinh viên, Giảng viên, Quản trị viên).
 <img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
+
+
 IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
 ### 4.1. Hình ảnh thực tế giao diện hệ thống
 > 
