@@ -1,5 +1,6 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
+<<<<<<< HEAD
 Thành viên 4: Quy chuẩn giao diện (UI/UX)
 
 ### 3.1. Hình ảnh thực tế giao diện hệ thống
@@ -7,6 +8,133 @@ Thành viên 4: Quy chuẩn giao diện (UI/UX)
 
 ![Giao diện Đăng nhập Hệ thống - Eduportal](image8.png)
 *Hình 3.1: Giao diện Cổng đăng ký học phần & Quản trị học vụ (Bố cục Split-Screen trên Desktop)*
+=======
+## 1. Thông tin chung
+
+- **Tên dự án:** StudentHub
+- **Môn học:** Lập trình Web
+- **Chủ đề:** Chủ đề 1
+- **Loại dự án:** Bài tập lớn theo nhóm
+- **Công nghệ sử dụng:** PHP 8.x, MySQL, PDO, MVC, HTML5, CSS3, JavaScript, Fetch API
+- **Mục tiêu:** Xây dựng hệ thống hỗ trợ quản lý học phần, đăng ký lớp học phần và quản lý thông tin theo từng vai trò người dùng.
+- ** Thành viên nhóm:
++ Phạm Ngọc Anh : Nhóm trưởng 
++ Nguyễn Thị Thu Huyền
++ Nguyễn Thị Kim Anh 
++ Tạ Như Quỳnh 
++ Lê Khánh Ly
+
+## 2. Giới thiệu dự án
+
+StudentHub là hệ thống quản lý khóa học và đăng ký học phần được xây dựng nhằm hỗ trợ sinh viên, giảng viên và quản trị viên thực hiện các công việc liên quan đến quản lý học phần.
+
+Hệ thống được phát triển bằng PHP và MySQL theo mô hình MVC, sử dụng PDO để kết nối cơ sở dữ liệu và JavaScript, Fetch API để xử lý các tương tác trên giao diện.
+
+Dự án hướng đến giao diện hiện đại, dễ sử dụng, có khả năng thích ứng với nhiều kích thước màn hình và bảo đảm các chức năng phù hợp với từng vai trò.
+
+## 3. Mục tiêu và chức năng chính
+
+### 3.1. Đăng nhập và phân quyền
+
+- Cung cấp giao diện đăng nhập cho sinh viên, giảng viên và quản trị viên.
+- Kiểm tra thông tin đăng nhập ở cả phía JavaScript và phía máy chủ PHP.
+- Xác định vai trò người dùng sau khi đăng nhập thành công.
+- Lưu thông tin phiên đăng nhập bằng PHP Session.
+- Điều hướng người dùng đến giao diện phù hợp với vai trò.
+- Hỗ trợ ghi nhớ tên đăng nhập bằng LocalStorage khi người dùng lựa chọn.
+- Hiển thị thông báo khi đăng nhập thành công hoặc thất bại.
+
+### 3.2. Quản lý dành cho sinh viên
+
+- Xem danh sách lớp học phần.
+- Xem thông tin chi tiết của lớp học phần.
+- Đăng ký lớp học phần theo chức năng được cung cấp.
+- Xem danh sách học phần đã đăng ký.
+- Theo dõi thông tin liên quan đến lịch học và học phần.
+
+### 3.3. Quản lý dành cho giảng viên
+
+- Xem danh sách lớp học phần được phân công.
+- Xem thông tin chi tiết của lớp học phần.
+- Theo dõi danh sách sinh viên đăng ký lớp học phần.
+- Xem số lượng sinh viên đã đăng ký và thông tin lớp học.
+
+### 3.4. Quản lý dành cho quản trị viên
+
+- Quản lý tài khoản người dùng.
+- Quản lý thông tin sinh viên và giảng viên.
+- Quản lý học phần và lớp học phần.
+- Quản lý các thông tin phục vụ hoạt động đăng ký học phần.
+- Hỗ trợ kiểm soát dữ liệu chung của hệ thống.
+## 4. Phân công nhiệm vụ các thành viên
+- Nhóm trưởng: Thành viên 1 — Form đăng nhập
+I. Nhóm trưởng: Thành viên 1 - Phạm Ngọc Anh — Form đăng nhập
+- Hoàn thiện wireframe đăng nhập.
+- Bố trí 3 vai trò: Sinh viên, Giảng viên, Quản trị viên.
+- Mô tả các trường tài khoản, mật khẩu và nút đăng nhập.
+- Xác định luồng đăng nhập thành công và thất bại.
+- <img width="786" height="591" alt="image" src="https://github.com/user-attachments/assets/e808a6b3-5498-43bd-990e-3aac18eb47a2" />
+1. Mô tả các thành phần
+- Sinh viên: 	Chọn vai trò sinh viên để đăng nhập
+- Giảng viên:	Chọn vai trò giảng viên
+- Quản trị viên:	Chọn vai trò quản trị hệ thống
+- Tên đăng nhập:	Nhập tài khoản được cấp
+- Mật khẩu: Nhập mật khẩu; có thể hiện hoặc ẩn
+- Ghi nhớ tên đăng nhập:	Cho phép ghi nhớ tên đăng nhập trên thiết bị nếu triển khai chức năng này
+- Quên mật khẩu:	Hướng dẫn khôi phục tài khoản
+- Đăng nhập:	Gửi thông tin để hệ thống kiểm tra
+2. Luồng đăng nhập thành công và thất bại
+  <img width="1089" height="537" alt="image" src="https://github.com/user-attachments/assets/e15c0b9e-98f2-445a-822d-343173651e35" />
+- Khi đăng nhập thành công, hệ thống phải xác minh vai trò và quyền của tài khoản ở phía máy chủ, không chỉ dựa vào vai trò người dùng tự chọn trên giao diện.
+
+Thành viên 1 phụ trách thiết kế wireframe cho màn hình đăng nhập của hệ thống StudentHub. Giao diện gồm ba vai trò: Sinh viên, Giảng viên và Quản trị viên; trường nhập tên đăng nhập, mật khẩu và nút Đăng nhập. Ngoài ra, giao diện có thể bổ sung chức năng hiện/ẩn mật khẩu, ghi nhớ tên đăng nhập và hỗ trợ khi quên mật khẩu.
+Luồng đăng nhập được chia thành hai trường hợp. Khi thông tin hợp lệ, hệ thống xác thực tài khoản, tạo phiên đăng nhập và điều hướng người dùng đến trang chức năng phù hợp với vai trò đã được xác minh. Khi thông tin không hợp lệ hoặc còn thiếu, hệ thống hiển thị thông báo lỗi và cho phép người dùng nhập lại.
+Kết quả cần đạt là giao diện rõ ràng, dễ sử dụng, thống nhất về bố cục và xác định được các luồng xử lý thành công, thất bại để làm cơ sở cho việc lập trình và kiểm thử.
+
+II. Thành viên 2 - Lê Khánh Ly – Luồng điều hướng
+1. Nhiệm vụ được phân công
+Thành viên 3 phụ trách xác định và xây dựng luồng điều hướng của hệ thống StudentHub sau khi người dùng đăng nhập. Nội dung tập trung vào việc xác định hướng điều hướng tương ứng với từng vai trò, bao gồm Sinh viên, Giảng viên và Quản trị viên, đồng thời xác định cách xử lý khi đăng nhập thành công, đăng nhập thất bại và đăng xuất khỏi hệ thống.
+2. Mô tả luồng điều hướng
+Sinh viên: Sau khi đăng nhập thành công và được hệ thống xác minh quyền truy cập, người dùng được điều hướng đến khu vực chức năng dành cho sinh viên.
+Giảng viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực chức năng dành cho giảng viên.
+Quản trị viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực quản trị hệ thống.
+Đăng nhập thất bại: Hệ thống giữ người dùng tại trang đăng nhập và hiển thị thông báo khi tài khoản, mật khẩu không chính xác hoặc thông tin nhập vào chưa đầy đủ.
+Đăng xuất: Hệ thống kết thúc phiên đăng nhập và đưa người dùng trở về trang đăng nhập.
+Truy cập không hợp lệ: Hệ thống kiểm tra trạng thái đăng nhập và quyền của người dùng trước khi cho phép truy cập các khu vực chức năng, tránh việc truy cập trái phép.
+3. Kết quả cần đạt
+Xác định rõ luồng di chuyển giữa màn hình đăng nhập và các khu vực chức năng theo từng vai trò, tạo cơ sở cho việc triển khai lập trình và kiểm thử hệ thống. Việc điều hướng phải dựa trên vai trò đã được xác minh ở phía máy chủ, kết hợp với cơ chế quản lý phiên đăng nhập và kiểm tra quyền truy cập.
+Ở giai đoạn demo hiện tại, thành viên 3 thực hiện xác định luồng điều hướng dự kiến theo ba vai trò. Việc chuyển đến các trang chức năng cụ thể sẽ được hoàn thiện khi các trang đích của hệ thống được xây dựng.
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/b0e7a6a6-c3da-4ae5-a3f9-87758fff6bae" />
+
+III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
+- Xác định các trường bắt buộc trên form đăng nhập: Vai trò đăng nhập, Tên đăng nhập và Mật khẩu.
+- Quy định thông báo lỗi chi tiết khi người dùng bỏ trống hoặc nhập sai định dạng:
+  + Bỏ trống tên đăng nhập hoặc mật khẩu: Hiển thị thông báo *"Vui lòng nhập tên đăng nhập/mật khẩu"* và đánh viền đỏ trường dữ liệu.
+  + Tên đăng nhập không đúng định dạng: Kiểm tra độ dài (3-30 ký tự) và ký tự hợp lệ.
+  + Mật khẩu không đạt yêu cầu: Yêu cầu tối thiểu 6 ký tự.
+- Xác định cơ chế kiểm tra chéo vai trò và tài khoản ở cả phía Client (JavaScript) và Server (PHP):
+  + Đối chiếu tên đăng nhập và mật khẩu với cơ sở dữ liệu/danh sách demo (hỗ trợ Sinh viên, Giảng viên và 3 tài khoản Quản trị viên).
+  + Kiểm tra tính khớp lệnh giữa vai trò người dùng chọn trên giao diện và phân quyền thực tế của tài khoản đó trong hệ thống.
+- Lập bảng các trường hợp kiểm thử (Test Cases) cho chức năng đăng nhập:
+  + TC01: Bỏ trống toàn bộ các trường bắt buộc.
+  <img width="292" height="404" alt="image" src="https://github.com/user-attachments/assets/7df1f1c9-ae76-4596-995e-5343b54b3d1e" />
+
+  + TC02: Nhập sai định dạng tên đăng nhập hoặc mật khẩu quá ngắn (<6 ký tự).
+  <img width="285" height="410" alt="image" src="https://github.com/user-attachments/assets/d6703b0c-6615-4392-8e5c-d71502bbf4ab" />
+
+  + TC03: Sai thông tin tài khoản hoặc mật khẩu.
+<img width="284" height="401" alt="image" src="https://github.com/user-attachments/assets/af7f9e6c-81fc-4639-bab4-160ba43e2978" />
+
+  + TC04: Chọn đúng tài khoản nhưng chọn sai vai trò đăng nhập.
+<img width="287" height="390" alt="image" src="https://github.com/user-attachments/assets/3099c351-3a0b-4f1c-854b-a672a787ff41" />
+
+  + TC05: Đăng nhập thành công với phân quyền hợp lệ (Sinh viên, Giảng viên, Quản trị viên).
+<img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
+IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
+Thành viên 4:
+1. Thiết lập Bộ quy chuẩn thiết kế dùng chung (Design Tokens)
+Xây dựng bảng màu chuẩn (Color Palette):
+>>>>>>> 9da7f54b0bacf099bab91b1af33f8757f3f87b82
 
 ---
 
@@ -60,6 +188,7 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
 
 ---
 
+<<<<<<< HEAD
 ### 3.5. Bảo toàn tính toàn vẹn chức năng & Bảo mật
 * **Phân quyền và phiên làm việc:** Giữ nguyên 100% logic đối chiếu tài khoản demo (3 Quản trị viên, 1 Giảng viên, 1 Sinh viên) và lưu trữ thông tin phiên `$_SESSION` trong PHP.
 * **Cơ chế xác thực hai tầng (Two-tier Validation):**
@@ -67,3 +196,138 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
+=======
+Đóng gói toàn bộ thuộc tính thành biến CSS (:root) để toàn bộ nhóm tái sử dụng đồng bộ cho các trang sau.
+
+2. Tái cấu trúc Bố cục hiển thị trên máy tính (Desktop Layout)
+Chuyển đổi từ "Hộp nổi đơn độc" sang "Bố cục chia đôi màn hình" (Split-Screen Layout):
+
+Cột trái (Brand & Showcase - 55%):
+
+Tích hợp hiệu ứng ánh sáng mờ đa tầng (Aurora Radial Glow) giúp lấp đầy khoảng trống màn hình lớn.
+
+Đặt khối nhận diện thương hiệu EDUPORTAL - Hệ Thống Đào Tạo Tín Chỉ.
+
+Thêm huy hiệu trạng thái học kỳ có chấm sáng nhấp nháy (pulse-dot).
+
+Tích hợp khối Feature Highlights (Tính năng nổi bật) tinh giản với icon nét đôi: Đăng ký tín chỉ trực tuyến và Thời khóa biểu & Tiến độ tích lũy.
+
+Cột phải (Auth Interaction - 45%):
+
+Không gian nền trắng tối giản, tập trung thị giác vào form đăng nhập, căn lề và khoảng đệm chuẩn mực.
+
+Tối ưu hóa khả năng thích ứng (Responsive):
+
+Tự động co gọn thành 1 cột mượt mà khi xem trên máy tính bảng hoặc màn hình điện thoại dưới 1024px.
+
+3. Tái thiết kế các Thành phần tương tác (UI Components & Micro-interactions)
+Bộ chọn vai trò dạng Bento Grid (Role Tiles):
+
+Chuyển các radio button thông thường thành 3 thẻ khối ngang hàng (Sinh viên, Giảng viên, Quản trị).
+
+Tích hợp khung icon riêng biệt, hiệu ứng nổi khối (translateY(-2px)) khi rê chuột, và viền xanh kèm bóng đổ khi được chọn (:checked).
+
+Ô nhập dữ liệu (Input Fields):
+
+Tích hợp biểu tượng chỉ dẫn (User, Lock) bên trong ô nhập.
+
+Hiệu ứng viền chuyển sắc và tạo viền sáng (box-shadow glow) khi trỏ chuột vào ô (:focus).
+
+Trạng thái cảnh báo lỗi: Ô nhập tự đổi viền đỏ và nền hồng nhạt khi dữ liệu không hợp lệ.
+
+Nút ẩn/hiện mật khẩu:
+
+Đặt gọn bên phải ô mật khẩu, chuyển đổi mượt mà giữa biểu tượng mắt mở và mắt đóng.
+
+Nút gửi biểu mẫu (Submit Button):
+
+Thiết kế dải màu Gradient chuyển sắc, hiệu ứng đổ bóng mềm, kèm trạng thái khóa nút và hiển thị "Đang xác thực hệ thống..." khi người dùng bấm gửi.
+
+Hệ thống thông báo & Phản hồi (Feedback System):
+
+Báo lỗi tức thì tại chân từng ô nhập (.field-error-msg).
+
+Hộp thông báo kết quả chung (.status-banner) dạng banner nổi có hiệu ứng trượt nhẹ (slideInDown).
+
+4. Đảm bảo & Giữ nguyên 100% Chức năng cốt lõi
+Giữ nguyên toàn bộ logic đăng nhập, đối chiếu danh sách tài khoản demo (3 Admin, 1 Giảng viên, 1 Sinh viên) và lưu thông tin $_SESSION trong index.php.
+
+Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ bằng JavaScript trước khi gửi và kiểm tra bảo mật ở phía server PHP.
+
+Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
+
+Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
+
+V. Thành viên 5 - Nguyễn Thị Kim Anh 
+1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
+   - tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là cầu nối tổng hợp toàn bộ các kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác, chuyển hóa thành bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
+2. Các nhiệm vụ cụ thể được phân công và triển khai
+
+   a) Xây dựng tài liệu kỹ thuật cốt lõi (README.md):
+   - Mô tả bài toán và kiến trúc: Soạn thảo file README.md đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần (Chủ đề 1), bối cảnh ứng dụng, kiến trúc mã nguồn (MVC tự xây dựng), công nghệ sử dụng (PHP 8.x, MySQL, PDO, HTML5/CSS3/JS, Bootstrap).
+   - Hướng dẫn cài đặt & Triển khai (Deployment Guide): Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (XAMPP/Apache/MySQL), hướng dẫn import cơ sở dữ liệu từ file studenthub.sql, cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
+@@ -95,6 +96,7 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
+      +  Quản trị viên: admin01 / admin123 (Quyền quản trị toàn hệ thống)
+  -  Tổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập,
+    + kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
+     
+    b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm:
+
+    - Đồng bộ hóa đặc tả kỹ thuật: Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên khác:
+@@ -108,12 +110,15 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
+    -  Checkpoint 5-6: Tổ chức cấu trúc MVC, Đăng nhập, Phân quyền Server-side và bảo mật CSRF.
+    -  Checkpoint 7-8: Tích hợp Fetch API, Kiểm thử Smoke test, hoàn thiện tài liệu README và URL chạy thử.
+    - Giám sát tuân thủ Git: Kiểm tra và nhắc nhở các thành viên tuân thủ quy trình làm việc trên Git, đảm bảo mỗi thành viên đều có commit đóng góp thực tế thể hiện trên lịch sử phát triển dự án.
+    
+  d) Lập Kế hoạch kiểm thử (Test Plan) & Xây dựng Bộ bộ kiểm thử nghiệm thu:
+    - Thiết lập Khung kiểm thử (Test Plan Matrix): Phối hợp với Thành viên 4 để chuẩn bị kịch bản kiểm thử toàn diện cho chức năng Đăng nhập & Phân quyền, bao gồm 15+ trường hợp kiểm thử (Test Cases) từ cơ bản đến nâng cao:
+    -  Kiểm thử Validation Client-side: Bỏ trống trường, nhập ký tự đặc biệt, độ dài chuỗi mật khẩu không đủ.
+    -  Kiểm thử Logic Server-side: Tài khoản không tồn tại, sai mật khẩu, chọn sai vai trò so với phân quyền trong CSDL.
+    - Kiểm thử Bảo mật & Phân quyền: Cố tình truy cập trực tiếp URL trang Admin khi chưa đăng nhập, thay đổi thông số Role trên LocalStorage/Cookie, vô hiệu hóa CSRF Token.
+    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn.   3. Kết quả đầu ra dự kiến (Deliverables)
+    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn. 
+    
+3. Kết quả đầu ra dự kiến (Deliverables)
+     - File README.md hoàn chỉnh: Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc.
+     -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
+     -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
+
+
+5. Cơ sở dữ liệu (Database)
+
+5.1. Mô tả các bảng
+<img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
+
+5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
+
+Khóa chính (PK): Xác định duy nhất mỗi bản ghi trong một bảng.
+
+Khóa ngoại (FK): Liên kết dữ liệu giữa các bảng và bảo đảm tính toàn vẹn tham chiếu.
+
+UNIQUE: Ngăn dữ liệu bị trùng tại các trường hoặc nhóm trường được quy định.
+
+Các mối quan hệ dự kiến:
+
+nguoi_dung – dang_ky_hoc: Một sinh viên có thể đăng ký nhiều lớp học phần.
+
+hoc_phan – lop_hoc_phan: Một học phần có thể được tổ chức thành nhiều lớp học phần.
+
+hoc_ky – lop_hoc_phan: Một học kỳ có thể có nhiều lớp học phần.
+
+nguoi_dung – lop_hoc_phan: Một giảng viên có thể phụ trách nhiều lớp học phần.
+
+lop_hoc_phan – dang_ky_hoc: Một lớp học phần có thể có nhiều lượt đăng ký.
+
+Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng ký và lớp học phần. Nên có ràng buộc UNIQUE trên cặp khóa ngoại này để ngăn một sinh viên đăng ký trùng cùng một lớp học phần.
+
+Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
+
+5.3. Sơ đồ ERD
+<img width="1209" height="764" alt="image" src="https://github.com/user-attachments/assets/ee0f2444-ddd1-4678-bb14-280ea5693d7b" />
+
+5.4. Chi tiết bảng nguoi_dung
+Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
+![alt text][def2]
+
+[def2]: image-2.png
+>>>>>>> 9da7f54b0bacf099bab91b1af33f8757f3f87b82
