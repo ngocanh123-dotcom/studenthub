@@ -1,14 +1,5 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
-<<<<<<< HEAD
-Thành viên 4: Quy chuẩn giao diện (UI/UX)
-
-### 3.1. Hình ảnh thực tế giao diện hệ thống
-> 
-
-![Giao diện Đăng nhập Hệ thống - Eduportal](image8.png)
-*Hình 3.1: Giao diện Cổng đăng ký học phần & Quản trị học vụ (Bố cục Split-Screen trên Desktop)*
-=======
 ## 1. Thông tin chung
 
 - **Tên dự án:** StudentHub
@@ -131,14 +122,15 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
   + TC05: Đăng nhập thành công với phân quyền hợp lệ (Sinh viên, Giảng viên, Quản trị viên).
 <img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
 IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
-Thành viên 4:
-1. Thiết lập Bộ quy chuẩn thiết kế dùng chung (Design Tokens)
-Xây dựng bảng màu chuẩn (Color Palette):
->>>>>>> 9da7f54b0bacf099bab91b1af33f8757f3f87b82
+### 4.1. Hình ảnh thực tế giao diện hệ thống
+> 
+
+![Giao diện Đăng nhập Hệ thống - Eduportal](image8.png)
+*Hình 3.1: Giao diện Cổng đăng ký học phần & Quản trị học vụ (Bố cục Split-Screen trên Desktop)*
 
 ---
 
-### 3.2. Hệ thống quy chuẩn thiết kế dùng chung (Design Tokens)
+### 4.2. Hệ thống quy chuẩn thiết kế dùng chung (Design Tokens)
 Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (`:root`) nhằm thiết lập khung quy chuẩn nhất quán cho toàn bộ các màn hình chức năng của dự án:
 
 * **Bảng màu chuẩn (Color Hierarchy — Tỷ lệ 60 - 30 - 10):**
@@ -157,7 +149,7 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
 
 ---
 
-### 3.3. Tái cấu trúc kiến trúc bố cục (Desktop & Responsive Architecture)
+### 4.3. Tái cấu trúc kiến trúc bố cục (Desktop & Responsive Architecture)
 * **Khắc phục triệt để hiện tượng "hộp nổi trôi dạt" (Floating Box):** Chuyển dịch từ form đơn trơ trọi giữa màn hình sang mô hình **Bố cục chia đôi màn hình (Split-Screen Layout)** chuyên nghiệp:
   * **Cột trái (Brand & Showcase — 55% Viewport):**
     * Áp dụng hiệu ứng ánh sáng cực quang mờ đa tầng (*Aurora Radial Glow*) với họa tiết lưới điểm tinh tế.
@@ -170,7 +162,7 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
 
 ---
 
-### 3.4. Thiết kế thành phần tương tác & Phản hồi vi mô (Micro-interactions)
+### 4.4. Thiết kế thành phần tương tác & Phản hồi vi mô (Micro-interactions)
 * **Bộ chọn vai trò dạng Bento Grid (Role Tiles):**
   * Thay thế các nút radio truyền thống bằng cụm 3 thẻ trực quan ngang hàng (Sinh viên, Giảng viên, Quản trị).
   * Icon được bọc trong khung nổi riêng biệt; hỗ trợ hiệu ứng nổi khối (`translateY(-2px)`) khi hover và hiển thị viền đôi kèm bóng đổ xanh khi kích hoạt (`:checked`).
@@ -188,75 +180,13 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
 
 ---
 
-<<<<<<< HEAD
-### 3.5. Bảo toàn tính toàn vẹn chức năng & Bảo mật
+### 4.5. Bảo toàn tính toàn vẹn chức năng & Bảo mật
 * **Phân quyền và phiên làm việc:** Giữ nguyên 100% logic đối chiếu tài khoản demo (3 Quản trị viên, 1 Giảng viên, 1 Sinh viên) và lưu trữ thông tin phiên `$_SESSION` trong PHP.
 * **Cơ chế xác thực hai tầng (Two-tier Validation):**
   * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
-=======
-Đóng gói toàn bộ thuộc tính thành biến CSS (:root) để toàn bộ nhóm tái sử dụng đồng bộ cho các trang sau.
-
-2. Tái cấu trúc Bố cục hiển thị trên máy tính (Desktop Layout)
-Chuyển đổi từ "Hộp nổi đơn độc" sang "Bố cục chia đôi màn hình" (Split-Screen Layout):
-
-Cột trái (Brand & Showcase - 55%):
-
-Tích hợp hiệu ứng ánh sáng mờ đa tầng (Aurora Radial Glow) giúp lấp đầy khoảng trống màn hình lớn.
-
-Đặt khối nhận diện thương hiệu EDUPORTAL - Hệ Thống Đào Tạo Tín Chỉ.
-
-Thêm huy hiệu trạng thái học kỳ có chấm sáng nhấp nháy (pulse-dot).
-
-Tích hợp khối Feature Highlights (Tính năng nổi bật) tinh giản với icon nét đôi: Đăng ký tín chỉ trực tuyến và Thời khóa biểu & Tiến độ tích lũy.
-
-Cột phải (Auth Interaction - 45%):
-
-Không gian nền trắng tối giản, tập trung thị giác vào form đăng nhập, căn lề và khoảng đệm chuẩn mực.
-
-Tối ưu hóa khả năng thích ứng (Responsive):
-
-Tự động co gọn thành 1 cột mượt mà khi xem trên máy tính bảng hoặc màn hình điện thoại dưới 1024px.
-
-3. Tái thiết kế các Thành phần tương tác (UI Components & Micro-interactions)
-Bộ chọn vai trò dạng Bento Grid (Role Tiles):
-
-Chuyển các radio button thông thường thành 3 thẻ khối ngang hàng (Sinh viên, Giảng viên, Quản trị).
-
-Tích hợp khung icon riêng biệt, hiệu ứng nổi khối (translateY(-2px)) khi rê chuột, và viền xanh kèm bóng đổ khi được chọn (:checked).
-
-Ô nhập dữ liệu (Input Fields):
-
-Tích hợp biểu tượng chỉ dẫn (User, Lock) bên trong ô nhập.
-
-Hiệu ứng viền chuyển sắc và tạo viền sáng (box-shadow glow) khi trỏ chuột vào ô (:focus).
-
-Trạng thái cảnh báo lỗi: Ô nhập tự đổi viền đỏ và nền hồng nhạt khi dữ liệu không hợp lệ.
-
-Nút ẩn/hiện mật khẩu:
-
-Đặt gọn bên phải ô mật khẩu, chuyển đổi mượt mà giữa biểu tượng mắt mở và mắt đóng.
-
-Nút gửi biểu mẫu (Submit Button):
-
-Thiết kế dải màu Gradient chuyển sắc, hiệu ứng đổ bóng mềm, kèm trạng thái khóa nút và hiển thị "Đang xác thực hệ thống..." khi người dùng bấm gửi.
-
-Hệ thống thông báo & Phản hồi (Feedback System):
-
-Báo lỗi tức thì tại chân từng ô nhập (.field-error-msg).
-
-Hộp thông báo kết quả chung (.status-banner) dạng banner nổi có hiệu ứng trượt nhẹ (slideInDown).
-
-4. Đảm bảo & Giữ nguyên 100% Chức năng cốt lõi
-Giữ nguyên toàn bộ logic đăng nhập, đối chiếu danh sách tài khoản demo (3 Admin, 1 Giảng viên, 1 Sinh viên) và lưu thông tin $_SESSION trong index.php.
-
-Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ bằng JavaScript trước khi gửi và kiểm tra bảo mật ở phía server PHP.
-
-Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
-
-Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
 
 V. Thành viên 5 - Nguyễn Thị Kim Anh 
 1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
