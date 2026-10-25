@@ -1,22 +1,25 @@
+
 <?php
 session_start();
 
-// Dữ liệu tài khoản demo đầy đủ cho các vai trò
-$taiKhoanDemo = [
-    'sv001' => ['password' => 'Sv@123', 'role' => 'sinhvien', 'tenVaiTro' => 'Sinh viên'],
-    'gv001' => ['password' => 'Gv@123', 'role' => 'giangvien', 'tenVaiTro' => 'Giảng viên'],
-    'admin' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên'],
-    'admin1' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên 1'],
-    'admin2' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên 2'],
-    'admin3' => ['password' => 'Admin@123', 'role' => 'quantri', 'tenVaiTro' => 'Quản trị viên 3']
-];
+// Kết nối cơ sở dữ liệu StudentHub
+require_once __DIR__ . '/../config/database.php';
 
+// Vai trò trên giao diện đăng nhập
 $tenVaiTroMap = [
     'sinhvien' => 'Sinh viên',
     'giangvien' => 'Giảng viên',
-    'quantri' => 'Quản trị viên'
+    'quantri'  => 'Quản trị viên'
 ];
 
+// Quy đổi vai trò giao diện sang giá trị trong bảng nguoi_dung
+$vaiTroDatabase = [
+    'sinhvien' => 'sinh_vien',
+    'giangvien' => 'giang_vien',
+    'quantri'  => 'admin'
+];
+
+// Khởi tạo thông báo
 $thongBao = '';
 $loaiThongBao = '';
 $loiUsername = '';
@@ -24,49 +27,86 @@ $loiPassword = '';
 $username = '';
 $role = 'sinhvien';
 
-// Xử lý Validation phía Server (PHP)
+// Xử lý khi người dùng nhấn nút Đăng nhập
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
 
-    if (!isset($tenVaiTroMap[$role])) {
+    // Kiểm tra vai trò
+    if (!isset($vaiTroDatabase[$role])) {
         $thongBao = 'Vui lòng chọn vai trò đăng nhập hợp lệ.';
         $loaiThongBao = 'error';
+
+    // Kiểm tra tên đăng nhập
     } elseif ($username === '') {
         $loiUsername = 'Vui lòng nhập tên đăng nhập.';
-        $thongBao = 'Vui lòng nhập tên đăng nhập.';
+        $thongBao = $loiUsername;
         $loaiThongBao = 'error';
+
     } elseif (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $username)) {
-        $loiUsername = 'Tên đăng nhập gồm 3-30 ký tự, không chứa ký tự đặc biệt.';
+        $loiUsername = 'Tên đăng nhập gồm 3-30 ký tự, chỉ dùng chữ, số và dấu gạch dưới.';
         $thongBao = 'Tên đăng nhập không đúng định dạng.';
         $loaiThongBao = 'error';
-    } elseif (trim($password) === '') {
+
+    // Kiểm tra mật khẩu
+    } elseif ($password === '') {
         $loiPassword = 'Vui lòng nhập mật khẩu.';
-        $thongBao = 'Vui lòng nhập mật khẩu.';
+        $thongBao = $loiPassword;
         $loaiThongBao = 'error';
+
     } elseif (strlen($password) < 6) {
         $loiPassword = 'Mật khẩu phải có ít nhất 6 ký tự.';
-        $thongBao = 'Mật khẩu phải có ít nhất 6 ký tự.';
+        $thongBao = $loiPassword;
         $loaiThongBao = 'error';
-    } elseif (!isset($taiKhoanDemo[$username])) {
-        $loiUsername = 'Tài khoản không tồn tại trong hệ thống.';
-        $thongBao = 'Tài khoản không tồn tại trong hệ thống.';
-        $loaiThongBao = 'error';
-    } elseif ($taiKhoanDemo[$username]['password'] !== $password) {
-        $loiPassword = 'Mật khẩu không chính xác.';
-        $thongBao = 'Mật khẩu không chính xác.';
-        $loaiThongBao = 'error';
-    } elseif ($taiKhoanDemo[$username]['role'] !== $role) {
-        $thongBao = 'Sai vai trò! Tài khoản "' . htmlspecialchars($username) . '" không thuộc vai trò ' . $tenVaiTroMap[$role] . '.';
-        $loaiThongBao = 'error';
-    } else {
-        $_SESSION['username'] = $username;
-        $_SESSION['role'] = $role;
-        $_SESSION['tenVaiTro'] = $taiKhoanDemo[$username]['tenVaiTro'];
 
-        $thongBao = 'Đăng nhập thành công! Xin chào ' . $taiKhoanDemo[$username]['tenVaiTro'] . '.';
-        $loaiThongBao = 'success';
+    } else {
+        // Tìm tài khoản trong cơ sở dữ liệu
+        $sql = "SELECT id, ten_dang_nhap, mat_khau_hash, ho_ten, vai_tro
+                FROM nguoi_dung
+                WHERE ten_dang_nhap = :username
+                LIMIT 1";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':username' => $username
+        ]);
+
+        $taiKhoan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Kiểm tra tài khoản và mật khẩu
+        if (
+            !$taiKhoan ||
+            !password_verify($password, $taiKhoan['mat_khau_hash'])
+        ) {
+            $thongBao = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
+            $loaiThongBao = 'error';
+
+        // Kiểm tra vai trò được chọn có đúng với tài khoản không
+        } elseif ($taiKhoan['vai_tro'] !== $vaiTroDatabase[$role]) {
+            $thongBao = 'Vai trò đăng nhập không khớp với tài khoản.';
+            $loaiThongBao = 'error';
+
+        } else {
+            // Đăng nhập thành công
+            session_regenerate_id(true);
+
+            $_SESSION['user_id'] = $taiKhoan['id'];
+            $_SESSION['username'] = $taiKhoan['ten_dang_nhap'];
+            $_SESSION['ho_ten'] = $taiKhoan['ho_ten'];
+            $_SESSION['role'] = $role;
+            $_SESSION['tenVaiTro'] = $tenVaiTroMap[$role];
+
+            // Chuyển đến trang tương ứng với vai trò
+            $trangDich = [
+                'sinhvien' => '../app/views/sinhvien/index.php',
+                'giangvien' => '../app/views/giangvien/index.php',
+                'quantri' => '../app/views/quantri/index.php'
+            ];
+
+            header('Location: ' . $trangDich[$role]);
+            exit;
+        }
     }
 }
 ?>
