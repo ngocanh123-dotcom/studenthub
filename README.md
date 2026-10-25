@@ -239,7 +239,8 @@ V. Thành viên 5 - Nguyễn Thị Kim Anh
 
      5. Cơ sở dữ liệu (Database)
 5.1. Mô tả các bảng
-![alt text][def]
+<img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
+
 5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
 
 Khóa chính (PK): Xác định duy nhất mỗi bản ghi trong một bảng.
@@ -265,8 +266,8 @@ Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng k�
 Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
 
 5.3. Sơ đồ ERD
-![alt text][def]
-[def]: image-1.png
+<img width="1209" height="764" alt="image" src="https://github.com/user-attachments/assets/ee0f2444-ddd1-4678-bb14-280ea5693d7b" />
+
 5.4. Chi tiết bảng nguoi_dung
 Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
 ![alt text][def2]
