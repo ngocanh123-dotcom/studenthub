@@ -1,94 +1,69 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
-## 1. Thông tin chung
-- Môn học: Lập trình web
-- Chủ đề: Chủ đề 1
-- Công nghệ: PHP 8.x, MySQL, PDO, MVC, Fetch API
+Thành viên 4: Quy chuẩn giao diện (UI/UX)
 
-## 2. Phân công thành viên
-- Nhóm trưởng: Khung MVC, CSDL
-- Thành viên 2: Module Sinh viên
-- Thành viên 3: Module Giảng viên
-- Thành viên 4: UI
-- Thành viên 5: Fetch API & UI
+### 3.1. Hình ảnh thực tế giao diện hệ thống
+> 
 
-Thành viên 4: UI
-1. Thiết lập Bộ quy chuẩn thiết kế dùng chung (Design Tokens)
-Xây dựng bảng màu chuẩn (Color Palette):
+![Giao diện Đăng nhập Hệ thống - Eduportal](image8.png)
+*Hình 3.1: Giao diện Cổng đăng ký học phần & Quản trị học vụ (Bố cục Split-Screen trên Desktop)*
 
-Màu chủ đạo (Primary): #2563eb (Xanh Royal Blue), màu hover #1d4ed8, màu nền phụ #eff6ff.
+---
 
-Màu nền không gian (Dark Slate): Gradient #0b0f19 kết hợp #0f172a và #1e3a8a tạo chiều sâu cho khu vực thương hiệu.
+### 3.2. Hệ thống quy chuẩn thiết kế dùng chung (Design Tokens)
+Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (`:root`) nhằm thiết lập khung quy chuẩn nhất quán cho toàn bộ các màn hình chức năng của dự án:
 
-Màu phản hồi ngữ thái: Màu lỗi #ef4444 (đỏ), màu thành công #10b981 (xanh lá).
+* **Bảng màu chuẩn (Color Hierarchy — Tỷ lệ 60 - 30 - 10):**
+  * *Màu chủ đạo (Primary - 30%):* `#2563eb` (Royal Blue), màu tương tác hover `#1d4ed8`, màu nền phụ `#eff6ff` kèm hiệu ứng đổ bóng mờ `rgba(37, 99, 235, 0.25)`.
+  * *Màu nền thương hiệu (Dark Slate - 60%):* Gradient đa tầng từ `#0b0f19` qua `#0f172a` đến `#1e3a8a` tạo chiều sâu thị giác phân lớp (*Visual Depth*).
+  * *Màu ngữ thái phản hồi (Semantic - 10%):* Báo lỗi `#ef4444` (nền `#fef2f2`, viền `#fecaca`), Báo thành công `#10b981` (nền `#ecfdf5`, viền `#a7f3d0`).
+* **Hệ thống Font chữ (Typography System):**
+  * Sử dụng bộ font hiện đại `Plus Jakarta Sans` với thang đo cấp bậc nghiêm ngặt:
+    * Tiêu đề chính (`H1` / `H2`): **24px – 34px** (`font-weight: 800`, `letter-spacing: -0.02em`).
+    * Nhãn trường (`Label`): **13px** (`font-weight: 600`, màu `Slate 700`).
+    * Ô nhập liệu (`Input Text`): **14px** (`font-weight: 400`, `line-height: 1.5`).
+    * Thông báo lỗi inline (`Error Helper`): **12px** (`font-weight: 500`).
+* **Quy chuẩn kích thước & Lưới khoảng cách (Component Grid & Radius):**
+  * Chiều cao cố định chuẩn cho toàn bộ Input và Button: **48px** (tối ưu tỷ lệ nhấp chuột trên máy tính và chạm trên thiết bị cảm ứng).
+  * Bo góc hệ thống: `8px` cho nút bấm/ô nhập liệu, `14px` cho thẻ vai trò/card module, `24px` cho khối bố cục lớn.
 
-Quy chuẩn Font chữ (Typography):
+---
 
-Sử dụng bộ font hiện đại Plus Jakarta Sans kết hợp thang phân cấp tỷ lệ chặt chẽ: Tiêu đề H1/H2 (24–34px, Bold 800), Nhãn trường (13px, Semi-bold 600), Ô nhập liệu (14px, Regular 400), Chú thích và báo lỗi (12px, Medium 500).
+### 3.3. Tái cấu trúc kiến trúc bố cục (Desktop & Responsive Architecture)
+* **Khắc phục triệt để hiện tượng "hộp nổi trôi dạt" (Floating Box):** Chuyển dịch từ form đơn trơ trọi giữa màn hình sang mô hình **Bố cục chia đôi màn hình (Split-Screen Layout)** chuyên nghiệp:
+  * **Cột trái (Brand & Showcase — 55% Viewport):**
+    * Áp dụng hiệu ứng ánh sáng cực quang mờ đa tầng (*Aurora Radial Glow*) với họa tiết lưới điểm tinh tế.
+    * Tích hợp khối nhận diện thương hiệu `EDUPORTAL - Hệ Thống Đào Tạo Tín Chỉ` kèm huy hiệu học kỳ hiển thị trạng thái hoạt động trực tiếp (`pulse-dot animation`).
+    * Khối **Feature Highlights** giới thiệu hai tính năng cốt lõi (Đăng ký tín chỉ trực tuyến & Thời khóa biểu tích lũy) sử dụng icon nét đôi tối giản.
+  * **Cột phải (Auth Interaction — 45% Viewport):**
+    * Không gian tối giản hóa (*Clean Minimalist Surface*), căn lề và độ đệm chuẩn mực, hướng sự chú ý tối đa của người dùng vào form tương tác xác thực.
+* **Tối ưu hóa đa thiết bị (Responsive Breakpoints):**
+  * Tự động tái sắp xếp linh hoạt từ 2 cột thành 1 cột duy nhất mượt mà trên Tablet và Mobile (dưới `1024px`), ẩn bớt các khối phụ để ưu tiên trải nghiệm đăng nhập nhanh.
 
-Quy chuẩn kích thước & Lưới khoảng cách (Component Sizing & Spacing):
+---
 
-Đồng bộ chiều cao chuẩn cho ô nhập liệu (input) và nút bấm (button) ở mức 48px.
+### 3.4. Thiết kế thành phần tương tác & Phản hồi vi mô (Micro-interactions)
+* **Bộ chọn vai trò dạng Bento Grid (Role Tiles):**
+  * Thay thế các nút radio truyền thống bằng cụm 3 thẻ trực quan ngang hàng (Sinh viên, Giảng viên, Quản trị).
+  * Icon được bọc trong khung nổi riêng biệt; hỗ trợ hiệu ứng nổi khối (`translateY(-2px)`) khi hover và hiển thị viền đôi kèm bóng đổ xanh khi kích hoạt (`:checked`).
+* **Ô nhập dữ liệu thông minh (Input Field States):**
+  * Tích hợp icon trực quan nội vùng (User, Lock).
+  * Trạng thái kích hoạt (`:focus`) tạo viền sáng chuyển màu và bóng đổ rộng `4px` (`var(--primary-glow)`).
+  * Trạng thái cảnh báo lỗi: Tự động đổi viền đỏ và nền hồng nhạt tức thì khi nhập sai định dạng.
+* **Kiểm soát mật khẩu trực quan:**
+  * Tích hợp nút chuyển đổi SVG mắt mở/nhắm đồng bộ thời gian thực, tăng tính tiện dụng khi nhập mật khẩu dài.
+* **Nút bấm xác thực (Submit Action):**
+  * Phủ dải chuyển màu Gradient xanh chiều sâu, kèm trạng thái khóa thao tác (`disabled`) và chuyển đổi nhãn *"Đang xác thực hệ thống..."* chống lặp request.
+* **Hệ thống phản hồi lỗi hai cấp (Feedback System):**
+  * Lỗi chi tiết hiển thị trực tiếp dưới từng trường (`.field-error-msg`).
+  * Thông báo trạng thái toàn cục (`.status-banner`) dạng banner nổi với hiệu ứng trượt nhẹ (`slideInDown`).
 
-Thiết lập bo góc chuẩn: 8px cho nút/input, 14px cho thẻ vai trò/card, 24px cho các khối lớn.
+---
 
-Đóng gói toàn bộ thuộc tính thành biến CSS (:root) để toàn bộ nhóm tái sử dụng đồng bộ cho các trang sau.
-
-2. Tái cấu trúc Bố cục hiển thị trên máy tính (Desktop Layout)
-Chuyển đổi từ "Hộp nổi đơn độc" sang "Bố cục chia đôi màn hình" (Split-Screen Layout):
-
-Cột trái (Brand & Showcase - 55%):
-
-Tích hợp hiệu ứng ánh sáng mờ đa tầng (Aurora Radial Glow) giúp lấp đầy khoảng trống màn hình lớn.
-
-Đặt khối nhận diện thương hiệu EDUPORTAL - Hệ Thống Đào Tạo Tín Chỉ.
-
-Thêm huy hiệu trạng thái học kỳ có chấm sáng nhấp nháy (pulse-dot).
-
-Tích hợp khối Feature Highlights (Tính năng nổi bật) tinh giản với icon nét đôi: Đăng ký tín chỉ trực tuyến và Thời khóa biểu & Tiến độ tích lũy.
-
-Cột phải (Auth Interaction - 45%):
-
-Không gian nền trắng tối giản, tập trung thị giác vào form đăng nhập, căn lề và khoảng đệm chuẩn mực.
-
-Tối ưu hóa khả năng thích ứng (Responsive):
-
-Tự động co gọn thành 1 cột mượt mà khi xem trên máy tính bảng hoặc màn hình điện thoại dưới 1024px.
-
-3. Tái thiết kế các Thành phần tương tác (UI Components & Micro-interactions)
-Bộ chọn vai trò dạng Bento Grid (Role Tiles):
-
-Chuyển các radio button thông thường thành 3 thẻ khối ngang hàng (Sinh viên, Giảng viên, Quản trị).
-
-Tích hợp khung icon riêng biệt, hiệu ứng nổi khối (translateY(-2px)) khi rê chuột, và viền xanh kèm bóng đổ khi được chọn (:checked).
-
-Ô nhập dữ liệu (Input Fields):
-
-Tích hợp biểu tượng chỉ dẫn (User, Lock) bên trong ô nhập.
-
-Hiệu ứng viền chuyển sắc và tạo viền sáng (box-shadow glow) khi trỏ chuột vào ô (:focus).
-
-Trạng thái cảnh báo lỗi: Ô nhập tự đổi viền đỏ và nền hồng nhạt khi dữ liệu không hợp lệ.
-
-Nút ẩn/hiện mật khẩu:
-
-Đặt gọn bên phải ô mật khẩu, chuyển đổi mượt mà giữa biểu tượng mắt mở và mắt đóng.
-
-Nút gửi biểu mẫu (Submit Button):
-
-Thiết kế dải màu Gradient chuyển sắc, hiệu ứng đổ bóng mềm, kèm trạng thái khóa nút và hiển thị "Đang xác thực hệ thống..." khi người dùng bấm gửi.
-
-Hệ thống thông báo & Phản hồi (Feedback System):
-
-Báo lỗi tức thì tại chân từng ô nhập (.field-error-msg).
-
-Hộp thông báo kết quả chung (.status-banner) dạng banner nổi có hiệu ứng trượt nhẹ (slideInDown).
-
-4. Đảm bảo & Giữ nguyên 100% Chức năng cốt lõi
-Giữ nguyên toàn bộ logic đăng nhập, đối chiếu danh sách tài khoản demo (3 Admin, 1 Giảng viên, 1 Sinh viên) và lưu thông tin $_SESSION trong index.php.
-
-Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ bằng JavaScript trước khi gửi và kiểm tra bảo mật ở phía server PHP.
-
-Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
-
-Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
+### 3.5. Bảo toàn tính toàn vẹn chức năng & Bảo mật
+* **Phân quyền và phiên làm việc:** Giữ nguyên 100% logic đối chiếu tài khoản demo (3 Quản trị viên, 1 Giảng viên, 1 Sinh viên) và lưu trữ thông tin phiên `$_SESSION` trong PHP.
+* **Cơ chế xác thực hai tầng (Two-tier Validation):**
+  * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
+  * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
+* **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
+* **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
