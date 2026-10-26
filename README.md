@@ -281,20 +281,21 @@ Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm ng
 Về các ràng buộc dữ liệu, bảng sử dụng khóa chính id để tránh trùng định danh bản ghi. Hai trường sinh_vien_id và lop_hoc_phan_id được kết hợp thành một ràng buộc UNIQUE nhằm ngăn sinh viên đăng ký trùng một lớp học phần. Ngoài ra, các khóa ngoại giúp liên kết dữ liệu đăng ký với sinh viên và lớp học phần, bảo đảm tính toàn vẹn tham chiếu.
 
 Như vậy, bảng dang_ky_hoc đóng vai trò quan trọng trong việc quản lý quá trình sinh viên đăng ký lớp học phần trên hệ thống StudentHub.
+
 5.6. Chi tiết bảng hoc_ky
-📌 Mô tả chung
+- Mô tả chung
 Bảng hoc_ky lưu trữ thông tin tổng quan về các học kỳ trong hệ thống StudentHub. Đây là bảng cơ sở đóng vai trò thiết lập khung thời gian đào tạo, quản lý các mốc thời gian quan trọng phục vụ cho công tác học vụ.
 
-⚙️ Chức năng chính
+- Chức năng chính
 Cấu hình thời gian: Thiết lập ngày bắt đầu và ngày kết thúc của từng học kỳ.
 
 Quản lý đợt đăng ký: Thiết lập thời gian mở/đóng cổng đăng ký tín chỉ, tạo điều kiện kiểm soát chặt chẽ thời gian đăng ký của sinh viên.
 
-🔗 Mối quan hệ
+- Mối quan hệ
 Bảng hoc_ky có quan hệ 1 - Nhiều (1-N) với bảng lop_hoc_phan thông qua khóa ngoại hoc_ky_id.
 (Ghi chú: Một học kỳ có thể chứa nhiều lớp học phần, nhưng mỗi lớp học phần chỉ thuộc về duy nhất một học kỳ).
 
-💡 Kết luận về vai trò của bảng
+- Kết luận về vai trò của bảng
 Bảng hoc_ky đóng vai trò là "bộ điều phối thời gian" cốt lõi của hệ thống. Dữ liệu từ bảng này đảm bảo quy trình đào tạo và đăng ký môn học diễn ra đúng tiến độ và tuân thủ quy định.
 
 Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ tự động đối chiếu thời gian thực tế (thời điểm hiện tại) với các mốc thoi_gian_mo_dk (thời gian mở đăng ký) và thoi_gian_dong_dk (thời gian đóng đăng ký) để quyết định xem có cho phép thao tác hay không, từ đó ngăn chặn các hành vi đăng ký sai quy định.
