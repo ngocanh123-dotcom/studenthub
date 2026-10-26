@@ -304,3 +304,26 @@ Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ
 - Mô tả chung: Bảng lop_hoc_phan lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ, liên kết trực tiếp với các bảng hoc_phan (môn học), hoc_ky, nguoi_dung (giảng viên) và quản lý sĩ số giới hạn để phục vụ quá trình tra cứu và đăng ký tín chỉ của sinh viên.
 <img width="619" height="162" alt="Screenshot 2026-10-25 230755" src="https://github.com/user-attachments/assets/7f20fcfd-3c3f-4d71-8f17-69907615bd83" />
 
+5.8 Chi tiết bảng học phần
+* **Bảng thực thể:** `hoc_phan` (Lưu trữ danh mục môn học đào tạo của nhà trường).
+* **Cấu trúc trường & Kiểu dữ liệu:**
+  * `id`: Khóa chính định danh (INT, Auto Increment).
+  * `ma_hoc_phan`: Mã định danh môn học (VARCHAR(20), NOT NULL, UNIQUE) — ví dụ: `MAT101`, `WEB102`.
+  * `ten_hoc_phan`: Tên môn học hiển thị (VARCHAR(150), NOT NULL).
+  * `so_tin_chi`: Số lượng tín chỉ tích lũy (INT, NOT NULL).
+  * `loai_hoc_phan`: Phân loại khối kiến thức (ENUM: `'dai_cuong'`, `'co_so_nganh'`, `'chuyen_nganh'`).
+  * `hoc_phan_tien_quyet_id`: Khóa ngoại tự tham chiếu (Self-referencing Foreign Key) trỏ về chính `hoc_phan(id)` để xác định điều kiện tiên quyết trước khi đăng ký.
+* **Hệ thống ràng buộc toàn vẹn (Constraints):**
+  * `PRIMARY KEY`: Đảm bảo định danh duy nhất cho từng bản ghi học phần.
+  * `UNIQUE KEY`: Ràng buộc `ma_hoc_phan` không được phép trùng lặp trong toàn trường.
+  * `CHECK (so_tin_chi > 0)`: Ngăn chặn nhập liệu số tín chỉ âm hoặc bằng 0.
+  * `FOREIGN KEY (hoc_phan_tien_quyet_id)`: Thiết lập toàn vẹn tham chiếu nội bộ với cơ chế `ON DELETE SET NULL` (nếu môn tiên quyết bị hủy/sáp nhập, môn học sau không bị xóa mà chỉ bỏ điều kiện tiên quyết).
+
+---
+
+#### 2. Dữ liệu mẫu Tiếng Việt (Mock Data)
+Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có dấu chuẩn `utf8mb4`, mô phỏng đầy đủ các tình huống:
+* Học phần đại cương độc lập, không yêu cầu tiên quyết (`hoc_phan_tien_quyet_id = NULL`).
+* Cặp học phần có quan hệ tiên quyết (Ví dụ: môn *Giải tích 2* yêu cầu hoàn thành môn *Giải tích 1* trước).
+* Phân loại đa dạng theo các khối kiến thức: Đại cương, Cơ sở ngành, Chuyên ngành.
+
