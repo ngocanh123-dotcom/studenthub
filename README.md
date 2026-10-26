@@ -285,13 +285,14 @@ Như vậy, bảng dang_ky_hoc đóng vai trò quan trọng trong việc quản 
 5.6. Chi tiết bảng hoc_ky
 - Mô tả chung
 Bảng hoc_ky lưu trữ thông tin tổng quan về các học kỳ trong hệ thống StudentHub. Đây là bảng cơ sở đóng vai trò thiết lập khung thời gian đào tạo, quản lý các mốc thời gian quan trọng phục vụ cho công tác học vụ.
-![Cấu trúc chi tiết các trường](image-6.png)
+
 - Chức năng chính
 Cấu hình thời gian: Thiết lập ngày bắt đầu và ngày kết thúc của từng học kỳ.
 
 Quản lý đợt đăng ký: Thiết lập thời gian mở/đóng cổng đăng ký tín chỉ, tạo điều kiện kiểm soát chặt chẽ thời gian đăng ký của sinh viên.
 
-- Mối quan hệ
+- <img width="1003" height="608" alt="image-6" src="https://github.com/user-attachments/assets/e24df44c-e20e-4d42-9f25-93b0ca972f36" />
+
 Bảng hoc_ky có quan hệ 1 - Nhiều (1-N) với bảng lop_hoc_phan thông qua khóa ngoại hoc_ky_id.
 (Ghi chú: Một học kỳ có thể chứa nhiều lớp học phần, nhưng mỗi lớp học phần chỉ thuộc về duy nhất một học kỳ).
 
