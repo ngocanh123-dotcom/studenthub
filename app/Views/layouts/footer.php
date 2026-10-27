@@ -1,6 +1,5 @@
-</main> <!-- Đóng sh-page-body -->
-    </div> <!-- Đóng sh-content-area -->
-</div> <!-- Đóng sh-main-wrapper -->
+</main> <!-- Đóng sh-main-content -->
+</div> <!-- Đóng sh-container -->
 
 <script src="/studenthub/assets/js/main.js"></script>
 </body>

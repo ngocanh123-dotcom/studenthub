@@ -53,7 +53,7 @@ $currentUri = $_SERVER['REQUEST_URI'];
             </a>
 
             <!-- 4. Chi tiết lớp học phần -->
-<a href="/studenthub/app/Views/classes/detail.php?id=1" 
+            <a href="/studenthub/app/Views/classes/detail.php?id=1" 
                class="sh-nav-item <?= (strpos($currentUri, '/classes/detail.php') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -84,6 +84,15 @@ $currentUri = $_SERVER['REQUEST_URI'];
                 <span>Đăng xuất</span>
             </a>
         </nav>
+    </div>
+
+    <!-- Khối trạng thái học kỳ ở chân Sidebar -->
+    <div class="sidebar-semester-pill">
+        <div class="semester-status-line">
+            <span class="green-dot"></span>
+            <span>Học kỳ 1 (2026 - 2027)</span>
+        </div>
+        <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
     </div>
 
     <!-- Khối trạng thái học kỳ ở chân Sidebar -->

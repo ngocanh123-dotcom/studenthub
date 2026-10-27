@@ -293,7 +293,7 @@ border-radius: 50%;
 
 /* ==========================================================================
    4. KHỐI SỐ LIỆU HỌC TẬP (4 THẺ KPI)
-========================================================================== */
+   ========================================================================== */
 .section-meta-heading {
   margin-bottom: 16px;
 }
@@ -442,7 +442,7 @@ border-radius: 50%;
 
 .classes-data-table td {
   padding: 16px 14px;
-border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
   font-size: 13.5px;
   color: var(--text-main);
   vertical-align: middle;

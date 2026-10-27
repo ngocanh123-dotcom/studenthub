@@ -60,7 +60,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                 <a href="#" class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                     <span>Đăng ký học phần</span>
                 </a>
@@ -237,7 +237,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                             <td><button class="btn-enroll-action">+ Đăng ký</button></td>
                         </tr>
                         <tr>
-<td><span class="class-code-tag">WEB102-01</span></td>
+                            <td><span class="class-code-tag">WEB102-01</span></td>
                             <td>
                                 <strong>Lập Trình Web Cơ Bản</strong><br>
                                 <small style="color:#64748b;">Mã HP: WEB102 • 3 tín chỉ</small>
