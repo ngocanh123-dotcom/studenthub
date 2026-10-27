@@ -1,104 +1,86 @@
-<div class="container mt-5">
-    <div class="row">
-        <!-- Thông tin lớp -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <h2 class="card-title fw-bold text-primary mb-1"><?= htmlspecialchars($classInfo['course_name']) ?></h2>
-                    <p class="text-muted mb-4">Mã lớp: <span class="badge bg-secondary"><?= htmlspecialchars($classInfo['id']) ?></span> | Mã HP: <?= htmlspecialchars($classInfo['course_code']) ?></p>
-                    
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-0"><strong>👨‍🏫 Giảng viên:</strong> <?= htmlspecialchars($classInfo['lecturer_name']) ?></li>
-                        <li class="list-group-item px-0"><strong>📅 Lịch học:</strong> <?= htmlspecialchars($classInfo['schedule']) ?></li>
-                        <li class="list-group-item px-0"><strong>📍 Phòng học:</strong> <?= htmlspecialchars($classInfo['room']) ?></li>
-                        <li class="list-group-item px-0"><strong>🎓 Số tín chỉ:</strong> <?= htmlspecialchars($classInfo['credits']) ?> TC</li>
-                    </ul>
-                </div>
+<!-- app/Views/classes/detail.php -->
+<div class="class-detail-container">
+    <!-- Breadcrumb điều hướng -->
+    <div class="breadcrumb">
+        <a href="index.php?controller=class">Danh sách lớp</a> > 
+        <span>Chi tiết lớp: <?= htmlspecialchars($classInfo['ma_lop']) ?></span>
+    </div>
+
+    <div class="detail-header">
+        <h1><?= htmlspecialchars($classInfo['ten_mon_hoc']) ?></h1>
+        <span class="status-badge active">Đang mở đăng ký</span>
+    </div>
+
+    <!-- KHỐI 1: THÔNG TIN CHUNG CỦA LỚP -->
+    <div class="info-card">
+        <h3 class="card-title">Thông tin học phần</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Mã lớp</span>
+                <span class="info-value font-bold text-blue"><?= htmlspecialchars($classInfo['ma_lop']) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Giảng viên phụ trách</span>
+                <span class="info-value"><?= htmlspecialchars($classInfo['ten_giang_vien']) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Số tín chỉ</span>
+                <span class="info-value"><?= htmlspecialchars($classInfo['so_tin_chi']) ?> TC</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Lịch học / Phòng</span>
+                <span class="info-value"><?= htmlspecialchars($classInfo['lich_hoc']) ?> | Phòng <?= htmlspecialchars($classInfo['phong_hoc']) ?></span>
             </div>
         </div>
 
-        <!-- Bảng điều khiển đăng ký -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 bg-light">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">Tình trạng lớp</h5>
-                    
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Đã đăng ký:</span>
-                        <span id="seat-count" class="fw-bold"><?= $classInfo['registered_seats'] ?> / <?= $classInfo['max_seats'] ?></span>
-                    </div>
-                    <?php 
-                        $percent = ($classInfo['registered_seats'] / $classInfo['max_seats']) * 100;
-                        $progressColor = $percent >= 90 ? 'bg-danger' : ($percent >= 60 ? 'bg-warning' : 'bg-success');
-                    ?>
-                    <div class="progress mb-4" style="height: 10px;">
-                        <div class="progress-bar <?= $progressColor ?>" role="progressbar" style="width: <?= $percent ?>%"></div>
-                    </div>
-
-                    <!-- Khu vực nút xử lý -->
-                    <div id="action-area">
-                        <?php if ($classInfo['status'] !== 'active'): ?>
-                            <button class="btn btn-dark w-100 disabled">🔒 Lớp đã khóa</button>
-                        <?php elseif ($isEnrolled): ?>
-                            <button class="btn btn-success w-100 disabled">✅ Đã đăng ký</button>
-                        <?php elseif ($isFull): ?>
-                            <button class="btn btn-danger w-100 disabled">❌ Đã đủ sĩ số</button>
-                        <?php else: ?>
-                            <button id="btn-enroll" class="btn btn-primary w-100 fw-bold">Đăng ký học phần</button>
-                        <?php endif; ?>
-                    </div>
-                    <!-- Thông báo Fetch API -->
-                    <div id="enroll-message" class="mt-3 small text-center"></div>
-                </div>
+        <!-- Thanh tiến trình sĩ số -->
+        <div class="capacity-section">
+            <div class="capacity-header">
+                <span class="info-label">Sĩ số lớp (<?= htmlspecialchars($classInfo['si_so_hien_tai']) ?>/<?= htmlspecialchars($classInfo['si_so_toi_da']) ?>)</span>
+            </div>
+            <?php 
+                $percent = ($classInfo['si_so_toi_da'] > 0) ? ($classInfo['si_so_hien_tai'] / $classInfo['si_so_toi_da']) * 100 : 0; 
+                $barColor = $percent >= 100 ? 'bg-danger' : 'bg-primary';
+            ?>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill <?= $barColor ?>" style="width: <?= $percent ?>%;"></div>
             </div>
         </div>
     </div>
+
+    <!-- KHỐI 2: DANH SÁCH SINH VIÊN -->
+    <div class="students-card">
+        <h3 class="card-title">Danh sách sinh viên đã đăng ký</h3>
+        
+        <?php if (!empty($students)): ?>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã Sinh Viên</th>
+                        <th>Họ và Tên</th>
+                        <th>Lớp Hành Chính</th>
+                        <th>Thời gian đăng ký</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($students as $index => $sv): ?>
+                    <tr>
+                        <td><?= $index + 1 ?></td>
+                        <td class="font-bold"><?= htmlspecialchars($sv['ma_sinh_vien']) ?></td>
+                        <td><?= htmlspecialchars($sv['ho_ten']) ?></td>
+                        <td><?= htmlspecialchars($sv['lop_hanh_chinh']) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($sv['ngay_dang_ky'])) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <p>Chưa có sinh viên nào đăng ký lớp học phần này.</p>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const btnEnroll = document.getElementById('btn-enroll');
-    if (btnEnroll) {
-        btnEnroll.addEventListener('click', function() {
-            btnEnroll.innerHTML = 'Đang xử lý...';
-            btnEnroll.disabled = true;
-
-            // Dùng Fetch API đáp ứng yêu cầu bắt buộc
-            fetch('/api/enroll', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    class_id: <?= $classInfo['id'] ?>,
-                    csrf_token: '<?= $_SESSION['csrf_token'] ?>'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const msgBox = document.getElementById('enroll-message');
-                if (data.status === 'success') {
-                    // Thành công: Cập nhật giao diện không cần reload
-                    btnEnroll.className = 'btn btn-success w-100 disabled';
-                    btnEnroll.innerHTML = '✅ Đã đăng ký';
-                    msgBox.innerHTML = `<span class="text-success">${data.message}</span>`;
-                    
-                    // Tăng sĩ số trên UI
-                    let currentSeats = <?= $classInfo['registered_seats'] ?> + 1;
-                    document.getElementById('seat-count').innerText = `${currentSeats} / <?= $classInfo['max_seats'] ?>`;
-                } else {
-                    // Lỗi: Khôi phục nút và báo lỗi
-                    btnEnroll.innerHTML = 'Đăng ký học phần';
-                    btnEnroll.disabled = false;
-                    msgBox.innerHTML = `<span class="text-danger">⚠️ ${data.message}</span>`;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                btnEnroll.innerHTML = 'Đăng ký học phần';
-                btnEnroll.disabled = false;
-            });
-        });
-    }
-});
-</script>
