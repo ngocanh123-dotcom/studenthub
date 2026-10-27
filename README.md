@@ -1,5 +1,9 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
+<<<<<<< HEAD
+## 4. Báo cáo chi tiết phần việc — Thành viên 4: Quy chuẩn giao diện (UI/UX)
+
+=======
 ## 1. Thông tin chung
 
 - **Tên dự án:** StudentHub
@@ -124,6 +128,7 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
 
 
 IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
+>>>>>>> 88e32198587ed0b543de7be311c2da5f01dddc5c
 ### 4.1. Hình ảnh thực tế giao diện hệ thống
 > 
 
@@ -188,6 +193,9 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
   * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
+<<<<<<< HEAD
+* **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
+=======
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 
 ### V. Thành viên 5 — Nguyễn Thị Kim Anh
@@ -327,3 +335,4 @@ Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có 
 * Cặp học phần có quan hệ tiên quyết (Ví dụ: môn *Giải tích 2* yêu cầu hoàn thành môn *Giải tích 1* trước).
 * Phân loại đa dạng theo các khối kiến thức: Đại cương, Cơ sở ngành, Chuyên ngành.
 
+>>>>>>> 88e32198587ed0b543de7be311c2da5f01dddc5c

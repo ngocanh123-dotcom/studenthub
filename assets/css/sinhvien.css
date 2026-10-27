@@ -1,0 +1,520 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --navy-sidebar: #0c192c;
+  --navy-sidebar-hover: #16263d;
+  --blue-active: #2563eb;
+  --blue-banner: #1d4ed8;
+  --bg-page: #f8fafc;
+  --border-light: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --green-status: #10b981;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.sh-body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.sh-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   1. CỘT SIDEBAR XANH ĐEN BÊN TRÁI
+   ========================================================================== */
+.sh-sidebar {
+  width: 260px;
+  background-color: var(--navy-sidebar);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 24px 8px;
+}
+
+.brand-icon-s {
+  width: 44px;
+  height: 44px;
+  background: var(--blue-active);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.brand-info h2 {
+  font-size: 19px;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.brand-info p {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin: 2px 0 0 0;
+}
+
+.sidebar-category-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 10px 8px 10px;
+}
+
+.sidebar-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sh-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.sh-nav-item:hover {
+  background-color: var(--navy-sidebar-hover);
+  color: #ffffff;
+}
+
+.sh-nav-item.active {
+  background-color: var(--blue-active);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.sh-nav-item.logout-link {
+  color: #f87171;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.sh-nav-item.logout-link:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.sidebar-semester-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.semester-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.green-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.sidebar-semester-pill p {
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ==========================================================================
+   2. KHU VỰC NỘI DUNG CHÍNH (MAIN CONTENT)
+   ========================================================================== */
+.sh-main-content {
+  flex: 1;
+  padding: 28px 40px;
+  overflow-y: auto;
+}
+
+.sh-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.top-breadcrumb {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.sh-top-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.header-subtext {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.profile-pill-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px 8px 10px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 99px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.profile-avatar-circle {
+  width: 38px;
+  height: 38px;
+  background: #eff6ff;
+  color: var(--blue-active);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.profile-name-role strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.profile-name-role span {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   3. PHẦN BỊ THIẾU: ĐỊNH DẠNG CHI TIẾT LỚP HỌC PHẦN (detail.php)
+   ========================================================================== */
+.detail-overview-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.overview-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 22px;
+}
+
+.code-pill-blue {
+  display: inline-block;
+  background: #eff6ff;
+  color: var(--blue-active);
+  border: 1px solid #bfdbfe;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.class-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.meta-tag-sub {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.meta-tag-sub strong {
+  color: #1e293b;
+}
+
+.badge-open-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* Lưới 4 thông số */
+.specs-grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.spec-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.spec-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.spec-val {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+  line-height: 1.35;
+}
+
+.spec-desc {
+  display: block;
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+/* Thanh Sĩ số */
+.class-capacity-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.capacity-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cap-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cap-numbers {
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.cap-numbers strong {
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.remain-pill {
+  color: #059669;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--blue-active);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.danger {
+  background: #ef4444;
+}
+
+/* Nút quay lại & Đăng ký */
+.action-buttons-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.btn-back-link {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.btn-back-link:hover {
+  color: var(--blue-active);
+  text-decoration: underline;
+}
+
+.btn-enroll-action {
+  background: var(--blue-active);
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-enroll-action:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+/* ==========================================================================
+   4. BẢNG DANH SÁCH SINH VIÊN
+   ========================================================================== */
+.classes-table-panel {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.panel-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-header-flex h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+
+.panel-header-flex p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.badge-total-students {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.classes-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.classes-data-table th {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+
+.classes-data-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13.5px;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.class-code-tag {
+  color: var(--blue-active);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.badge-enrolled-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 1100px) {
+  .specs-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
