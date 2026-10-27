@@ -32,7 +32,7 @@ body.sh-body {
 }
 
 /* ==========================================================================
-   1. CỘT SIDEBAR XANH ĐEN BÊN TRÁI
+   1. SIDEBAR XANH ĐEN BÊN TRÁI
    ========================================================================== */
 .sh-sidebar {
   width: 260px;
@@ -234,7 +234,343 @@ body.sh-body {
 }
 
 /* ==========================================================================
-   3. PHẦN BỊ THIẾU: ĐỊNH DẠNG CHI TIẾT LỚP HỌC PHẦN (detail.php)
+   3. BANNER XIN CHÀO MÀU XANH DƯƠNG (Nổi khối)
+   ========================================================================== */
+.hero-welcome-banner {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  border-radius: 20px;
+  padding: 34px 40px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 25px -5px rgba(29, 78, 216, 0.3);
+}
+
+.banner-subtag {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.hero-welcome-banner h2 {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.hero-welcome-banner p {
+  font-size: 14px;
+  color: #e0e7ff;
+  max-width: 650px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.banner-sh-badge {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  transform: rotate(8deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   4. KHỐI SỐ LIỆU HỌC TẬP (4 THẺ KPI)
+   ========================================================================== */
+.section-meta-heading {
+  margin-bottom: 16px;
+}
+
+.section-meta-heading h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+
+.section-meta-heading p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sh-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.sh-metric-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.card-top-row span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.metric-circle-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.metric-circle-icon.blue { background: #eff6ff; color: #2563eb; }
+.metric-circle-icon.green { background: #ecfdf5; color: #10b981; }
+.metric-circle-icon.purple { background: #f5f3ff; color: #7c3aed; }
+.metric-circle-icon.amber { background: #fffbeb; color: #d97706; }
+
+.metric-big-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.metric-big-number.green-text {
+  color: #059669;
+  font-size: 22px;
+}
+
+.metric-bottom-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   5. BẢNG DANH SÁCH LỚP HỌC PHẦN & HƯỚNG DẪN QUY TRÌNH
+   ========================================================================== */
+.sh-lower-split {
+  display: grid;
+  grid-template-columns: 2.1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.classes-table-panel {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.panel-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-header-flex h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+
+.panel-header-flex p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.btn-see-all-pill {
+  font-size: 12.5px;
+  color: var(--blue-active);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-see-all-pill:hover {
+  background: var(--blue-active);
+  color: #ffffff;
+}
+
+.classes-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.classes-data-table th {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+
+.classes-data-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13.5px;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.class-code-tag {
+  color: var(--blue-active);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.btn-enroll-action {
+  background: var(--blue-active);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-enroll-action:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.badge-enrolled-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.guide-instructions-panel {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.guide-instructions-panel h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.guide-instructions-panel .guide-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 20px;
+}
+
+.steps-flow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.step-flow-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.step-number-circle {
+  width: 28px;
+  height: 28px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  color: var(--blue-active);
+  font-size: 13px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-text-content strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.step-text-content p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.btn-cta-all-classes {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--navy-sidebar);
+  color: #ffffff;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-cta-all-classes:hover {
+  background: #16263d;
+  box-shadow: 0 4px 12px rgba(12, 25, 44, 0.25);
+}
+
+/* ==========================================================================
+   6. HỖ TRỢ TRANG CHI TIẾT (detail.php)
    ========================================================================== */
 .detail-overview-card {
   background: #ffffff;
@@ -296,7 +632,6 @@ body.sh-body {
   font-weight: 700;
 }
 
-/* Lưới 4 thông số */
 .specs-grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -334,7 +669,6 @@ body.sh-body {
   color: #94a3b8;
 }
 
-/* Thanh Sĩ số */
 .class-capacity-box {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -391,7 +725,6 @@ body.sh-body {
   background: #ef4444;
 }
 
-/* Nút quay lại & Đăng ký */
 .action-buttons-strip {
   display: flex;
   justify-content: space-between;
@@ -412,109 +745,14 @@ body.sh-body {
   text-decoration: underline;
 }
 
-.btn-enroll-action {
-  background: var(--blue-active);
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 13.5px;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-enroll-action:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-}
-
-/* ==========================================================================
-   4. BẢNG DANH SÁCH SINH VIÊN
-   ========================================================================== */
-.classes-table-panel {
-  background: #ffffff;
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  padding: 24px 30px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-}
-
-.panel-header-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.panel-header-flex h3 {
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 3px;
-}
-
-.panel-header-flex p {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.badge-total-students {
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.classes-data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.classes-data-table th {
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #64748b;
-  letter-spacing: 0.04em;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border-light);
-  text-align: left;
-}
-
-.classes-data-table td {
-  padding: 16px 14px;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 13.5px;
-  color: var(--text-main);
-  vertical-align: middle;
-}
-
-.class-code-tag {
-  color: var(--blue-active);
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.badge-enrolled-ok {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 8px;
-}
-
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
+  .sh-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .specs-grid-container {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .sh-lower-split {
+    grid-template-columns: 1fr;
   }
 }
