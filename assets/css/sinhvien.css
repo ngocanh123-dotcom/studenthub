@@ -152,7 +152,7 @@ body.sh-body {
   width: 7px;
   height: 7px;
   background-color: #34d399;
-  border-radius: 50%;
+border-radius: 50%;
   box-shadow: 0 0 8px #34d399;
 }
 
@@ -595,7 +595,7 @@ body.sh-body {
   background: #eff6ff;
   color: var(--blue-active);
   border: 1px solid #bfdbfe;
-  font-size: 12px;
+font-size: 12px;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 6px;

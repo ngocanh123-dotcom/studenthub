@@ -31,3 +31,4 @@ class ClassController {
         require_once __DIR__ . '/../Views/classes/detail.php';
     }
 }
+?>

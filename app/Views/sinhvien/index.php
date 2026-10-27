@@ -118,7 +118,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                 <div class="profile-avatar-circle">SV</div>
                 <div class="profile-name-role">
                     <strong><?= htmlspecialchars($hoTen) ?></strong>
-                    <span>Sinh viên • <?= htmlspecialchars($maSinhVien) ?></span>
+<span>Sinh viên • <?= htmlspecialchars($maSinhVien) ?></span>
                 </div>
             </div>
         </header>
@@ -177,7 +177,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <div class="metric-circle-icon purple">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                            <polyline points="2 17 12 22 22 17"></polyline>
+<polyline points="2 17 12 22 22 17"></polyline>
                             <polyline points="2 12 12 17 22 12"></polyline>
                         </svg>
                     </div>
@@ -288,7 +288,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <div class="step-flow-item">
                         <div class="step-number-circle">3</div>
                         <div class="step-text-content">
-                            <strong>Theo dõi lịch sử đăng ký</strong>
+<strong>Theo dõi lịch sử đăng ký</strong>
                             <p>Kiểm tra trạng thái hoặc hủy học phần trong thời hạn cho phép.</p>
                         </div>
                     </div>

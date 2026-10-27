@@ -94,4 +94,13 @@ $currentUri = $_SERVER['REQUEST_URI'];
         </div>
         <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
     </div>
+
+    <!-- Khối trạng thái học kỳ ở chân Sidebar -->
+    <div class="sidebar-semester-pill">
+        <div class="semester-status-line">
+            <span class="green-dot"></span>
+            <span>Học kỳ 1 (2026 - 2027)</span>
+        </div>
+        <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
+    </div>
 </aside>
