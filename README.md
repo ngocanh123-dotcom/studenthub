@@ -1,5 +1,9 @@
 # HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
 
+<<<<<<< HEAD
+## 4. Báo cáo chi tiết phần việc — Thành viên 4: Quy chuẩn giao diện (UI/UX)
+
+=======
 ## 1. Thông tin chung
 
 - **Tên dự án:** StudentHub
@@ -124,6 +128,7 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
 
 
 IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
+>>>>>>> 88e32198587ed0b543de7be311c2da5f01dddc5c
 ### 4.1. Hình ảnh thực tế giao diện hệ thống
 > 
 
@@ -188,42 +193,51 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
   * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
+<<<<<<< HEAD
+* **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
+=======
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 
-V. Thành viên 5 - Nguyễn Thị Kim Anh 
-1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
-   - tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là cầu nối tổng hợp toàn bộ các kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác, chuyển hóa thành bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
-2. Các nhiệm vụ cụ thể được phân công và triển khai
+### V. Thành viên 5 — Nguyễn Thị Kim Anh
+**Vai trò:** Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống & Đảm bảo chất lượng (QA/Testing)
 
-   a) Xây dựng tài liệu kỹ thuật cốt lõi (README.md):
-   - Mô tả bài toán và kiến trúc: Soạn thảo file README.md đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần (Chủ đề 1), bối cảnh ứng dụng, kiến trúc mã nguồn (MVC tự xây dựng), công nghệ sử dụng (PHP 8.x, MySQL, PDO, HTML5/CSS3/JS, Bootstrap).
-   - Hướng dẫn cài đặt & Triển khai (Deployment Guide): Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (XAMPP/Apache/MySQL), hướng dẫn import cơ sở dữ liệu từ file studenthub.sql, cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
-@@ -95,6 +96,7 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
-      +  Quản trị viên: admin01 / admin123 (Quyền quản trị toàn hệ thống)
-  -  Tổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập,
-    + kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
-     
-    b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm:
+#### 1. Mô tả chi tiết vai trò và trách nhiệm
+Trong dự án xây dựng **Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub)**, tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là "cầu nối" tổng hợp toàn bộ kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác. Từ đó, tôi chuyển hóa chúng thành một bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
 
-    - Đồng bộ hóa đặc tả kỹ thuật: Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên khác:
-@@ -108,12 +110,15 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
-    -  Checkpoint 5-6: Tổ chức cấu trúc MVC, Đăng nhập, Phân quyền Server-side và bảo mật CSRF.
-    -  Checkpoint 7-8: Tích hợp Fetch API, Kiểm thử Smoke test, hoàn thiện tài liệu README và URL chạy thử.
-    - Giám sát tuân thủ Git: Kiểm tra và nhắc nhở các thành viên tuân thủ quy trình làm việc trên Git, đảm bảo mỗi thành viên đều có commit đóng góp thực tế thể hiện trên lịch sử phát triển dự án.
-    
-  d) Lập Kế hoạch kiểm thử (Test Plan) & Xây dựng Bộ bộ kiểm thử nghiệm thu:
-    - Thiết lập Khung kiểm thử (Test Plan Matrix): Phối hợp với Thành viên 4 để chuẩn bị kịch bản kiểm thử toàn diện cho chức năng Đăng nhập & Phân quyền, bao gồm 15+ trường hợp kiểm thử (Test Cases) từ cơ bản đến nâng cao:
-    -  Kiểm thử Validation Client-side: Bỏ trống trường, nhập ký tự đặc biệt, độ dài chuỗi mật khẩu không đủ.
-    -  Kiểm thử Logic Server-side: Tài khoản không tồn tại, sai mật khẩu, chọn sai vai trò so với phân quyền trong CSDL.
-    - Kiểm thử Bảo mật & Phân quyền: Cố tình truy cập trực tiếp URL trang Admin khi chưa đăng nhập, thay đổi thông số Role trên LocalStorage/Cookie, vô hiệu hóa CSRF Token.
-    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn.   3. Kết quả đầu ra dự kiến (Deliverables)
-    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn. 
-    
-3. Kết quả đầu ra dự kiến (Deliverables)
-     - File README.md hoàn chỉnh: Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc.
-     -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
-     -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
+#### 2. Các nhiệm vụ cụ thể được phân công và triển khai
 
+**a) Xây dựng tài liệu kỹ thuật cốt lõi (`README.md`)**
+- **Mô tả bài toán và kiến trúc:** Soạn thảo file `README.md` đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần, bối cảnh ứng dụng, kiến trúc mã nguồn (`MVC tự xây dựng`) và công nghệ sử dụng (`PHP 8.x`, `MySQL`, `PDO`, `HTML5/CSS3/JS`).
+- **Hướng dẫn cài đặt & Triển khai (Deployment Guide):** Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (`XAMPP/Apache/MySQL`), hướng dẫn import cơ sở dữ liệu từ file `studenthub.sql` và cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
+- **Cung cấp dữ liệu mẫu & Tài khoản Demo:** Xây dựng danh sách tài khoản demo đầy đủ cho cả 3 vai trò (Sinh viên, Giảng viên, Quản trị viên) kèm thông tin đăng nhập thực tế để giảng viên và người kiểm thử có thể đánh giá nhanh chóng.
+- **Tổng hợp tài liệu mô tả màn hình:** Viết phần mô tả tổng hợp cho màn hình Form đăng nhập, kết hợp hài hòa giữa `Wireframe thiết kế` (Thành viên 1), `Quy chuẩn giao diện` (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
+
+**b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm**
+- **Đồng bộ hóa đặc tả kỹ thuật:** Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên:
+  - Kế thừa quy tắc **Validation** từ Thành viên 2 & 4 (ràng buộc độ dài, ký tự đặc biệt, kiểm tra rỗng, mã hóa lỗi).
+  - Kế thừa **Sơ đồ luồng điều hướng (`Route System`)** từ Thành viên 3 (điều hướng Sinh viên, Giảng viên, Admin, xử lý Đăng xuất và Truy cập trái phép).
+  - Kế thừa **Quy chuẩn UI/UX** từ Thành viên 4 (mã màu chủ đạo, font chữ, quy định viền đỏ khi lỗi, hiển thị thông báo alert).
+- **Tổ chức tài liệu nhóm:** Sắp xếp cấu trúc báo cáo bài tập lớn mạch lạc theo đúng yêu cầu đề bài (Mục tiêu, Phân công nhiệm vụ, Sơ đồ ERD, Luồng nghiệp vụ, Kế hoạch kiểm thử).
+
+**c) Quản lý phân công công việc và theo dõi tiến độ dự án**
+- **Lập bảng theo dõi Checkpoint:** Xây dựng bảng Phân công nhiệm vụ và Ma trận tiến độ chi tiết bám sát theo các mốc học tập:
+  - `Checkpoint 1-2:` Đăng ký đề tài, hoàn thiện Wireframe, quy tắc Validation và Sơ đồ Route.
+  - `Checkpoint 3-4:` Sơ đồ ERD, Kịch bản SQL và Chức năng CRUD cơ bản.
+  - `Checkpoint 5-6:` Tổ chức cấu trúc MVC, Đăng nhập, Phân quyền Server-side và bảo mật CSRF.
+  - `Checkpoint 7-8:` Tích hợp Fetch API, Kiểm thử Smoke test, hoàn thiện tài liệu README và URL chạy thử.
+- **Giám sát tuân thủ Git:** Kiểm tra và nhắc nhở các thành viên tuân thủ quy trình làm việc trên Git, đảm bảo mỗi thành viên đều có commit đóng góp thực tế thể hiện trên lịch sử phát triển dự án.
+
+**d) Lập Kế hoạch kiểm thử (Test Plan) & Xây dựng Bộ kiểm thử nghiệm thu**
+- **Thiết lập Khung kiểm thử (`Test Plan Matrix`):** Phối hợp với các thành viên để chuẩn bị kịch bản kiểm thử toàn diện cho chức năng Đăng nhập & Phân quyền, bao gồm `15+ trường hợp kiểm thử (Test Cases)` từ cơ bản đến nâng cao:
+  - *Kiểm thử Validation Client-side:* Bỏ trống trường, nhập ký tự đặc biệt, độ dài chuỗi mật khẩu không đủ.
+  - *Kiểm thử Logic Server-side:* Tài khoản không tồn tại, sai mật khẩu, chọn sai vai trò so với phân quyền trong CSDL.
+  - *Kiểm thử Bảo mật & Phân quyền:* Cố tình truy cập trực tiếp URL trang Admin khi chưa đăng nhập, thay đổi thông số Role trên `LocalStorage/Cookie`, vô hiệu hóa `CSRF Token`.
+- **Chuẩn bị Ma trận báo cáo kết quả:** Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: `Mã TC`, `Mô tả`, `Các bước thực hiện`, `Dữ liệu đầu vào`, `Kết quả mong đợi`, `Kết quả thực tế`, `Trạng thái Pass/Fail`) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn.
+
+#### 3. Kết quả đầu ra dự kiến (Deliverables)
+- 📄 **File `README.md` hoàn chỉnh:** Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc hệ thống.
+- 📊 **Báo cáo Phân tích & Phân công nhiệm vụ nhóm:** Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
+- ✅ **Bảng Kế hoạch Kiểm thử (Test Plan & Checklist):** Ma trận kiểm thử tối thiểu 15 trường hợp, phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.
 
 5. Cơ sở dữ liệu (Database)
 
@@ -275,3 +289,50 @@ Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm ng
 Về các ràng buộc dữ liệu, bảng sử dụng khóa chính id để tránh trùng định danh bản ghi. Hai trường sinh_vien_id và lop_hoc_phan_id được kết hợp thành một ràng buộc UNIQUE nhằm ngăn sinh viên đăng ký trùng một lớp học phần. Ngoài ra, các khóa ngoại giúp liên kết dữ liệu đăng ký với sinh viên và lớp học phần, bảo đảm tính toàn vẹn tham chiếu.
 
 Như vậy, bảng dang_ky_hoc đóng vai trò quan trọng trong việc quản lý quá trình sinh viên đăng ký lớp học phần trên hệ thống StudentHub.
+
+5.6. Chi tiết bảng hoc_ky
+- Mô tả chung
+Bảng hoc_ky lưu trữ thông tin tổng quan về các học kỳ trong hệ thống StudentHub. Đây là bảng cơ sở đóng vai trò thiết lập khung thời gian đào tạo, quản lý các mốc thời gian quan trọng phục vụ cho công tác học vụ.
+
+- <img width="1003" height="608" alt="image-6" src="https://github.com/user-attachments/assets/e24df44c-e20e-4d42-9f25-93b0ca972f36" />
+- Chức năng chính
+Cấu hình thời gian: Thiết lập ngày bắt đầu và ngày kết thúc của từng học kỳ.
+
+Quản lý đợt đăng ký: Thiết lập thời gian mở/đóng cổng đăng ký tín chỉ, tạo điều kiện kiểm soát chặt chẽ thời gian đăng ký của sinh viên.
+
+Bảng hoc_ky có quan hệ 1 - Nhiều (1-N) với bảng lop_hoc_phan thông qua khóa ngoại hoc_ky_id.
+(Ghi chú: Một học kỳ có thể chứa nhiều lớp học phần, nhưng mỗi lớp học phần chỉ thuộc về duy nhất một học kỳ).
+
+- Kết luận về vai trò của bảng
+Bảng hoc_ky đóng vai trò là "bộ điều phối thời gian" cốt lõi của hệ thống. Dữ liệu từ bảng này đảm bảo quy trình đào tạo và đăng ký môn học diễn ra đúng tiến độ và tuân thủ quy định.
+
+Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ tự động đối chiếu thời gian thực tế (thời điểm hiện tại) với các mốc thoi_gian_mo_dk (thời gian mở đăng ký) và thoi_gian_dong_dk (thời gian đóng đăng ký) để quyết định xem có cho phép thao tác hay không, từ đó ngăn chặn các hành vi đăng ký sai quy định.
+
+5.7 Chi tiết bảng lop_hoc_phan
+- Mô tả chung: Bảng lop_hoc_phan lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ, liên kết trực tiếp với các bảng hoc_phan (môn học), hoc_ky, nguoi_dung (giảng viên) và quản lý sĩ số giới hạn để phục vụ quá trình tra cứu và đăng ký tín chỉ của sinh viên.
+<img width="619" height="162" alt="Screenshot 2026-10-25 230755" src="https://github.com/user-attachments/assets/7f20fcfd-3c3f-4d71-8f17-69907615bd83" />
+
+5.8 Chi tiết bảng học phần
+* **Bảng thực thể:** `hoc_phan` (Lưu trữ danh mục môn học đào tạo của nhà trường).
+* **Cấu trúc trường & Kiểu dữ liệu:**
+  * `id`: Khóa chính định danh (INT, Auto Increment).
+  * `ma_hoc_phan`: Mã định danh môn học (VARCHAR(20), NOT NULL, UNIQUE) — ví dụ: `MAT101`, `WEB102`.
+  * `ten_hoc_phan`: Tên môn học hiển thị (VARCHAR(150), NOT NULL).
+  * `so_tin_chi`: Số lượng tín chỉ tích lũy (INT, NOT NULL).
+  * `loai_hoc_phan`: Phân loại khối kiến thức (ENUM: `'dai_cuong'`, `'co_so_nganh'`, `'chuyen_nganh'`).
+  * `hoc_phan_tien_quyet_id`: Khóa ngoại tự tham chiếu (Self-referencing Foreign Key) trỏ về chính `hoc_phan(id)` để xác định điều kiện tiên quyết trước khi đăng ký.
+* **Hệ thống ràng buộc toàn vẹn (Constraints):**
+  * `PRIMARY KEY`: Đảm bảo định danh duy nhất cho từng bản ghi học phần.
+  * `UNIQUE KEY`: Ràng buộc `ma_hoc_phan` không được phép trùng lặp trong toàn trường.
+  * `CHECK (so_tin_chi > 0)`: Ngăn chặn nhập liệu số tín chỉ âm hoặc bằng 0.
+  * `FOREIGN KEY (hoc_phan_tien_quyet_id)`: Thiết lập toàn vẹn tham chiếu nội bộ với cơ chế `ON DELETE SET NULL` (nếu môn tiên quyết bị hủy/sáp nhập, môn học sau không bị xóa mà chỉ bỏ điều kiện tiên quyết).
+
+---
+
+#### 2. Dữ liệu mẫu Tiếng Việt (Mock Data)
+Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có dấu chuẩn `utf8mb4`, mô phỏng đầy đủ các tình huống:
+* Học phần đại cương độc lập, không yêu cầu tiên quyết (`hoc_phan_tien_quyet_id = NULL`).
+* Cặp học phần có quan hệ tiên quyết (Ví dụ: môn *Giải tích 2* yêu cầu hoàn thành môn *Giải tích 1* trước).
+* Phân loại đa dạng theo các khối kiến thức: Đại cương, Cơ sở ngành, Chuyên ngành.
+
+>>>>>>> 88e32198587ed0b543de7be311c2da5f01dddc5c

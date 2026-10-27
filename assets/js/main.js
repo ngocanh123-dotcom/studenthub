@@ -8,22 +8,6 @@ const usernameError = document.getElementById("usernameError");
 const passwordError = document.getElementById("passwordError");
 const submitBtn = document.getElementById("submitBtn");
 
-// Danh sách tài khoản demo
-const taiKhoanDemo = {
-  sv001:  { password: "Sv@123",    role: "sinhvien",  tenVaiTro: "Sinh viên" },
-  gv001:  { password: "Gv@123",    role: "giangvien", tenVaiTro: "Giảng viên" },
-  admin:  { password: "Admin@123", role: "quantri",   tenVaiTro: "Quản trị viên" },
-  admin1: { password: "Admin@123", role: "quantri",   tenVaiTro: "Quản trị viên 1" },
-  admin2: { password: "Admin@123", role: "quantri",   tenVaiTro: "Quản trị viên 2" },
-  admin3: { password: "Admin@123", role: "quantri",   tenVaiTro: "Quản trị viên 3" }
-};
-
-const tenVaiTroMap = {
-  sinhvien: "Sinh viên",
-  giangvien: "Giảng viên",
-  quantri: "Quản trị viên"
-};
-
 // SVG Icon con mắt đóng / mở
 const eyeOpenSVG = `
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,9 +29,7 @@ try {
     usernameInput.value = savedUsername;
     rememberInput.checked = true;
   }
-} catch (e) {
-  // Tránh lỗi môi trường Private/Incognito chặn Storage
-}
+} catch (e) {}
 
 function showMessage(text, type) {
   message.textContent = text;
@@ -86,71 +68,40 @@ togglePassword.addEventListener("click", () => {
 
 // Xử lý Validation Submit
 form.addEventListener("submit", event => {
-  event.preventDefault();
+  let hasError = false;
   clearErrors();
 
   const username = usernameInput.value.trim();
   const password = passwordInput.value;
-
-  // 1. Kiểm tra vai trò
   const selectedRole = form.querySelector('input[name="role"]:checked');
-  if (!selectedRole || !tenVaiTroMap[selectedRole.value]) {
-    showMessage("Vui lòng chọn vai trò đăng nhập.", "error");
-    return;
-  }
-  const role = selectedRole.value;
 
-  // 2. Kiểm tra tên đăng nhập
+  // 1. Kiểm tra trên giao diện (Frontend Validation)
+  if (!selectedRole) {
+    showMessage("Vui lòng chọn vai trò đăng nhập.", "error");
+    hasError = true;
+  }
+
   const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
   if (!username) {
     setFieldError(usernameInput, usernameError, "Vui lòng nhập tên đăng nhập.");
-    showMessage("Vui lòng nhập tên đăng nhập.", "error");
-    usernameInput.focus();
-    return;
-  }
-  if (!usernameRegex.test(username)) {
-    setFieldError(usernameInput, usernameError, "Tên đăng nhập từ 3-30 ký tự, không chứa ký tự đặc biệt.");
-    showMessage("Định dạng tên đăng nhập không hợp lệ.", "error");
-    usernameInput.focus();
-    return;
+    hasError = true;
+  } else if (!usernameRegex.test(username)) {
+    setFieldError(usernameInput, usernameError, "Định dạng không hợp lệ.");
+    hasError = true;
   }
 
-  // 3. Kiểm tra mật khẩu
-  if (!password.trim()) {
-    setFieldError(passwordInput, passwordError, "Vui lòng nhập mật khẩu.");
-    showMessage("Vui lòng nhập mật khẩu.", "error");
-    passwordInput.focus();
-    return;
-  }
-  if (password.length < 6) {
+  if (!password || password.length < 6) {
     setFieldError(passwordInput, passwordError, "Mật khẩu phải có ít nhất 6 ký tự.");
-    showMessage("Mật khẩu phải có ít nhất 6 ký tự.", "error");
-    passwordInput.focus();
+    hasError = true;
+  }
+
+  // Nếu có lỗi nhập liệu thì CHẶN form lại, không gửi lên PHP
+  if (hasError) {
+    event.preventDefault();
     return;
   }
 
-  // 4. Kiểm tra tài khoản và đối chiếu vai trò
-  const account = taiKhoanDemo[username];
-  if (!account) {
-    setFieldError(usernameInput, usernameError, "Tài khoản không tồn tại trong hệ thống.");
-    showMessage("Tài khoản không tồn tại trong hệ thống!", "error");
-    usernameInput.focus();
-    return;
-  }
-
-  if (account.password !== password) {
-    setFieldError(passwordInput, passwordError, "Mật khẩu không chính xác.");
-    showMessage("Mật khẩu không chính xác!", "error");
-    passwordInput.focus();
-    return;
-  }
-
-  if (account.role !== role) {
-    showMessage(`Sai vai trò! Tài khoản "${username}" không thuộc vai trò ${tenVaiTroMap[role]}.`, "error");
-    return;
-  }
-
-  // 5. Lưu tên đăng nhập nếu chọn Ghi nhớ
+  // 2. Nếu điền chuẩn, lưu localStorage và CHO PHÉP form gửi data sang index.php
   try {
     if (rememberInput && rememberInput.checked) {
       localStorage.setItem("rememberedUsername", username);
@@ -159,29 +110,12 @@ form.addEventListener("submit", event => {
     }
   } catch (e) {}
 
-  
-  // 6. Hiệu ứng phản hồi thành công và chuyển trang
   submitBtn.disabled = true;
-  submitBtn.innerHTML = `<span>Đang chuyển đến hệ thống...</span>`;
-
-  showMessage(
-    `Đăng nhập thành công! Xin chào ${account.tenVaiTro}.`,
-    "success"
-  );
-
-  setTimeout(() => {
-    // Chuyển đến trang theo vai trò
-    if (account.role === "giangvien") {
-      window.location.href = "../app/views/giangvien/index.php";
-    } else if (account.role === "sinhvien") {
-      window.location.href = "../app/views/sinhvien/index.php";
-    } else if (account.role === "quantri") {
-      window.location.href = "../app/views/quantri/index.php";
-    }
-  }, 800);
+  submitBtn.innerHTML = `<span>Đang xác thực hệ thống...</span>`;
+});
 
 // Xử lý quên mật khẩu
 document.getElementById("forgotLink").addEventListener("click", event => {
   event.preventDefault();
-  showMessage("Vui lòng liên hệ phòng Đào tạo hoặc Quản trị viên để được cấp lại mật khẩu.", "error");
+  showMessage("Vui lòng liên hệ phòng Đào tạo để được cấp lại mật khẩu.", "error");
 });

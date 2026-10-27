@@ -1,182 +1,152 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đăng ký - StudentHub</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Kế thừa CSS từ file danh_sach_lop_hoc_phan.php của bạn Huyền để đồng bộ */
-        :root { --navy: #0f2342; --blue: #2563eb; --bg: #f4f7fb; --card: #fff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --danger: #dc2626; --danger-bg: #fef2f2; --success: #059669; --success-bg: #ecfdf5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: "Segoe UI", sans-serif; color: var(--text); background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
-        
-        .topbar { height: 68px; background: var(--card); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
-        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
-        .brand-logo { width: 40px; height: 40px; border-radius: 12px; background: var(--blue); color: #fff; font-weight: 800; display: grid; place-items: center; }
-        .app-body { display: flex; flex: 1; }
-        
-        .sidebar { width: 245px; background: var(--navy); color: #cbd5e1; padding: 22px 14px; flex-shrink: 0; }
-        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-        .nav-link { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: #cbd5e1; text-decoration: none; font-size: 14px; }
-        .nav-link:hover, .nav-link.active { background: var(--blue); color: #fff; }
-        
-        .main-content { flex: 1; padding: 26px 32px; }
-        .page-header { margin-bottom: 22px; }
-        .page-header h2 { font-size: 24px; font-weight: 800; }
-        
-        .panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04); }
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 13px 16px; background: #f8fafc; font-size: 12px; font-weight: 700; color: #475569; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        td { padding: 14px 16px; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        
-        .badge { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-        .badge-success { background: var(--success-bg); color: var(--success); }
-        .badge-danger { background: var(--danger-bg); color: var(--danger); }
-        
-        .btn { height: 32px; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; transition: 0.15s; }
-        .btn-danger { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
-        .btn-danger:hover { background: var(--danger); color: #fff; }
-        .btn-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
-    </style>
-</head>
-<body>
+<?php
+// app/Views/lichsu/index.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-    <header class="topbar">
-        <a href="#" class="brand">
-            <div class="brand-logo">S</div>
-            <div class="brand-text">
-                <h1 style="font-size: 19px; font-weight: 800;">StudentHub</h1>
-                <span style="font-size: 10.5px; color: var(--muted); font-weight: 700;">CỔNG THÔNG TIN SINH VIÊN</span>
-            </div>
-        </a>
-        <div class="user-profile">
-            <strong>Sinh viên: <?= htmlspecialchars($_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang') ?></strong>
-        </div>
-    </header>
+// 1. Kiểm tra quyền sinh viên bảo mật (Giống các bạn)
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'sinhvien') {
+    header('Location: /studenthub/public/index.php');
+    exit;
+}
 
-    <div class="app-body">
-        <aside class="sidebar">
-            <div class="sidebar-label" style="font-size:11px; font-weight:700; color:#64748b; padding:0 12px; margin-bottom:10px;">MENU SINH VIÊN</div>
-            <ul class="nav-list">
-                <li><a href="danh_sach_lop_hoc_phan.php" class="nav-link"><i class="fa-solid fa-table-list"></i> Danh sách lớp học phần</a></li>
-                <li><a href="lich_su_dang_ky.php" class="nav-link active"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đăng ký</a></li>
-            </ul>
-        </aside>
+// 2. Khai báo các biến cho Header
+$breadcrumb = 'Trang chủ / Lịch sử đăng ký';
+$pageTitle = 'Lịch sử đăng ký học phần';
+$pageSubtitle = 'Theo dõi các lớp đã đăng ký và thực hiện hủy nếu còn trong thời gian quy định.';
 
-        <main class="main-content">
-            <div class="page-header">
-                <h2>Lịch sử đăng ký học phần</h2>
-                <p style="color: var(--muted); font-size: 13.5px; margin-top: 4px;">Theo dõi các lớp đã đăng ký và thực hiện hủy nếu còn trong thời gian quy định.</p>
-            </div>
+// 3. Nhúng Header (Bao gồm cả Sidebar)
+require_once __DIR__ . '/../layouts/header.php';
+?>
 
-            <section class="panel-card">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Mã lớp</th>
-                                <th>Tên học phần</th>
-                                <th>Số TC</th>
-                                <th>Giảng viên</th>
-                                <th>Ngày đăng ký</th>
-                                <th>Trạng thái</th>
-                                <th style="text-align:right;">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($danhSachLichSu)): ?>
-                                <tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--muted);">Bạn chưa đăng ký lớp học phần nào.</td></tr>
-                            <?php else: ?>
-                                <?php foreach ($danhSachLichSu as $row): 
-                                    $isDaHuy = ($row['trang_thai'] === 'da_huy');
-                                    
-                                    // Logic kiểm tra quá hạn (ẩn nút Hủy nếu quá hạn)
-                                    $deadline = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
-                                    $isExpired = $deadline && strtotime(date('Y-m-d H:i:s')) > strtotime($deadline);
-                                ?>
-                                    <tr id="row-<?= $row['id'] ?>">
-                                        <td><span style="font-weight:700; color:var(--blue); background:#eff6ff; padding:4px 10px; border-radius:7px;"><?= htmlspecialchars($row['ma_lop']) ?></span></td>
-                                        <td><div style="font-weight:600;"><?= htmlspecialchars($row['ten_hoc_phan']) ?></div></td>
-                                        <td><?= (int)$row['so_tin_chi'] ?></td>
-                                        <td><?= htmlspecialchars($row['ten_giang_vien']) ?></td>
-                                        <td><?= date('d/m/Y H:i', strtotime($row['ngay_dang_ky'])) ?></td>
-                                        <td>
-                                            <span class="badge <?= $isDaHuy ? 'badge-danger' : 'badge-success' ?>">
-                                                <?= $isDaHuy ? 'Đã hủy' : 'Đã đăng ký' ?>
-                                            </span>
-                                        </td>
-                                        <td style="text-align:right;">
-                                            <?php if ($isDaHuy): ?>
-                                                <button class="btn btn-disabled" disabled>Đã hủy</button>
-                                            <?php elseif ($isExpired): ?>
-                                                <button class="btn btn-disabled" title="Đã quá thời hạn hủy" disabled>Quá hạn hủy</button>
-                                            <?php else: ?>
-                                                <button class="btn btn-danger btn-huy" data-id="<?= $row['id'] ?>">
-                                                    <i class="fa-solid fa-xmark"></i> Hủy đăng ký
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Script xử lý Fetch API -->
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
-        const buttons = document.querySelectorAll('.btn-huy');
-
-        buttons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (!confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học phần này không?')) return;
-
-                const dangKyId = this.dataset.id;
-                const originalText = this.innerHTML;
-                
-                this.disabled = true;
-                this.innerHTML = 'Đang xử lý...';
-
-                fetch('api_huy_dang_ky.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        dang_ky_id: dangKyId,
-                        csrf_token: csrfToken
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Cập nhật giao diện dòng đó
-                        const row = document.getElementById(`row-${dangKyId}`);
-                        const statusBadge = row.querySelector('.badge');
-                        statusBadge.className = 'badge badge-danger';
-                        statusBadge.innerText = 'Đã hủy';
+<!-- NỘI DUNG CHÍNH CỦA BẠN (BẮT ĐẦU) -->
+<section class="panel-card-custom" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04); overflow: hidden; margin-top: 20px;">
+    <div class="table-wrap-custom" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <tr>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">MÃ LỚP</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">TÊN HỌC PHẦN</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">SỐ TC</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">GIẢNG VIÊN</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">NGÀY ĐĂNG KÝ</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;">TRẠNG THÁI</th>
+                    <th style="padding: 13px 16px; font-size: 12px; font-weight: 700; color: #475569; text-align:right;">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($danhSachLichSu)): ?>
+                    <tr><td colspan="7" style="text-align:center; padding: 30px; color: #64748b;">Bạn chưa đăng ký lớp học phần nào.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($danhSachLichSu as $row): 
+                        $isDaHuy = ($row['trang_thai'] === 'da_huy');
                         
-                        this.className = 'btn btn-disabled';
-                        this.innerHTML = 'Đã hủy';
-                    } else {
-                        alert('Lỗi: ' + data.message);
-                        this.disabled = false;
-                        this.innerHTML = originalText;
-                    }
+                        // Logic kiểm tra quá hạn (ẩn nút Hủy nếu quá hạn)
+                        $deadline = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
+                        $isExpired = $deadline && strtotime(date('Y-m-d H:i:s')) > strtotime($deadline);
+                    ?>
+                        <tr id="row-<?= $row['id'] ?>" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 14px 16px;">
+                                <span style="font-weight:700; color:#2563eb; background:#eff6ff; padding:4px 10px; border-radius:7px; font-size:12.5px;">
+                                    <?= htmlspecialchars($row['ma_lop']) ?>
+                                </span>
+                            </td>
+                            <td style="padding: 14px 16px; font-weight:600; color:#0f172a;">
+                                <?= htmlspecialchars($row['ten_hoc_phan']) ?>
+                            </td>
+                            <td style="padding: 14px 16px; font-size:13.5px;"><?= (int)$row['so_tin_chi'] ?></td>
+                            <td style="padding: 14px 16px; font-size:13.5px;"><?= htmlspecialchars($row['ten_giang_vien']) ?></td>
+                            <td style="padding: 14px 16px; font-size:13.5px;"><?= date('d/m/Y H:i', strtotime($row['ngay_dang_ky'])) ?></td>
+                            <td style="padding: 14px 16px;">
+                                <?php if ($isDaHuy): ?>
+                                    <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex;">
+                                        Đã hủy
+                                    </span>
+                                <?php else: ?>
+                                    <span style="background: #ecfdf5; color: #059669; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex;">
+                                        Đã đăng ký
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding: 14px 16px; text-align:right;">
+                                <?php if ($isDaHuy): ?>
+                                    <button style="height: 32px; padding: 0 11px; font-size: 12px; border-radius: 8px; font-weight: 600; background: #f1f5f9; color: #94a3b8; border: none; cursor: not-allowed;" disabled>Đã hủy</button>
+                                <?php elseif ($isExpired): ?>
+                                    <button style="height: 32px; padding: 0 11px; font-size: 12px; border-radius: 8px; font-weight: 600; background: #f1f5f9; color: #94a3b8; border: none; cursor: not-allowed;" title="Đã quá thời hạn hủy" disabled>Quá hạn hủy</button>
+                                <?php else: ?>
+                                    <button class="btn-huy" data-id="<?= $row['id'] ?>" style="height: 32px; padding: 0 11px; font-size: 12px; border-radius: 8px; font-weight: 600; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; cursor: pointer;">
+                                        ✖ Hủy đăng ký
+                                    </button>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- SCRIPT FETCH API -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const csrfToken = '<?= $_SESSION['csrf_token'] ?? '' ?>';
+    const buttons = document.querySelectorAll('.btn-huy');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học phần này không?')) return;
+
+            const dangKyId = this.dataset.id;
+            const originalText = this.innerHTML;
+            
+            this.disabled = true;
+            this.innerHTML = 'Đang xử lý...';
+
+            // ĐƯỜNG DẪN FETCH API SỬA LẠI CHO ĐÚNG THƯ MỤC PUBLIC
+            fetch('/studenthub/public/api_huy_dang_ky.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dang_ky_id: dangKyId,
+                    csrf_token: csrfToken
                 })
-                .catch(err => {
-                    alert('Có lỗi xảy ra khi kết nối máy chủ.');
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const row = document.getElementById(`row-${dangKyId}`);
+                    const statusBadge = row.querySelector('.badge');
+                    // Cập nhật lại màu badge
+                    if(statusBadge) {
+                         statusBadge.style.background = '#fef2f2';
+                         statusBadge.style.color = '#dc2626';
+                         statusBadge.innerText = 'Đã hủy';
+                    }
+                    
+                    this.style.background = '#f1f5f9';
+                    this.style.color = '#94a3b8';
+                    this.style.border = 'none';
+                    this.style.cursor = 'not-allowed';
+                    this.innerHTML = 'Đã hủy';
+                } else {
+                    alert('Lỗi: ' + data.message);
                     this.disabled = false;
                     this.innerHTML = originalText;
-                });
+                }
+            })
+            .catch(err => {
+                alert('Có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại.');
+                this.disabled = false;
+                this.innerHTML = originalText;
             });
         });
     });
-    </script>
-</body>
-</html>
+});
+</script>
+<!-- NỘI DUNG CHÍNH CỦA BẠN (KẾT THÚC) -->
+
+<?php 
+// 4. Nhúng Footer
+require_once __DIR__ . '/../layouts/footer.php'; 
+?>
