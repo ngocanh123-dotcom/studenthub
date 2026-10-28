@@ -293,8 +293,25 @@ Bảng hoc_ky đóng vai trò là "bộ điều phối thời gian" cốt lõi c
 Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ tự động đối chiếu thời gian thực tế (thời điểm hiện tại) với các mốc thoi_gian_mo_dk (thời gian mở đăng ký) và thoi_gian_dong_dk (thời gian đóng đăng ký) để quyết định xem có cho phép thao tác hay không, từ đó ngăn chặn các hành vi đăng ký sai quy định.
 
 5.7 Chi tiết bảng lop_hoc_phan
-- Mô tả chung: Bảng lop_hoc_phan lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ, liên kết trực tiếp với các bảng hoc_phan (môn học), hoc_ky, nguoi_dung (giảng viên) và quản lý sĩ số giới hạn để phục vụ quá trình tra cứu và đăng ký tín chỉ của sinh viên.
+- Mô tả chung và cấu trúc bảng lop_hoc_phan: Bảng lop_hoc_phan đóng vai trò trung tâm lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ. Bảng liên kết trực tiếp với các bảng hoc_phan (môn học), hoc_ky, nguoi_dung và dang_ky_hoc để quản lý sĩ số giới hạn, phục vụ quá trình tra cứu và đăng ký tín chỉ trực tuyến của sinh viên.
 <img width="619" height="162" alt="Screenshot 2026-10-25 230755" src="https://github.com/user-attachments/assets/7f20fcfd-3c3f-4d71-8f17-69907615bd83" />
+
+- Chức năng chính của Module Danh sách Lớp học phần (`public/danh_sach_lop_hoc_phan.php`)
+* **Hiển thị danh sách lớp học phần trực quan:** Liệt kê đầy đủ các thông tin thiết yếu của từng lớp mở bao gồm: Mã lớp mở, Tên học phần (kèm mã học phần & số tín chỉ), Giảng viên phụ trách, Học kỳ, Lịch học/Thời gian mở đăng ký, Sĩ số hiện tại và Trạng thái lớp.
+* **Thống kê tổng quan thời gian thực (Real-time Dashboard Cards):** Tự động tính toán và hiển thị 3 chỉ số quan trọng cho sinh viên:
+  * Tổng số lớp học phần hiện có.
+  * Số lớp đang mở và còn chỗ trống.
+  * Số lớp sinh viên hiện tại đã đăng ký thành công.
+* **Tìm kiếm và Bộ lọc đa tiêu chí:**
+  * Tìm kiếm theo từ khóa (`tu_khoa`): Tra cứu nhanh theo Mã lớp mở (`ma_lop`), Mã học phần (`ma_hoc_phan`) hoặc Tên học phần (`ten_hoc_phan`).
+  * Lọc theo Học kỳ (`hoc_ky_id`), Giảng viên phụ trách (`giang_vien_id`).
+  * Lọc theo Trạng thái lớp (`trang_thai`): *Đang mở*, *Còn chỗ trống*, *Đã đủ sĩ số*, hoặc *Đã khóa*.
+* **Kiểm soát sĩ số & Trạng thái tự động:**
+  * Tự động đếm số lượng sinh viên đã đăng ký (`si_so_hien_tai`) từ bảng `dang_ky_hoc` để tính số chỗ còn lại (`so_cho_con_lai = si_so_toi_da - si_so_hien_tai`) và hiển thị thanh tiến trình (Progress bar) trực quan.
+  * Tự động đổi trạng thái nút thao tác thành **Đã ĐK** (nếu sinh viên đã đăng ký lớp đó), **Khóa ĐK** (nếu lớp bị khóa hoặc đã đầy sĩ số `0 chỗ trống`), hoặc **+ Đăng ký** (nếu lớp đang mở và còn chỗ).
+* **Phân trang (Pagination) & Xuất báo cáo CSV/Excel:**
+  * Hỗ trợ chia trang (6 lớp/trang) giúp tối ưu tốc độ tải và giao diện gọn gàng.
+  * Tích hợp tính năng **Xuất Excel (CSV)** hỗ trợ chuẩn mã hóa UTF-8 BOM (hiển thị tiếng Việt có dấu trên Microsoft Excel) theo đúng điều kiện đang lọc.
 
 5.8 Chi tiết bảng học phần
 * **Bảng thực thể:** `hoc_phan` (Lưu trữ danh mục môn học đào tạo của nhà trường).
