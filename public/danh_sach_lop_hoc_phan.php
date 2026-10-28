@@ -14,7 +14,7 @@ if (!isset($pdo) || !($pdo instanceof PDO)) {
     $db_host = 'localhost';
     $db_name = 'studenthub';
     $db_user = 'root';
-    $db_pass = '';
+    $db_pass = '03112006';
 
     try {
         $pdo = new PDO(
