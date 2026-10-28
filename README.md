@@ -226,8 +226,94 @@ Trong dự án xây dựng **Hệ thống Quản lý khóa học và Đăng ký 
 
 5. Cơ sở dữ liệu (Database)
 
+<<<<<<< Updated upstream
 5.1. Mô tả các bảng
 <img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
+=======
+Không gian nền trắng tối giản, tập trung thị giác vào form đăng nhập, căn lề và khoảng đệm chuẩn mực.
+
+Tối ưu hóa khả năng thích ứng (Responsive):
+
+Tự động co gọn thành 1 cột mượt mà khi xem trên máy tính bảng hoặc màn hình điện thoại dưới 1024px.
+
+3. Tái thiết kế các Thành phần tương tác (UI Components & Micro-interactions)
+Bộ chọn vai trò dạng Bento Grid (Role Tiles):
+
+Chuyển các radio button thông thường thành 3 thẻ khối ngang hàng (Sinh viên, Giảng viên, Quản trị).
+
+Tích hợp khung icon riêng biệt, hiệu ứng nổi khối (translateY(-2px)) khi rê chuột, và viền xanh kèm bóng đổ khi được chọn (:checked).
+
+Ô nhập dữ liệu (Input Fields):
+
+Tích hợp biểu tượng chỉ dẫn (User, Lock) bên trong ô nhập.
+
+Hiệu ứng viền chuyển sắc và tạo viền sáng (box-shadow glow) khi trỏ chuột vào ô (:focus).
+
+Trạng thái cảnh báo lỗi: Ô nhập tự đổi viền đỏ và nền hồng nhạt khi dữ liệu không hợp lệ.
+
+Nút ẩn/hiện mật khẩu:
+
+Đặt gọn bên phải ô mật khẩu, chuyển đổi mượt mà giữa biểu tượng mắt mở và mắt đóng.
+
+Nút gửi biểu mẫu (Submit Button):
+
+Thiết kế dải màu Gradient chuyển sắc, hiệu ứng đổ bóng mềm, kèm trạng thái khóa nút và hiển thị "Đang xác thực hệ thống..." khi người dùng bấm gửi.
+
+Hệ thống thông báo & Phản hồi (Feedback System):
+
+Báo lỗi tức thì tại chân từng ô nhập (.field-error-msg).
+
+Hộp thông báo kết quả chung (.status-banner) dạng banner nổi có hiệu ứng trượt nhẹ (slideInDown).
+
+4. Đảm bảo & Giữ nguyên 100% Chức năng cốt lõi
+Giữ nguyên toàn bộ logic đăng nhập, đối chiếu danh sách tài khoản demo (3 Admin, 1 Giảng viên, 1 Sinh viên) và lưu thông tin $_SESSION trong index.php.
+
+Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ bằng JavaScript trước khi gửi và kiểm tra bảo mật ở phía server PHP.
+
+Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
+
+Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
+
+V. Thành viên 5 - Nguyễn Thị Kim Anh 
+1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
+   - tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là cầu nối tổng hợp toàn bộ các kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác, chuyển hóa thành bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
+2. Các nhiệm vụ cụ thể được phân công và triển khai
+
+   a) Xây dựng tài liệu kỹ thuật cốt lõi (README.md):
+   - Mô tả bài toán và kiến trúc: Soạn thảo file README.md đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần (Chủ đề 1), bối cảnh ứng dụng, kiến trúc mã nguồn (MVC tự xây dựng), công nghệ sử dụng (PHP 8.x, MySQL, PDO, HTML5/CSS3/JS, Bootstrap).
+   - Hướng dẫn cài đặt & Triển khai (Deployment Guide): Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (XAMPP/Apache/MySQL), hướng dẫn import cơ sở dữ liệu từ file studenthub.sql, cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
+@@ -95,6 +96,7 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
+      +  Quản trị viên: admin01 / admin123 (Quyền quản trị toàn hệ thống)
+  -  Tổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập,
+    + kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
+     
+    b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm:
+
+    - Đồng bộ hóa đặc tả kỹ thuật: Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên khác:
+@@ -108,12 +110,15 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
+    -  Checkpoint 5-6: Tổ chức cấu trúc MVC, Đăng nhập, Phân quyền Server-side và bảo mật CSRF.
+    -  Checkpoint 7-8: Tích hợp Fetch API, Kiểm thử Smoke test, hoàn thiện tài liệu README và URL chạy thử.
+    - Giám sát tuân thủ Git: Kiểm tra và nhắc nhở các thành viên tuân thủ quy trình làm việc trên Git, đảm bảo mỗi thành viên đều có commit đóng góp thực tế thể hiện trên lịch sử phát triển dự án.
+    
+  d) Lập Kế hoạch kiểm thử (Test Plan) & Xây dựng Bộ bộ kiểm thử nghiệm thu:
+    - Thiết lập Khung kiểm thử (Test Plan Matrix): Phối hợp với Thành viên 4 để chuẩn bị kịch bản kiểm thử toàn diện cho chức năng Đăng nhập & Phân quyền, bao gồm 15+ trường hợp kiểm thử (Test Cases) từ cơ bản đến nâng cao:
+    -  Kiểm thử Validation Client-side: Bỏ trống trường, nhập ký tự đặc biệt, độ dài chuỗi mật khẩu không đủ.
+    -  Kiểm thử Logic Server-side: Tài khoản không tồn tại, sai mật khẩu, chọn sai vai trò so với phân quyền trong CSDL.
+    - Kiểm thử Bảo mật & Phân quyền: Cố tình truy cập trực tiếp URL trang Admin khi chưa đăng nhập, thay đổi thông số Role trên LocalStorage/Cookie, vô hiệu hóa CSRF Token.
+    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn.   3. Kết quả đầu ra dự kiến (Deliverables)
+    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn. 
+    
+3. Kết quả đầu ra dự kiến (Deliverables)
+     - File README.md hoàn chỉnh: Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc.
+     -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
+     -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
+
+
+
+5. Cơ sở dữ liệu (Database)
+5.1. Mô tả các bảng
+![alt text](image-3.png)
+>>>>>>> Stashed changes
 
 5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
 
@@ -254,8 +340,12 @@ Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng k�
 Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
 
 5.3. Sơ đồ ERD
+<<<<<<< Updated upstream
 <img width="1209" height="764" alt="image" src="https://github.com/user-attachments/assets/ee0f2444-ddd1-4678-bb14-280ea5693d7b" />
 
+=======
+![alt text](image-4.png)
+>>>>>>> Stashed changes
 5.4. Chi tiết bảng nguoi_dung
 Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
 ![alt text][def2]
