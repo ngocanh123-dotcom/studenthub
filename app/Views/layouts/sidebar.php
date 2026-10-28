@@ -66,7 +66,7 @@ $currentUri = $_SERVER['REQUEST_URI'];
             </a>
 
             <!-- 5. Lịch sử đăng ký -->
-            <a href="/studenthub/app/Views/lichsu/index.php" class="sh-nav-item">
+           <a href="/studenthub/public/lich_su_dang_ky.php" class="sh-nav-item">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 14 14"></polyline>
