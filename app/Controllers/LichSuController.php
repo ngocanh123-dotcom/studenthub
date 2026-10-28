@@ -12,7 +12,7 @@ class LichSuController {
     // Hiển thị trang Lịch sử
     public function index() {
         // Lấy ID sinh viên (hỗ trợ cả 2 cách lưu session của nhóm)
-        $sinhVienId = $_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 4;
+        $sinhVienId = $_SESSION['user_id']  ?? 0;
 
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

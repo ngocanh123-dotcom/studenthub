@@ -74,7 +74,7 @@ if ($hoc_ky_id !== '') {
 }
 
 if ($giang_vien_id !== '') {
-    $where[] = "lhp.giang_vien_id = :giang_vien_id";
+$where[] = "lhp.giang_vien_id = :giang_vien_id";
     $params[':giang_vien_id'] = (int)$giang_vien_id;
 }
 
@@ -172,7 +172,7 @@ foreach ($danh_sach_goc as $row) {
 // =========================================================================
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="Danh_Sach_Lop_Hoc_Phan.csv"');
+header('Content-Disposition: attachment; filename="Danh_Sach_Lop_Hoc_Phan.csv"');
     $out = fopen('php://output', 'w');
     fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
@@ -241,7 +241,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
             background: #fff;
             outline: none;
         }
-        .input-control:focus {
+.input-control:focus {
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
@@ -334,7 +334,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+align-items: center;
             flex-wrap: wrap;
             gap: 14px;
         }
@@ -396,7 +396,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #fcfdff;
+background: #fcfdff;
         }
         .pages { display: flex; gap: 6px; }
         .page-item {
@@ -462,7 +462,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
                 </a>
 
                 <a href="/studenthub/app/Views/classes/detail.php?id=1" class="sh-nav-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -521,8 +521,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
                 </div>
             </div>
         </header>
-
-        <!-- 3 THẺ THỐNG KÊ NHANH CHO SINH VIÊN -->
+<!-- 3 THẺ THỐNG KÊ NHANH CHO SINH VIÊN -->
         <div class="stats-grid-custom">
             <div class="stat-card-custom">
                 <div class="stat-icon-custom blue"><i class="fa-solid fa-book-open"></i></div>
@@ -580,7 +579,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
 
                 <select name="giang_vien_id" class="input-control">
                     <option value="">-- Tất cả giảng viên --</option>
-                    <?php foreach ($ds_giang_vien as $gv): ?>
+<?php foreach ($ds_giang_vien as $gv): ?>
                         <option value="<?= $gv['id'] ?>" <?= $giang_vien_id == $gv['id'] ? 'selected' : '' ?>>
                             <?= htmlspecialchars($gv['ho_ten']) ?>
                         </option>
@@ -633,7 +632,10 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
                                 $bi_khoa = ($row['trang_thai'] === 'khoa' || (int)$row['trang_thai_dang_ky'] === 0);
                                 $day_cho = ($con_lai <= 0);
                                 $ty_le   = $row['si_so_toi_da'] > 0 ? min(100, round(($row['si_so_hien_tai'] / $row['si_so_toi_da']) * 100)) : 0;
-                                $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
+ HEAD
+$lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
+
+                               
                                 $mo_dk   = $row['thoi_gian_mo_rieng'] ?? $row['thoi_gian_mo_dk'];
                                 $dong_dk = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
                             ?>
@@ -671,7 +673,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
                                     </td>
                                     <td>
                                         <?php if ($bi_khoa): ?>
-                                            <span class="badge-khoa"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Đã khóa</span>
+<span class="badge-khoa"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Đã khóa</span>
                                         <?php elseif ($day_cho): ?>
                                             <span class="badge-day"><span style="width:6px;height:6px;border-radius:50%;background:#d97706;display:inline-block;"></span> Đủ sĩ số</span>
                                         <?php else: ?>
@@ -717,7 +719,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
                     <?php endfor; ?>
                 </div>
             </div>
-        </section>
+</section>
 
     </main>
 </div>

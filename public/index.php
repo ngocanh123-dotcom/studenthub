@@ -19,7 +19,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 // 2. KẾT NỐI CƠ SỞ DỮ LIỆU
-$conn = null;
+$pdo = null;
 if (file_exists(__DIR__ . '/../config/database.php')) {
     require_once __DIR__ . '/../config/database.php';
 }
@@ -59,12 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $taiKhoan = null;
 
         // Ưu tiên đối soát dữ liệu qua CSDL MySQL
-        if ($conn) {
+        if (isset($pdo) && $pdo) {
             try {
                 $sql = "SELECT id, ten_dang_nhap, mat_khau_hash, ho_ten, vai_tro 
                         FROM nguoi_dung 
                         WHERE ten_dang_nhap = :u LIMIT 1";
-                $stmt = $conn->prepare($sql);
+                $stmt = $pdo->prepare($sql);
                 $stmt->execute([':u' => $username]);
                 $userDb = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -95,25 +95,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Dự phòng đối soát bộ nhớ nếu DB chưa được import seed.sql
         if (!$authenticated && empty($thongBao)) {
-            $demoAccounts = [
-                'GV001' => ['password' => 'Gv@123', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng'],
-                'gv001' => ['password' => 'Gv@123', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng'],
-                'SV001' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Nguyễn Thu Trang'],
-                'sv001' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Nguyễn Thu Trang'],
-                'admin' => ['password' => 'Admin@123', 'role' => 'quantri', 'ho_ten' => 'Quản trị viên Hệ thống']
-            ];
+           $demoAccounts = [
+    'GV001' => ['password' => 'Gv@123', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng', 'id' => 2],
+    'gv001' => ['password' => 'Gv@123', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng', 'id' => 2],
+    
+    'SV001' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Nguyễn Thu Trang', 'id' => 4],
+    'sv001' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Nguyễn Thu Trang', 'id' => 4],
+    
+    // Thêm SV002 vào để bạn test xem có hiện đúng lịch sử của người khác không
+    'SV002' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Vũ Quốc Bảo', 'id' => 5],
+    'sv002' => ['password' => 'Sv@123', 'role' => 'sinhvien',  'ho_ten' => 'Vũ Quốc Bảo', 'id' => 5],
+
+    'admin' => ['password' => 'Admin@123', 'role' => 'quantri', 'ho_ten' => 'Quản trị viên Hệ thống', 'id' => 1]
+];
 
             if (isset($demoAccounts[$username])) {
                 $acc = $demoAccounts[$username];
                 if ($password === $acc['password'] || $password === 'password' || $password === '123456') {
                     if ($role === $acc['role']) {
                         $authenticated = true;
-                        $taiKhoan = [
-                            'id' => 1,
-                            'ten_dang_nhap' => $username,
-                            'ho_ten' => $acc['ho_ten'],
-                            'vai_tro' => $vaiTroDatabase[$acc['role']]
-                        ];
+       $taiKhoan = [
+    'id' => $acc['id'], // <-- Lấy ID từ mảng demo, không gán cứng bằng 1 nữa
+    'ten_dang_nhap' => $username,
+    'ho_ten' => $acc['ho_ten'],
+    'vai_tro' => $vaiTroDatabase[$acc['role']]
+];
                     } else {
                         $thongBao = 'Tài khoản không thuộc vai trò ' . $tenVaiTroMap[$role] . '.';
                         $loaiThongBao = 'error';
