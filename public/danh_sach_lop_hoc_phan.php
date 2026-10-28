@@ -632,10 +632,10 @@ background: #fcfdff;
                                 $bi_khoa = ($row['trang_thai'] === 'khoa' || (int)$row['trang_thai_dang_ky'] === 0);
                                 $day_cho = ($con_lai <= 0);
                                 $ty_le   = $row['si_so_toi_da'] > 0 ? min(100, round(($row['si_so_hien_tai'] / $row['si_so_toi_da']) * 100)) : 0;
- HEAD
+ 
 $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
 
-                               
+                            
                                 $mo_dk   = $row['thoi_gian_mo_rieng'] ?? $row['thoi_gian_mo_dk'];
                                 $dong_dk = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
                             ?>
