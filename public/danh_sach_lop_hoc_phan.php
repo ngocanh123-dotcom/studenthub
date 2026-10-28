@@ -629,6 +629,10 @@ background: #fcfdff;
                                                <?php else: ?>
                             <?php foreach ($lop_hien_thi as $row):
                                 $con_lai = (int)$row['so_cho_con_lai'];
+                                $bi_khoa = ($row['trang_thai'] === 'khoa' || (int)$row['trang_thai_dang_ky'] === 0);
+                                $day_cho = ($con_lai <= 0);
+                                $ty_le   = $row['si_so_toi_da'] > 0 ? min(100, round(($row['si_so_hien_tai'] / $row['si_so_toi_da']) * 100)) : 0;
+$lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
 
                                 $bi_khoa = (
                                     $row['trang_thai'] === 'khoa'
