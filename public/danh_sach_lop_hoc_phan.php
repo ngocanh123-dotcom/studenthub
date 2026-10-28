@@ -453,13 +453,13 @@ background: #fcfdff;
                     </svg>
                     <span>Danh sách lớp học phần</span>
                 </a>
-                 <a href="#" class="sh-nav-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    <span>Đăng ký học phần</span>
-                </a>
+                 <a href="/studenthub/public/trang_dang_ky_hoc.php" class="sh-nav-item">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+    <span>Đăng ký học phần</span>
+</a>
 
                 <a href="/studenthub/app/Views/classes/detail.php?id=1" class="sh-nav-item">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -626,18 +626,35 @@ background: #fcfdff;
                                     Không tìm thấy lớp học phần nào phù hợp với điều kiện lọc.
                                 </td>
                             </tr>
-                        <?php else: ?>
+                                               <?php else: ?>
                             <?php foreach ($lop_hien_thi as $row):
                                 $con_lai = (int)$row['so_cho_con_lai'];
-                                $bi_khoa = ($row['trang_thai'] === 'khoa' || (int)$row['trang_thai_dang_ky'] === 0);
-                                $day_cho = ($con_lai <= 0);
-                                $ty_le   = $row['si_so_toi_da'] > 0 ? min(100, round(($row['si_so_hien_tai'] / $row['si_so_toi_da']) * 100)) : 0;
- HEAD
-$lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
 
-                               
-                                $mo_dk   = $row['thoi_gian_mo_rieng'] ?? $row['thoi_gian_mo_dk'];
-                                $dong_dk = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
+                                $bi_khoa = (
+                                    $row['trang_thai'] === 'khoa'
+                                    || (int)$row['trang_thai_dang_ky'] === 0
+                                );
+
+                                $day_cho = ($con_lai <= 0);
+
+                                $ty_le = (int)$row['si_so_toi_da'] > 0
+                                    ? min(
+                                        100,
+                                        round(
+                                            ((int)$row['si_so_hien_tai'] / (int)$row['si_so_toi_da']) * 100
+                                        )
+                                    )
+                                    : 0;
+
+                                $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau']))
+                                    . ' - '
+                                    . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
+
+                                $mo_dk = $row['thoi_gian_mo_rieng']
+                                    ?? $row['thoi_gian_mo_dk'];
+
+                                $dong_dk = $row['thoi_gian_dong_rieng']
+                                    ?? $row['thoi_gian_dong_dk'];
                             ?>
                                 <tr>
                                     <td>
@@ -692,7 +709,7 @@ $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y'
                                         <?php elseif ($bi_khoa || $day_cho): ?>
                                             <span class="btn-sm-action btn-disabled-sm">Khóa ĐK</span>
                                         <?php else: ?>
-                                            <a href="dang_ky_hoc.php?lop_hoc_phan_id=<?= (int)$row['id'] ?>" class="btn-sm-action btn-blue-sm">
+                                           <a href="/studenthub/public/dang_ky_hoc.php?lop_hoc_phan_id=<?= (int)$row['id'] ?>">
                                                 + Đăng ký
                                             </a>
                                         <?php endif; ?>
