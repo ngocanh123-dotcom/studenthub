@@ -480,16 +480,37 @@ function tenVaiTro($role)
                             </select>
                         </div>
 
-                        <div class="form-field">
-                            <label for="mat_khau">
-                                Mật khẩu <?= !empty($duLieuSua['id']) ? '(để trống nếu không đổi)' : '<span>*</span>' ?>
-                            </label>
-                            <input id="mat_khau" name="mat_khau" type="password"
-                                   <?= empty($duLieuSua['id']) ? 'required' : '' ?>
-                                   minlength="6" maxlength="128"
-                                   autocomplete="new-password"
-                                   placeholder="<?= !empty($duLieuSua['id']) ? 'Không đổi thì để trống' : 'Ít nhất 6 ký tự' ?>">
-                        </div>
+                       
+<div class="form-field">
+    <label for="mat_khau">
+        Mật khẩu
+        <?php if (empty($duLieuSua['id'])): ?>
+            <span>*</span>
+        <?php else: ?>
+            <small>(Để trống nếu không đổi)</small>
+        <?php endif; ?>
+    </label>
+
+    <input
+        id="mat_khau"
+        name="mat_khau"
+        type="password"
+        <?= empty($duLieuSua['id']) ? 'required' : '' ?>
+        minlength="6"
+        maxlength="128"
+        autocomplete="new-password"
+        placeholder="<?= empty($duLieuSua['id'])
+            ? 'Nhập mật khẩu, tối thiểu 6 ký tự'
+            : 'Nhập mật khẩu mới nếu muốn đổi' ?>"
+    >
+
+    <?php if (empty($duLieuSua['id'])): ?>
+        <small class="password-help">
+            Mật khẩu này sẽ được cấp cho sinh viên khi đăng nhập.
+        </small>
+    <?php endif; ?>
+</div>
+
                     </div>
 
                     <div class="form-actions">

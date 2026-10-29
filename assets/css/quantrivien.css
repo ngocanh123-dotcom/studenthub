@@ -966,3 +966,29 @@ a {
         width: 100%;
     }
 }
+
+/* Trường mật khẩu trong form quản lý tài khoản */
+.account-form .form-field:has(#mat_khau) {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.account-form #mat_khau {
+    display: block !important;
+    width: 100% !important;
+    min-height: 46px;
+    box-sizing: border-box;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #fff;
+    color: #0f172a;
+}
+
+.account-form .password-help {
+    display: block;
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 12px;
+}

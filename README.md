@@ -179,7 +179,7 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
   * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
-<<<<<<< HEAD
+
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 
@@ -226,7 +226,7 @@ Trong dự án xây dựng **Hệ thống Quản lý khóa học và Đăng ký 
 
 5. Cơ sở dữ liệu (Database)
 
-<<<<<<< Updated upstream
+
 5.1. Mô tả các bảng
 <img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
 =======
@@ -313,7 +313,7 @@ V. Thành viên 5 - Nguyễn Thị Kim Anh
 5. Cơ sở dữ liệu (Database)
 5.1. Mô tả các bảng
 ![alt text](image-3.png)
->>>>>>> Stashed changes
+
 
 5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
 
@@ -340,12 +340,12 @@ Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng k�
 Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
 
 5.3. Sơ đồ ERD
-<<<<<<< Updated upstream
+
 <img width="1209" height="764" alt="image" src="https://github.com/user-attachments/assets/ee0f2444-ddd1-4678-bb14-280ea5693d7b" />
 
 =======
 ![alt text](image-4.png)
->>>>>>> Stashed changes
+
 5.4. Chi tiết bảng nguoi_dung
 Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
 ![alt text][def2]

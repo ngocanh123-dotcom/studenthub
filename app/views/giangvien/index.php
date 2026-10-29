@@ -149,28 +149,27 @@ function trangThaiLop($status): string
 
 <div class="layout">
 
-    <aside class="sidebar">
-        <p class="menu-title">MENU CHÍNH</p>
+    
+<aside class="sidebar">
+    <p class="menu-title">MENU CHÍNH</p>
 
-        <a href="index.php" class="menu-item active">
-            <span>▦</span> Tổng quan
-        </a>
+    <a href="index.php" class="menu-item active">
+        <span>▦</span> Tổng quan
+    </a>
 
-        <a href="lop_hoc_phan.php" class="menu-item">
-            <span>▤</span> Lớp học phần
-        </a>
+    <a href="lop_hoc_phan.php" class="menu-item">
+        <span>▤</span> Lớp học phần
+    </a>
 
-        <a href="sinh_vien.php" class="menu-item">
-            <span>♙</span> Sinh viên theo lớp
-        </a>
+    <a href="sinh_vien.php" class="menu-item">
+        <span>♙</span> Sinh viên theo lớp
+    </a>
 
-        <div class="sidebar-bottom">
-            <a href="../../../public/index.php"
-               class="menu-item logout">
-                <span>⇥</span> Quay lại đăng nhập
-            </a>
-        </div>
-    </aside>
+    <a href="../../../public/index.php" class="menu-item logout">
+        <span>⇥</span> Quay lại đăng nhập
+    </a>
+</aside>
+
 
     <main class="main-content">
 
