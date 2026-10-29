@@ -147,12 +147,9 @@ class AdminLopHocPhanController {
             exit;
         }
 
-        $csrf = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
-            $_SESSION['admin_notice'] = 'Phiên làm việc hết hạn hoặc token bảo mật không hợp lệ.';
-            $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
-            exit;
+        // [TC 8] Kiểm tra mã CSRF token trên mọi form gửi phương thức POST
+        if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
         $maLop = strtoupper(trim($_POST['ma_lop'] ?? ''));
@@ -263,12 +260,9 @@ class AdminLopHocPhanController {
             exit;
         }
 
-        $csrf = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
-            $_SESSION['admin_notice'] = 'Phiên làm việc hết hạn hoặc token bảo mật không hợp lệ.';
-            $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
-            exit;
+        // [TC 8] Kiểm tra mã CSRF token trên mọi form gửi phương thức POST
+        if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
         $id = (int)($_POST['id'] ?? 0);
@@ -365,12 +359,9 @@ class AdminLopHocPhanController {
             exit;
         }
 
-        $csrf = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
-            $_SESSION['admin_notice'] = 'Xác thực bảo mật CSRF không thành công.';
-            $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
-            exit;
+        // [TC 8] Kiểm tra mã CSRF token trên mọi form gửi phương thức POST
+        if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
         $id = (int)($_POST['id'] ?? 0);
@@ -409,12 +400,9 @@ class AdminLopHocPhanController {
             exit;
         }
 
-        $csrf = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
-            $_SESSION['admin_notice'] = 'Xác thực bảo mật CSRF không thành công.';
-            $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
-            exit;
+        // [TC 8] Kiểm tra mã CSRF token trên mọi form gửi phương thức POST
+        if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
         $id = (int)($_POST['id'] ?? 0);

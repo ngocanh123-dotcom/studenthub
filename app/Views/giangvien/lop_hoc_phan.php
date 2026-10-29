@@ -47,6 +47,14 @@ if (!$hocPhanId || $hocPhanId < 1) {
 // 4. Lấy thông tin học phần và các lớp thuộc học phần đó
 try {
     // Kiểm tra học phần có thuộc giảng viên đang đăng nhập không
+    // [TC 6]: Xác định ID giảng viên hiện tại từ Session
+    $currentLecturerId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
+    if ($currentLecturerId <= 0) {
+        $stmtGvId = $pdo->prepare("SELECT id FROM nguoi_dung WHERE ten_dang_nhap = :u AND vai_tro = 'giang_vien' LIMIT 1");
+        $stmtGvId->execute([':u' => $username]);
+        $currentLecturerId = (int)$stmtGvId->fetchColumn();
+    }
+
     $sqlHocPhan = "
         SELECT DISTINCT
             hp.id,
@@ -55,18 +63,15 @@ try {
         FROM hoc_phan hp
         INNER JOIN lop_hoc_phan lhp
             ON lhp.hoc_phan_id = hp.id
-        INNER JOIN nguoi_dung gv
-            ON gv.id = lhp.giang_vien_id
         WHERE hp.id = :hoc_phan_id
-          AND gv.ten_dang_nhap = :username
-          AND gv.vai_tro = 'giang_vien'
+          AND lhp.giang_vien_id = :current_lecturer_id
         LIMIT 1
     ";
 
     $stmtHocPhan = $pdo->prepare($sqlHocPhan);
     $stmtHocPhan->execute([
         'hoc_phan_id' => $hocPhanId,
-        'username' => $username
+        'current_lecturer_id' => $currentLecturerId
     ]);
 
     $hocPhan = $stmtHocPhan->fetch();
@@ -76,7 +81,7 @@ try {
         exit('Không tìm thấy học phần hoặc bạn không có quyền xem học phần này.');
     }
 
-    // Lấy danh sách lớp thuộc học phần đã chọn
+    // [TC 6]: Lấy danh sách lớp thuộc học phần do giảng viên hiện tại phụ trách
     $sqlLop = "
         SELECT
             lhp.id,
@@ -93,13 +98,10 @@ try {
         FROM lop_hoc_phan lhp
         INNER JOIN hoc_ky hk
             ON hk.id = lhp.hoc_ky_id
-        INNER JOIN nguoi_dung gv
-            ON gv.id = lhp.giang_vien_id
         LEFT JOIN dang_ky_hoc dk
             ON dk.lop_hoc_phan_id = lhp.id
         WHERE lhp.hoc_phan_id = :hoc_phan_id
-          AND gv.ten_dang_nhap = :username
-          AND gv.vai_tro = 'giang_vien'
+          AND lhp.giang_vien_id = :current_lecturer_id
         GROUP BY
             lhp.id,
             lhp.ma_lop,
@@ -112,7 +114,7 @@ try {
     $stmtLop = $pdo->prepare($sqlLop);
     $stmtLop->execute([
         'hoc_phan_id' => $hocPhanId,
-        'username' => $username
+        'current_lecturer_id' => $currentLecturerId
     ]);
 
     $classes = $stmtLop->fetchAll();

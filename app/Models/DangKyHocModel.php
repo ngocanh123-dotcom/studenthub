@@ -161,34 +161,28 @@ class DangKyHocModel
                 );
             }
 
-            // Kiểm tra đăng ký hiện có
-            $sql = "
-                SELECT id, trang_thai
+            // [TC 2]: Kiểm tra trùng lớp
+            $sqlCheckTrung = "
+                SELECT COUNT(*)
                 FROM dang_ky_hoc
                 WHERE sinh_vien_id = :sinh_vien_id
                   AND lop_hoc_phan_id = :lop_id
-                LIMIT 1
-                FOR UPDATE
+                  AND trang_thai = 'dang_ky'
             ";
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([
+            $stmtCheck = $this->conn->prepare($sqlCheckTrung);
+            $stmtCheck->execute([
                 'sinh_vien_id' => $sinhVienId,
-                'lop_id' => $lopId
+                'lop_id'       => $lopId
             ]);
 
-            $dangKyCu = $stmt->fetch();
-
-            if (
-                $dangKyCu &&
-                $dangKyCu['trang_thai'] === 'dang_ky'
-            ) {
+            if ((int)$stmtCheck->fetchColumn() > 0) {
                 throw new RuntimeException(
                     'Bạn đã đăng ký lớp học phần này rồi.'
                 );
             }
 
-            // Kiểm tra sĩ số lớp
+            // [TC 3 & TC 5]: Kiểm tra sĩ số lớp trực tiếp từ CSDL
             $sql = "
                 SELECT COUNT(*)
                 FROM dang_ky_hoc
@@ -203,9 +197,25 @@ class DangKyHocModel
 
             if ($siSoHienTai >= (int) $lop['si_so_toi_da']) {
                 throw new RuntimeException(
-                    'Lớp đã đủ sĩ số. Vui lòng chọn lớp khác.'
+                    'Lớp học phần đã đủ sĩ số.'
                 );
             }
+
+            // Lấy bản ghi cũ nếu từng đăng ký và hủy
+            $sqlCu = "
+                SELECT id
+                FROM dang_ky_hoc
+                WHERE sinh_vien_id = :sinh_vien_id
+                  AND lop_hoc_phan_id = :lop_id
+                LIMIT 1
+                FOR UPDATE
+            ";
+            $stmtCu = $this->conn->prepare($sqlCu);
+            $stmtCu->execute([
+                'sinh_vien_id' => $sinhVienId,
+                'lop_id'       => $lopId
+            ]);
+            $dangKyCu = $stmtCu->fetch();
 
             // Khôi phục đăng ký đã hủy hoặc tạo đăng ký mới
             if ($dangKyCu) {

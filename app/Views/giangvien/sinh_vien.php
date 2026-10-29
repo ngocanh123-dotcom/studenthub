@@ -46,6 +46,14 @@ if (!$lopId || $lopId < 1) {
 
 // 4. Lấy thông tin lớp và kiểm tra quyền giảng viên
 try {
+    // [TC 6]: Xác định ID giảng viên hiện tại từ Session
+    $currentLecturerId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
+    if ($currentLecturerId <= 0) {
+        $stmtGvId = $pdo->prepare("SELECT id FROM nguoi_dung WHERE ten_dang_nhap = :u AND vai_tro = 'giang_vien' LIMIT 1");
+        $stmtGvId->execute([':u' => $username]);
+        $currentLecturerId = (int)$stmtGvId->fetchColumn();
+    }
+
     $sqlLop = "
         SELECT
             lhp.id,
@@ -59,18 +67,15 @@ try {
             ON hp.id = lhp.hoc_phan_id
         INNER JOIN hoc_ky hk
             ON hk.id = lhp.hoc_ky_id
-        INNER JOIN nguoi_dung gv
-            ON gv.id = lhp.giang_vien_id
         WHERE lhp.id = :lop_id
-          AND gv.ten_dang_nhap = :username
-          AND gv.vai_tro = 'giang_vien'
+          AND lhp.giang_vien_id = :current_lecturer_id
         LIMIT 1
     ";
 
     $stmtLop = $pdo->prepare($sqlLop);
     $stmtLop->execute([
         'lop_id' => $lopId,
-        'username' => $username
+        'current_lecturer_id' => $currentLecturerId
     ]);
 
     $lop = $stmtLop->fetch();

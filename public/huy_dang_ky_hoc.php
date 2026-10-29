@@ -54,17 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 /**
- * Kiểm tra CSRF để bảo vệ thao tác hủy đăng ký.
+ * [TC 8] Kiểm tra mã CSRF Token trên mọi form gửi phương thức POST.
  */
-if (
-    empty($_SESSION['csrf_token'])
-    || !isset($_POST['csrf_token'])
-    || !hash_equals(
-        (string) $_SESSION['csrf_token'],
-        (string) $_POST['csrf_token']
-    )
-) {
-    quayLaiDanhSach('phien_khong_hop_le');
+if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+    die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
 }
 
 /**
