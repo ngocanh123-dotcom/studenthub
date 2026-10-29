@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -139,10 +138,12 @@ if (!$lopId || $lopId <= 0) {
                 $thongBao = 'Lớp học phần đã đủ sĩ số.';
             } else {
                 if ($dangKyCu) {
-                    // Đăng ký lại: khôi phục bản ghi đã hủy.
+                    // ĐĂNG KÝ LẠI: Khôi phục bản ghi đã hủy, CẬP NHẬT LẠI NGÀY GIỜ và XÓA NGÀY HỦY
                     $stmt = $pdo->prepare("
                         UPDATE dang_ky_hoc
-                        SET trang_thai = 'dang_ky'
+                        SET trang_thai = 'dang_ky', 
+                            ngay_dang_ky = NOW(), 
+                            ngay_huy = NULL
                         WHERE id = :id
                           AND sinh_vien_id = :sv_id
                           AND lop_hoc_phan_id = :lop_id
@@ -157,9 +158,9 @@ if (!$lopId || $lopId <= 0) {
                     // Chưa có bản ghi: tạo đăng ký mới.
                     $stmt = $pdo->prepare("
                         INSERT INTO dang_ky_hoc
-                            (lop_hoc_phan_id, sinh_vien_id, trang_thai)
+                            (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
                         VALUES
-                            (:lop_id, :sv_id, 'dang_ky')
+                            (:lop_id, :sv_id, 'dang_ky', NOW())
                     ");
 
                     $stmt->execute([
@@ -273,7 +274,7 @@ if (!$lopId || $lopId <= 0) {
             </a>
 
             <a class="secondary"
-               href="/studenthub/app/Views/lichsu/index.php">
+               href="/studenthub/public/lich_su_dang_ky.php">
                 Xem lịch sử đăng ký
             </a>
         </div>

@@ -67,9 +67,9 @@ $currentUri = $_SERVER['REQUEST_URI'];
                 <span>Chi tiết lớp học phần</span>
             </a>
 
-            <!-- 5. Lịch sử đăng ký -->
-
-           <a href="/studenthub/public/lich_su_dang_ky.php" class="sh-nav-item">
+                       <!-- 5. Lịch sử đăng ký -->
+            <a href="/studenthub/public/lich_su_dang_ky.php" 
+               class="sh-nav-item <?= (strpos($currentUri, 'lich_su_dang_ky') !== false || strpos($currentUri, 'lichsu') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 14 14"></polyline>
