@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -261,6 +260,43 @@ if (!$lopId || $lopId <= 0) {
                 ]);
 
             } else {
+<<<<<<< HEAD
+                if ($dangKyCu) {
+
+                    $stmt = $pdo->prepare("
+                        UPDATE dang_ky_hoc
+                        SET trang_thai = 'dang_ky', 
+                            ngay_dang_ky = NOW(), 
+                            ngay_huy = NULL
+                        WHERE id = :id
+                          AND sinh_vien_id = :sv_id
+                          AND lop_hoc_phan_id = :lop_id
+                    ");
+
+                    $stmt->execute([
+                        'id' => $dangKyCu['id'],
+                        'sv_id' => $sinhVienId,
+                        'lop_id' => $lopId
+                    ]);
+
+                } else {
+                    // Tạo bản ghi đăng ký mới.
+                    $stmt = $pdo->prepare("
+                        INSERT INTO dang_ky_hoc
+                            (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
+                        VALUES
+                            (:lop_id, :sv_id, 'dang_ky', NOW())
+                    ");
+
+                    $stmt->execute([
+                        'lop_id' => $lopId,
+                        'sv_id' => $sinhVienId
+                    ]);
+                }
+
+                $thongBao = 'Đăng ký học phần thành công!';
+                $loaiThongBao = 'success';
+=======
                 // Tạo bản ghi đăng ký mới
                 $stmt = $pdo->prepare("
                     INSERT INTO dang_ky_hoc
@@ -273,6 +309,7 @@ if (!$lopId || $lopId <= 0) {
                     'lop_id' => $lopId,
                     'sv_id'  => $sinhVienId
                 ]);
+>>>>>>> ecf41f69be407f3cf84945b67f61f8da7f50cd82
             }
 
             $thongBao = 'Đăng ký học phần thành công!';
@@ -412,10 +449,14 @@ if (!$lopId || $lopId <= 0) {
                 Quay lại đăng ký học phần
             </a>
 
+
+         
+
             <a
                 class="secondary"
                 href="/studenthub/public/lich_su_dang_ky.php"
             >
+
                 Xem lịch sử đăng ký
             </a>
         </div>

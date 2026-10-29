@@ -28,6 +28,7 @@ body.sh-body {
 
 .sh-container {
   display: flex;
+  align-items: flex-start;
   min-height: 100vh;
 }
 
@@ -43,6 +44,17 @@ body.sh-body {
   justify-content: space-between;
   padding: 24px 16px;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  /* Ẩn thanh cuộn của sidebar để giữ thẩm mỹ tối giản */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.sh-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .sidebar-brand-box {
