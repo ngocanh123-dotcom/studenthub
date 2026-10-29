@@ -22,6 +22,14 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ép trình duyệt luôn cập nhật CSS mới bằng chuỗi time() chống cache -->
     <link rel="stylesheet" href="/studenthub/assets/css/sinhvien.css?v=<?= time() ?>">
+    <style>
+        /* Đảm bảo thẻ <a> khi dùng class .btn-enroll-action hiển thị chuẩn nút bấm */
+        a.btn-enroll-action {
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
+        }
+    </style>
 </head>
 <body class="sh-body">
 
@@ -38,73 +46,73 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
             </div>
 
             <div class="sidebar-category-title">CỔNG SINH VIÊN</div>
-<nav class="sidebar-menu-list">
-    <a href="/studenthub/app/Views/sinhvien/index.php"
-       class="sh-nav-item active">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        <span>Tổng quan</span>
-    </a>
+            <nav class="sidebar-menu-list">
+                <a href="/studenthub/app/Views/sinhvien/index.php"
+                   class="sh-nav-item active">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Tổng quan</span>
+                </a>
 
-    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php"
-       class="sh-nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
-        </svg>
-        <span>Danh sách lớp học phần</span>
-    </a>
+                <a href="/studenthub/public/danh_sach_lop_hoc_phan.php"
+                   class="sh-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Danh sách lớp học phần</span>
+                </a>
 
-    <a href="/studenthub/public/trang_dang_ky_hoc.php"
-       class="sh-nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        <span>Đăng ký học phần</span>
-    </a>
+                <a href="/studenthub/public/trang_dang_ky_hoc.php"
+                   class="sh-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <span>Đăng ký học phần</span>
+                </a>
 
-    <a href="/studenthub/app/Views/classes/detail.php?id=1"
-       class="sh-nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-        </svg>
-        <span>Chi tiết lớp học phần</span>
-    </a>
+                <a href="/studenthub/app/Views/classes/detail.php?id=1"
+                   class="sh-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <span>Chi tiết lớp học phần</span>
+                </a>
 
-    <a href="/studenthub/app/Views/lichsu/index.php"
-       class="sh-nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 14 14"/>
-        </svg>
-        <span>Lịch sử đăng ký</span>
-    </a>
+                <a href="/studenthub/app/Views/lichsu/index.php"
+                   class="sh-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 14 14"/>
+                    </svg>
+                    <span>Lịch sử đăng ký</span>
+                </a>
 
-    <a href="/studenthub/public/index.php?action=logout"
-       class="sh-nav-item logout-link" title="Đăng xuất">
-        <svg width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span>Đăng xuất</span>
-    </a>
-</nav>
+                <a href="/studenthub/public/index.php?action=logout"
+                   class="sh-nav-item logout-link" title="Đăng xuất">
+                    <svg width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Đăng xuất</span>
+                </a>
+            </nav>
         </div>
 
         <div class="sidebar-semester-pill">
@@ -130,7 +138,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                 <div class="profile-avatar-circle">SV</div>
                 <div class="profile-name-role">
                     <strong><?= htmlspecialchars($hoTen) ?></strong>
-<span>Sinh viên • <?= htmlspecialchars($maSinhVien) ?></span>
+                    <span>Sinh viên • <?= htmlspecialchars($maSinhVien) ?></span>
                 </div>
             </div>
         </header>
@@ -189,7 +197,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <div class="metric-circle-icon purple">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-<polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 17 12 22 22 17"></polyline>
                             <polyline points="2 12 12 17 22 12"></polyline>
                         </svg>
                     </div>
@@ -224,7 +232,6 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         <h3>Lớp học phần đang mở đăng ký</h3>
                         <p>Các lớp học phần tiêu biểu trong học kỳ hiện tại</p>
                     </div>
-                    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="btn-see-all-pill">Xem tất cả lớp &rarr;</a>
                 </div>
 
                 <table class="classes-data-table">
@@ -246,7 +253,9 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                             </td>
                             <td>ThS Trần Bình Trọng</td>
                             <td>28/40 <span style="color:#059669; font-weight:700;">(còn 12)</span></td>
-                            <td><button class="btn-enroll-action">+ Đăng ký</button></td>
+                            <td>
+                                <a href="/studenthub/public/trang_dang_ky_hoc.php?ma_lop=MAT101-01" class="btn-enroll-action">+ Đăng ký</a>
+                            </td>
                         </tr>
                         <tr>
                             <td><span class="class-code-tag">WEB102-01</span></td>
@@ -271,7 +280,9 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                             </td>
                             <td>ThS Nguyễn Minh Châu</td>
                             <td>22/40 <span style="color:#059669; font-weight:700;">(còn 18)</span></td>
-                            <td><button class="btn-enroll-action">+ Đăng ký</button></td>
+                            <td>
+                                <a href="/studenthub/public/trang_dang_ky_hoc.php?ma_lop=DBS201-02" class="btn-enroll-action">+ Đăng ký</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -300,7 +311,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <div class="step-flow-item">
                         <div class="step-number-circle">3</div>
                         <div class="step-text-content">
-<strong>Theo dõi lịch sử đăng ký</strong>
+                            <strong>Theo dõi lịch sử đăng ký</strong>
                             <p>Kiểm tra trạng thái hoặc hủy học phần trong thời hạn cho phép.</p>
                         </div>
                     </div>
