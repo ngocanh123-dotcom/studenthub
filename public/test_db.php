@@ -1,15 +1,8 @@
-
 <?php
 
-$duongDan = __DIR__ . '/../config/database.php';
 
-if (!file_exists($duongDan)) {
-    exit('Không tìm thấy file config/database.php');
-}
-
-require_once $duongDan;
+require_once __DIR__ . '/../config/database.php';
 
 echo 'Kết nối MySQL thành công!<br>';
-
 echo 'Database đang sử dụng: ' .
-    htmlspecialchars($conn->query('SELECT DATABASE()')->fetchColumn());
+    htmlspecialchars((string) $conn->query('SELECT DATABASE()')->fetchColumn());
