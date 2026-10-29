@@ -517,16 +517,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
 
-            <!-- KHỐI HƯỚNG DẪN TÀI KHOẢN DÙNG THỬ (TEST CREDENTIALS) -->
-            <div style="margin-top: 20px; padding: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; font-size: 12.5px; color: #475569;">
-                <strong style="display: block; margin-bottom: 6px; color: #1e293b;">📋 Tài khoản kiểm thử dùng chung:</strong>
-                <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
-                    <li><strong>Sinh viên:</strong> <code>sv001</code> / Mật khẩu: <code>Sv@123</code> hoặc <code>123456</code></li>
-                    <li><strong>Giảng viên:</strong> <code>gv001</code> / Mật khẩu: <code>Gv@123</code> hoặc <code>123456</code></li>
-                    <li><strong>Quản trị viên:</strong> <code>admin</code> / Mật khẩu: <code>Admin@123</code> hoặc <code>123456</code></li>
-                </ul>
-            </div>
-
             <div class="auth-card-footer">
                 Hệ thống Quản lý khóa học và Đăng ký học phần • StudentHub 2026
             </div>
