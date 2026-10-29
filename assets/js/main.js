@@ -1,3 +1,4 @@
+
 const form = document.getElementById("loginForm");
 const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
@@ -8,7 +9,6 @@ const usernameError = document.getElementById("usernameError");
 const passwordError = document.getElementById("passwordError");
 const submitBtn = document.getElementById("submitBtn");
 
-// SVG Icon con mắt đóng / mở
 const eyeOpenSVG = `
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
@@ -30,44 +30,72 @@ try {
     rememberInput.checked = true;
   }
 } catch (e) {}
+const forgotLink = document.getElementById("forgotLink");
+
+const tenVaiTroMap = {
+    sinhvien: "Sinh viên",
+    giangvien: "Giảng viên",
+    quantri: "Quản trị viên"
+};
+
 
 function showMessage(text, type) {
-  message.textContent = text;
-  message.className = "status-banner " + type;
+    message.textContent = text;
+    message.className = "status-banner " + type;
 }
 
 function setFieldError(input, errorEl, text) {
-  input.classList.add("invalid");
-  if (errorEl) errorEl.textContent = text;
+    input.classList.add("invalid");
+    if (errorEl) errorEl.textContent = text;
 }
 
 function clearErrors() {
-  usernameInput.classList.remove("invalid");
-  passwordInput.classList.remove("invalid");
-  if (usernameError) usernameError.textContent = "";
-  if (passwordError) passwordError.textContent = "";
-  message.className = "status-banner";
-  message.textContent = "";
+    usernameInput.classList.remove("invalid");
+    passwordInput.classList.remove("invalid");
+
+    if (usernameError) usernameError.textContent = "";
+    if (passwordError) passwordError.textContent = "";
+
+    message.className = "status-banner";
+    message.textContent = "";
 }
 
-// Ẩn hoặc hiện mật khẩu
-togglePassword.addEventListener("click", () => {
-  const isPass = passwordInput.type === "password";
-  passwordInput.type = isPass ? "text" : "password";
-  togglePassword.innerHTML = isPass ? eyeClosedSVG : eyeOpenSVG;
-  togglePassword.title = isPass ? "Ẩn mật khẩu" : "Hiện mật khẩu";
-});
+// Ghi nhớ tên đăng nhập, không lưu mật khẩu
+try {
+    const savedUsername = localStorage.getItem("rememberedUsername");
 
-// Xóa lỗi tức thì khi người dùng gõ phím
+    if (savedUsername) {
+        usernameInput.value = savedUsername;
+        rememberInput.checked = true;
+    }
+} catch (error) {
+    // Bỏ qua nếu trình duyệt không cho phép sử dụng localStorage
+}
+
+// Hiện hoặc ẩn mật khẩu
+if (togglePassword) {
+    togglePassword.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+
+        passwordInput.type = isPassword ? "text" : "password";
+        togglePassword.title = isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu";
+        togglePassword.setAttribute(
+            "aria-label",
+            isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+        );
+    });
+}
+
+// Xóa thông báo lỗi khi người dùng sửa dữ liệu
 [usernameInput, passwordInput].forEach(input => {
-  input.addEventListener("input", () => {
-    input.classList.remove("invalid");
-    clearErrors();
-  });
+    input.addEventListener("input", () => {
+        input.classList.remove("invalid");
+        clearErrors();
+    });
 });
 
-// Xử lý Validation Submit
 form.addEventListener("submit", event => {
+
   let hasError = false;
   clearErrors();
 
@@ -107,8 +135,20 @@ form.addEventListener("submit", event => {
       localStorage.setItem("rememberedUsername", username);
     } else {
       localStorage.removeItem("rememberedUsername");
+
+    clearErrors();
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+    const selectedRole = form.querySelector('input[name="role"]:checked');
+
+    // Kiểm tra vai trò
+    if (!selectedRole || !tenVaiTroMap[selectedRole.value]) {
+        event.preventDefault();
+        showMessage("Vui lòng chọn vai trò đăng nhập.", "error");
+        return;
     }
-  } catch (e) {}
+
 
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<span>Đang xác thực hệ thống...</span>`;
@@ -119,3 +159,90 @@ document.getElementById("forgotLink").addEventListener("click", event => {
   event.preventDefault();
   showMessage("Vui lòng liên hệ phòng Đào tạo để được cấp lại mật khẩu.", "error");
 });
+    // Kiểm tra tên đăng nhập
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+
+    if (!username) {
+        event.preventDefault();
+        setFieldError(
+            usernameInput,
+            usernameError,
+            "Vui lòng nhập tên đăng nhập."
+        );
+        showMessage("Vui lòng nhập tên đăng nhập.", "error");
+        usernameInput.focus();
+        return;
+    }
+
+    if (!usernameRegex.test(username)) {
+        event.preventDefault();
+        setFieldError(
+            usernameInput,
+            usernameError,
+            "Tên đăng nhập từ 3-30 ký tự, chỉ dùng chữ, số và dấu gạch dưới."
+        );
+        showMessage("Tên đăng nhập không đúng định dạng.", "error");
+        usernameInput.focus();
+        return;
+    }
+
+    // Kiểm tra mật khẩu
+    if (!password.trim()) {
+        event.preventDefault();
+        setFieldError(
+            passwordInput,
+            passwordError,
+            "Vui lòng nhập mật khẩu."
+        );
+        showMessage("Vui lòng nhập mật khẩu.", "error");
+        passwordInput.focus();
+        return;
+    }
+
+    if (password.length < 6) {
+        event.preventDefault();
+        setFieldError(
+            passwordInput,
+            passwordError,
+            "Mật khẩu phải có ít nhất 6 ký tự."
+        );
+        showMessage("Mật khẩu phải có ít nhất 6 ký tự.", "error");
+        passwordInput.focus();
+        return;
+    }
+
+    // Ghi nhớ tên đăng nhập nếu được chọn
+    try {
+        if (rememberInput.checked) {
+            localStorage.setItem("rememberedUsername", username);
+        } else {
+            localStorage.removeItem("rememberedUsername");
+        }
+    } catch (error) {
+        // Không ảnh hưởng đến việc đăng nhập
+    }
+
+    // Không kiểm tra tài khoản demo tại JavaScript.
+    // Để form gửi username, password và role đến PHP.
+    // PHP sẽ xác thực với MySQL và chuyển trang khi thành công.
+    submitBtn.disabled = true;
+    submitBtn.textContent = "ĐANG KIỂM TRA ĐĂNG NHẬP...";
+});
+
+// Khôi phục trạng thái nút nếu PHP trả lại trang do đăng nhập lỗi
+window.addEventListener("pageshow", () => {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = "<span>ĐĂNG NHẬP VÀO HỆ THỐNG</span>";
+});
+
+// Quên mật khẩu
+if (forgotLink) {
+    forgotLink.addEventListener("click", event => {
+        event.preventDefault();
+        showMessage(
+            "Vui lòng liên hệ Quản trị viên để được cấp lại mật khẩu.",
+            "error"
+        );
+    });
+}
+
