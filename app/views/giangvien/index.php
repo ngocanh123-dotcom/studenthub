@@ -36,8 +36,17 @@ try {
     exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
 }
 
-// 3. Lấy danh sách học phần của giảng viên
+// 3. Lấy danh sách học phần của giảng viên [TC 6]
 try {
+    // [TC 6]: Xác định ID giảng viên hiện tại từ Session
+    $currentLecturerId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
+    if ($currentLecturerId <= 0) {
+        $stmtGvId = $pdo->prepare("SELECT id FROM nguoi_dung WHERE ten_dang_nhap = :u AND vai_tro = 'giang_vien' LIMIT 1");
+        $stmtGvId->execute([':u' => $username]);
+        $currentLecturerId = (int)$stmtGvId->fetchColumn();
+    }
+
+    // [TC 6]: Đảm bảo câu truy vấn lấy danh sách lớp luôn có điều kiện WHERE lhp.giang_vien_id = :current_lecturer_id
     $sql = "
         SELECT
             hp.id AS hoc_phan_id,
@@ -47,10 +56,7 @@ try {
         FROM hoc_phan hp
         INNER JOIN lop_hoc_phan lhp
             ON lhp.hoc_phan_id = hp.id
-        INNER JOIN nguoi_dung gv
-            ON gv.id = lhp.giang_vien_id
-        WHERE gv.ten_dang_nhap = :username
-          AND gv.vai_tro = 'giang_vien'
+        WHERE lhp.giang_vien_id = :current_lecturer_id
         GROUP BY
             hp.id,
             hp.ma_hoc_phan,
@@ -59,7 +65,7 @@ try {
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(['username' => $username]);
+    $stmt->execute(['current_lecturer_id' => $currentLecturerId]);
     $classes = $stmt->fetchAll();
 
     // 4. Thống kê tổng quan (giữ nguyên)
@@ -74,7 +80,7 @@ try {
 
     $tongHocPhan = count($classes);
 
-    // Tính tổng lượt sinh viên đăng ký của các lớp phụ trách
+    // [TC 6]: Tính tổng lượt sinh viên đăng ký của các lớp do giảng viên phụ trách
     $sqlSinhVien = "
         SELECT COUNT(
             DISTINCT CONCAT(dk.lop_hoc_phan_id, '-', dk.sinh_vien_id)
@@ -82,15 +88,12 @@ try {
         FROM dang_ky_hoc dk
         INNER JOIN lop_hoc_phan lhp
             ON lhp.id = dk.lop_hoc_phan_id
-        INNER JOIN nguoi_dung gv
-            ON gv.id = lhp.giang_vien_id
-        WHERE gv.ten_dang_nhap = :username
-          AND gv.vai_tro = 'giang_vien'
+        WHERE lhp.giang_vien_id = :current_lecturer_id
           AND dk.trang_thai = 'dang_ky'
     ";
 
     $stmtSinhVien = $pdo->prepare($sqlSinhVien);
-    $stmtSinhVien->execute(['username' => $username]);
+    $stmtSinhVien->execute(['current_lecturer_id' => $currentLecturerId]);
     $tongSinhVien = (int)$stmtSinhVien->fetchColumn();
 
 } catch (PDOException $e) {

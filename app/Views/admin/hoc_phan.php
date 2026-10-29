@@ -297,49 +297,11 @@ function e($value)
 <body>
 <div class="layout">
 
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">S</div>
-            <div>
-                <strong>StudentHub</strong>
-                <small>Hệ thống quản lý học phần</small>
-            </div>
-        </div>
-
-        <nav class="menu">
-            <div class="menu-title">QUẢN TRỊ HỆ THỐNG</div>
-
-            <a class="menu-link" href="index.php">
-                <span class="menu-icon">⌂</span> Tổng quan
-            </a>
-
-            <a class="menu-link" href="tai_khoan.php">
-                <span class="menu-icon">♙</span> Quản lý tài khoản
-            </a>
-
-            <a class="menu-link active" href="hoc_phan.php">
-                <span class="menu-icon">▤</span> Quản lý học phần
-            </a>
-
-            <a class="menu-link" href="lop_hoc_phan.php">
-                <span class="menu-icon">▦</span> Quản lý lớp học phần
-            </a>
-
-            <a class="menu-link" href="hoc_ky.php">
-                <span class="menu-icon">▣</span> Quản lý học kỳ
-            </a>
-        </nav>
-
-        <div class="sidebar-bottom">
-            <a class="menu-link logout" href="../../../app/auth/logout.php">
-                <span class="menu-icon">↪</span> Đăng xuất
-            </a>
-
-            <div class="sidebar-note">
-                <span class="status-dot"></span> Hệ thống đang hoạt động
-            </div>
-        </div>
-    </aside>
+    <!-- THANH MENU BÊN TRÁI -->
+    <?php 
+    $activeMenu = 'hoc_phan';
+    require __DIR__ . '/../layouts/admin_sidebar.php'; 
+    ?>
 
     <main class="main">
         <header class="topbar">

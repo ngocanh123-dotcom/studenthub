@@ -107,6 +107,8 @@ $sql = "
         lhp.si_so_toi_da,
         lhp.thoi_gian_mo_rieng,
         lhp.thoi_gian_dong_rieng,
+        lhp.lich_hoc,
+        lhp.phong_hoc,
 
         hp.ma_hoc_phan,
         hp.ten_hoc_phan,
@@ -1023,7 +1025,6 @@ foreach ($ds_hoc_ky as $hk_item) {
                             <!-- DANH SÁCH CÁC LỚP CON -->
                             <div class="course-classes-body">
                                 <?php foreach ($mon['ds_lop'] as $lop): 
-                                    $lich_hk = date('d/m/Y', strtotime($lop['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($lop['ngay_ket_thuc']));
                                     $mo_dk   = $lop['thoi_gian_mo_rieng'] ?? $lop['thoi_gian_mo_dk'];
                                     $dong_dk = $lop['thoi_gian_dong_rieng'] ?? $lop['thoi_gian_dong_dk'];
                                 ?>
@@ -1044,7 +1045,7 @@ foreach ($ds_hoc_ky as $hk_item) {
                                         <div class="class-col-schedule">
                                             <div class="schedule-main">
                                                 <i class="fa-regular fa-calendar-days" style="color:#2563eb;"></i>
-                                                <span>Lịch học: <?= $lich_hk ?></span>
+                                                <span>Lịch học: <?= !empty($lop['lich_hoc']) ? htmlspecialchars($lop['lich_hoc']) . (!empty($lop['phong_hoc']) ? ' - P.' . htmlspecialchars($lop['phong_hoc']) : '') : 'Chưa xếp lịch cụ thể' ?></span>
                                             </div>
                                             <?php if ($mo_dk && $dong_dk): ?>
                                                 <div class="schedule-sub">
