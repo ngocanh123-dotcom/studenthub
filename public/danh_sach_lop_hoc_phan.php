@@ -74,7 +74,7 @@ if ($hoc_ky_id !== '') {
 }
 
 if ($giang_vien_id !== '') {
-$where[] = "lhp.giang_vien_id = :giang_vien_id";
+    $where[] = "lhp.giang_vien_id = :giang_vien_id";
     $params[':giang_vien_id'] = (int)$giang_vien_id;
 }
 
@@ -172,7 +172,7 @@ foreach ($danh_sach_goc as $row) {
 // =========================================================================
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename="Danh_Sach_Lop_Hoc_Phan.csv"');
+    header('Content-Disposition: attachment; filename="Danh_Sach_Lop_Hoc_Phan.csv"');
     $out = fopen('php://output', 'w');
     fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
@@ -241,7 +241,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
             background: #fff;
             outline: none;
         }
-.input-control:focus {
+        .input-control:focus {
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
@@ -334,7 +334,7 @@ $ds_giang_vien = $pdo->query("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung W
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
-align-items: center;
+            align-items: center;
             flex-wrap: wrap;
             gap: 14px;
         }
@@ -383,10 +383,10 @@ align-items: center;
         }
         .progress-bar { height: 100%; background: #2563eb; }
 
-        .btn-sm-action { height: 32px; padding: 0 11px; font-size: 12px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; cursor: pointer;}
+        .btn-sm-action { height: 32px; padding: 0 12px; font-size: 12px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; cursor: pointer; transition: all 0.15s;}
         .btn-outline-sm { border: 1px solid #e2e8f0; background: #fff; color: #0f172a; }
         .btn-outline-sm:hover { border-color: #2563eb; color: #2563eb; }
-        .btn-blue-sm { background: #2563eb; color: #fff; border: none; }
+        .btn-blue-sm { background: #2563eb; color: #fff; border: 1px solid #2563eb; }
         .btn-blue-sm:hover { background: #1d4ed8; }
         .btn-registered-sm { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
         .btn-disabled-sm { background: #f1f5f9; color: #94a3b8; border: none; cursor: not-allowed; }
@@ -396,7 +396,7 @@ align-items: center;
             display: flex;
             justify-content: space-between;
             align-items: center;
-background: #fcfdff;
+            background: #fcfdff;
         }
         .pages { display: flex; gap: 6px; }
         .page-item {
@@ -453,16 +453,17 @@ background: #fcfdff;
                     </svg>
                     <span>Danh sách lớp học phần</span>
                 </a>
-                 <a href="/studenthub/public/trang_dang_ky_hoc.php" class="sh-nav-item">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-    </svg>
-    <span>Đăng ký học phần</span>
-</a>
+
+                <a href="/studenthub/public/trang_dang_ky_hoc.php" class="sh-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <span>Đăng ký học phần</span>
+                </a>
 
                 <a href="/studenthub/app/Views/classes/detail.php?id=1" class="sh-nav-item">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -521,7 +522,8 @@ background: #fcfdff;
                 </div>
             </div>
         </header>
-<!-- 3 THẺ THỐNG KÊ NHANH CHO SINH VIÊN -->
+
+        <!-- 3 THẺ THỐNG KÊ NHANH CHO SINH VIÊN -->
         <div class="stats-grid-custom">
             <div class="stat-card-custom">
                 <div class="stat-icon-custom blue"><i class="fa-solid fa-book-open"></i></div>
@@ -579,7 +581,7 @@ background: #fcfdff;
 
                 <select name="giang_vien_id" class="input-control">
                     <option value="">-- Tất cả giảng viên --</option>
-<?php foreach ($ds_giang_vien as $gv): ?>
+                    <?php foreach ($ds_giang_vien as $gv): ?>
                         <option value="<?= $gv['id'] ?>" <?= $giang_vien_id == $gv['id'] ? 'selected' : '' ?>>
                             <?= htmlspecialchars($gv['ho_ten']) ?>
                         </option>
@@ -626,39 +628,15 @@ background: #fcfdff;
                                     Không tìm thấy lớp học phần nào phù hợp với điều kiện lọc.
                                 </td>
                             </tr>
-                                               <?php else: ?>
+                        <?php else: ?>
                             <?php foreach ($lop_hien_thi as $row):
                                 $con_lai = (int)$row['so_cho_con_lai'];
                                 $bi_khoa = ($row['trang_thai'] === 'khoa' || (int)$row['trang_thai_dang_ky'] === 0);
                                 $day_cho = ($con_lai <= 0);
-                                $ty_le   = $row['si_so_toi_da'] > 0 ? min(100, round(($row['si_so_hien_tai'] / $row['si_so_toi_da']) * 100)) : 0;
-$lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
-
-                                $bi_khoa = (
-                                    $row['trang_thai'] === 'khoa'
-                                    || (int)$row['trang_thai_dang_ky'] === 0
-                                );
-
-                                $day_cho = ($con_lai <= 0);
-
-                                $ty_le = (int)$row['si_so_toi_da'] > 0
-                                    ? min(
-                                        100,
-                                        round(
-                                            ((int)$row['si_so_hien_tai'] / (int)$row['si_so_toi_da']) * 100
-                                        )
-                                    )
-                                    : 0;
-
-                                $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau']))
-                                    . ' - '
-                                    . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
-
-                                $mo_dk = $row['thoi_gian_mo_rieng']
-                                    ?? $row['thoi_gian_mo_dk'];
-
-                                $dong_dk = $row['thoi_gian_dong_rieng']
-                                    ?? $row['thoi_gian_dong_dk'];
+                                $ty_le   = (int)$row['si_so_toi_da'] > 0 ? min(100, round(((int)$row['si_so_hien_tai'] / (int)$row['si_so_toi_da']) * 100)) : 0;
+                                $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($row['ngay_ket_thuc']));
+                                $mo_dk   = $row['thoi_gian_mo_rieng'] ?? $row['thoi_gian_mo_dk'];
+                                $dong_dk = $row['thoi_gian_dong_rieng'] ?? $row['thoi_gian_dong_dk'];
                             ?>
                                 <tr>
                                     <td>
@@ -694,7 +672,7 @@ $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y'
                                     </td>
                                     <td>
                                         <?php if ($bi_khoa): ?>
-<span class="badge-khoa"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Đã khóa</span>
+                                            <span class="badge-khoa"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Đã khóa</span>
                                         <?php elseif ($day_cho): ?>
                                             <span class="badge-day"><span style="width:6px;height:6px;border-radius:50%;background:#d97706;display:inline-block;"></span> Đủ sĩ số</span>
                                         <?php else: ?>
@@ -702,10 +680,12 @@ $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y'
                                         <?php endif; ?>
                                     </td>
                                     <td style="text-align:right; white-space:nowrap;">
-                                        <a href="chi_tiet_lop_hoc_phan.php?id=<?= (int)$row['id'] ?>" class="btn-sm-action btn-outline-sm" title="Xem chi tiết lớp học phần">
+                                        <!-- 1. NÚT CHI TIẾT: Chuyển sang trang Chi tiết lớp học phần chuẩn của nhóm -->
+                                        <a href="/studenthub/app/Views/classes/detail.php?id=<?= (int)$row['id'] ?>" class="btn-sm-action btn-outline-sm" title="Xem chi tiết lớp học phần">
                                             Chi tiết
                                         </a>
 
+                                        <!-- 2. NÚT ĐĂNG KÝ: Chuyển sang Trang Đăng Ký Học Phần để thao tác (không tự động đăng ký luôn) -->
                                         <?php if ((int)$row['sv_da_dang_ky'] > 0): ?>
                                             <span class="btn-sm-action btn-registered-sm">
                                                 <i class="fa-solid fa-check"></i> Đã ĐK
@@ -713,7 +693,7 @@ $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y'
                                         <?php elseif ($bi_khoa || $day_cho): ?>
                                             <span class="btn-sm-action btn-disabled-sm">Khóa ĐK</span>
                                         <?php else: ?>
-                                           <a href="/studenthub/public/dang_ky_hoc.php?lop_hoc_phan_id=<?= (int)$row['id'] ?>">
+                                            <a href="/studenthub/public/trang_dang_ky_hoc.php?lop_hoc_phan_id=<?= (int)$row['id'] ?>&id=<?= (int)$row['id'] ?>" class="btn-sm-action btn-blue-sm" title="Đi đến trang đăng ký học phần">
                                                 + Đăng ký
                                             </a>
                                         <?php endif; ?>
@@ -740,7 +720,7 @@ $lich_hk = date('d/m/Y', strtotime($row['ngay_bat_dau'])) . ' - ' . date('d/m/Y'
                     <?php endfor; ?>
                 </div>
             </div>
-</section>
+        </section>
 
     </main>
 </div>
