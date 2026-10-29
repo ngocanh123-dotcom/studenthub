@@ -194,11 +194,7 @@ if (!$lopId || $lopId <= 0) {
 
             } else {
                 if ($dangKyCu) {
-<<<<<<< HEAD
-                    // ĐĂNG KÝ LẠI: Khôi phục bản ghi đã hủy, CẬP NHẬT LẠI NGÀY GIỜ và XÓA NGÀY HỦY
-=======
-                    // Khôi phục bản ghi nếu sinh viên đã hủy lớp này.
->>>>>>> ebca9570d8c33d9f2d297b23147d5c1b53d3d409
+
                     $stmt = $pdo->prepare("
                         UPDATE dang_ky_hoc
                         SET trang_thai = 'dang_ky', 
