@@ -41,9 +41,12 @@ a {
     text-decoration: none;
 }
 
-.layout {
+.layout,
+.admin-container,
+.sh-container {
     display: flex;
     min-height: 100vh;
+    align-items: flex-start;
 }
 
 /* ==========================================================================
@@ -51,9 +54,10 @@ a {
    ========================================================================== */
 
 .sidebar,
+.admin-sidebar,
 .sh-sidebar {
     width: 260px;
-    min-height: 100vh;
+    height: 100vh;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -61,6 +65,17 @@ a {
     padding: 24px 16px;
     background-color: var(--navy-sidebar);
     color: #ffffff;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.sidebar::-webkit-scrollbar,
+.admin-sidebar::-webkit-scrollbar,
+.sh-sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar-top-group {
