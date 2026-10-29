@@ -1,16 +1,35 @@
-<?php
-session_start();
 
-if (!isset($_SESSION['user_id'])) {
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/**
+ * Nhận diện sinh viên từ session của StudentHub.
+ */
+$sinhVienId = (int) (
+    $_SESSION['nguoi_dung_id']
+    ?? $_SESSION['user_id']
+    ?? 0
+);
+
+$vaiTro = strtolower(trim((string) (
+    $_SESSION['role']
+    ?? $_SESSION['vai_tro']
+    ?? ''
+)));
+
+if ($sinhVienId <= 0) {
     exit('Không tìm thấy phiên đăng nhập. Vui lòng đăng nhập lại.');
 }
 
-if (($_SESSION['role'] ?? '') !== 'sinhvien') {
-    exit('Tài khoản hiện tại không có quyền đăng ký học phần. Vai trò: '
-        . htmlspecialchars((string)($_SESSION['role'] ?? 'chưa xác định'), ENT_QUOTES, 'UTF-8'));
+if (!in_array($vaiTro, ['sinhvien', 'sinh_vien'], true)) {
+    exit(
+        'Tài khoản hiện tại không có quyền đăng ký học phần. Vai trò: '
+        . htmlspecialchars($vaiTro ?: 'chưa xác định', ENT_QUOTES, 'UTF-8')
+    );
 }
 
-$sinhVienId = (int) $_SESSION['user_id'];
 $lopId = filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
 $thongBao = '';
 $loaiThongBao = 'error';
@@ -19,7 +38,7 @@ if (!$lopId || $lopId <= 0) {
     $thongBao = 'Mã lớp học phần không hợp lệ.';
 } else {
     try {
-        // Tìm file kết nối database của dự án.
+        // Tìm file kết nối database.
         $duongDanKetNoi = [
             __DIR__ . '/../config/database.php',
             __DIR__ . '/../config/Database.php',
@@ -27,17 +46,14 @@ if (!$lopId || $lopId <= 0) {
             __DIR__ . '/../config/db.php',
         ];
 
-        $daNapKetNoi = false;
-
         foreach ($duongDanKetNoi as $file) {
             if (is_file($file)) {
                 require_once $file;
-                $daNapKetNoi = true;
                 break;
             }
         }
 
-        // Lấy kết nối PDO từ các kiểu thường dùng trong dự án.
+        // Lấy kết nối PDO hiện có.
         $pdo = $pdo ?? $conn ?? $db ?? null;
 
         if (!$pdo instanceof PDO && class_exists('Database')) {
@@ -48,40 +64,50 @@ if (!$lopId || $lopId <= 0) {
             }
         }
 
+        // Dự phòng kết nối trực tiếp nếu dự án chưa tạo PDO.
         if (!$pdo instanceof PDO) {
-            throw new RuntimeException(
-                'Chưa tìm thấy kết nối PDO. Hãy kiểm tra file config/database.php hoặc lớp Database của dự án.'
+            $pdo = new PDO(
+                'mysql:host=localhost;dbname=studenthub;charset=utf8mb4',
+                'root',
+                getenv('STUDENTHUB_DB_PASS') ?: '',
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]
             );
         }
 
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Kiểm tra lớp học phần.
-        $sqlLop = "
-            SELECT
-                id,
-                trang_thai,
-                si_so_toi_da
+        // Bắt đầu giao dịch để kiểm tra và cập nhật nhất quán.
+        $pdo->beginTransaction();
+
+        // Khóa thông tin lớp trong lúc kiểm tra sĩ số.
+        $stmtLop = $pdo->prepare("
+            SELECT id, trang_thai, si_so_toi_da
             FROM lop_hoc_phan
             WHERE id = :lop_id
             LIMIT 1
-        ";
+            FOR UPDATE
+        ");
 
-        $stmtLop = $pdo->prepare($sqlLop);
         $stmtLop->execute(['lop_id' => $lopId]);
-        $lop = $stmtLop->fetch(PDO::FETCH_ASSOC);
+        $lop = $stmtLop->fetch();
 
         if (!$lop) {
             throw new RuntimeException('Không tìm thấy lớp học phần này.');
         }
 
-        // Kiểm tra trạng thái đăng ký hiện tại.
+        // Tìm bản ghi đăng ký hiện có của sinh viên.
         $stmtTrung = $pdo->prepare("
             SELECT id, trang_thai
             FROM dang_ky_hoc
             WHERE lop_hoc_phan_id = :lop_id
               AND sinh_vien_id = :sv_id
+            ORDER BY id DESC
             LIMIT 1
+            FOR UPDATE
         ");
 
         $stmtTrung->execute([
@@ -89,14 +115,14 @@ if (!$lopId || $lopId <= 0) {
             'sv_id' => $sinhVienId,
         ]);
 
-        $dangKyCu = $stmtTrung->fetch(PDO::FETCH_ASSOC);
+        $dangKyCu = $stmtTrung->fetch();
 
         if ($dangKyCu && $dangKyCu['trang_thai'] === 'dang_ky') {
-            $thongBao = 'M đã đăng ký lớp học phần này rồi.';
-        } elseif (strtolower((string)$lop['trang_thai']) !== 'mo') {
+            $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
+        } elseif (strtolower(trim((string)$lop['trang_thai'])) !== 'mo') {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';
         } else {
-            // Đếm số sinh viên đã đăng ký còn hiệu lực.
+            // Đếm số đăng ký đang còn hiệu lực.
             $stmtSiSo = $pdo->prepare("
                 SELECT COUNT(*)
                 FROM dang_ky_hoc
@@ -105,6 +131,7 @@ if (!$lopId || $lopId <= 0) {
             ");
 
             $stmtSiSo->execute(['lop_id' => $lopId]);
+
             $siSoHienTai = (int)$stmtSiSo->fetchColumn();
             $siSoToiDa = (int)$lop['si_so_toi_da'];
 
@@ -112,15 +139,22 @@ if (!$lopId || $lopId <= 0) {
                 $thongBao = 'Lớp học phần đã đủ sĩ số.';
             } else {
                 if ($dangKyCu) {
-                    // Khôi phục đăng ký đã hủy.
+                    // Đăng ký lại: khôi phục bản ghi đã hủy.
                     $stmt = $pdo->prepare("
                         UPDATE dang_ky_hoc
                         SET trang_thai = 'dang_ky'
                         WHERE id = :id
+                          AND sinh_vien_id = :sv_id
+                          AND lop_hoc_phan_id = :lop_id
                     ");
-                    $stmt->execute(['id' => $dangKyCu['id']]);
+
+                    $stmt->execute([
+                        'id' => $dangKyCu['id'],
+                        'sv_id' => $sinhVienId,
+                        'lop_id' => $lopId,
+                    ]);
                 } else {
-                    // Tạo đăng ký mới.
+                    // Chưa có bản ghi: tạo đăng ký mới.
                     $stmt = $pdo->prepare("
                         INSERT INTO dang_ky_hoc
                             (lop_hoc_phan_id, sinh_vien_id, trang_thai)
@@ -138,9 +172,17 @@ if (!$lopId || $lopId <= 0) {
                 $loaiThongBao = 'success';
             }
         }
+
+        $pdo->commit();
+
     } catch (Throwable $e) {
+        if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
         error_log('StudentHub đăng ký học phần: ' . $e->getMessage());
-        $thongBao = 'Không thể xử lý đăng ký. Chi tiết: ' . $e->getMessage();
+
+        $thongBao = 'Không thể xử lý đăng ký. Hãy kiểm tra cấu hình và dữ liệu cơ sở dữ liệu.';
     }
 }
 ?>
@@ -152,6 +194,7 @@ if (!$lopId || $lopId <= 0) {
     <title>Kết quả đăng ký | StudentHub</title>
     <style>
         * { box-sizing: border-box; }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -163,6 +206,7 @@ if (!$lopId || $lopId <= 0) {
             background: #f4f7fb;
             color: #26364a;
         }
+
         .card {
             width: 100%;
             max-width: 500px;
@@ -172,6 +216,7 @@ if (!$lopId || $lopId <= 0) {
             border-radius: 18px;
             box-shadow: 0 10px 35px rgba(20, 60, 110, .10);
         }
+
         .icon {
             width: 64px;
             height: 64px;
@@ -183,8 +228,10 @@ if (!$lopId || $lopId <= 0) {
             background: <?= $loaiThongBao === 'success' ? '#e2f8ed' : '#fff0e8' ?>;
             color: <?= $loaiThongBao === 'success' ? '#15965c' : '#c45b28' ?>;
         }
+
         h1 { margin: 0 0 12px; font-size: 24px; }
         p { line-height: 1.7; overflow-wrap: anywhere; }
+
         .actions {
             display: flex;
             justify-content: center;
@@ -192,6 +239,7 @@ if (!$lopId || $lopId <= 0) {
             gap: 10px;
             margin-top: 24px;
         }
+
         a {
             display: inline-block;
             padding: 12px 18px;
@@ -199,6 +247,7 @@ if (!$lopId || $lopId <= 0) {
             text-decoration: none;
             font-weight: 600;
         }
+
         .primary { background: #1769d2; color: white; }
         .secondary { background: #edf3fb; color: #1769d2; }
     </style>
@@ -219,8 +268,8 @@ if (!$lopId || $lopId <= 0) {
 
         <div class="actions">
             <a class="primary"
-               href="/studenthub/public/danh_sach_lop_hoc_phan.php">
-                Quay lại danh sách lớp
+               href="/studenthub/public/trang_dang_ky_hoc.php">
+                Quay lại đăng ký học phần
             </a>
 
             <a class="secondary"
