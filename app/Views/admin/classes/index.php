@@ -90,23 +90,115 @@
         .btn-create-class:hover {
             background: #1d4ed8;
         }
-        .btn-export-csv {
+        .btn-export-pdf {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             background: #ffffff;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
             padding: 10px 16px;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 13px;
             text-decoration: none;
+            cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-export-csv:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
+        .btn-export-pdf:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 12mm 10mm;
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 11pt !important;
+            }
+            .layout {
+                display: block !important;
+            }
+            .main {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .content {
+                padding: 0 !important;
+            }
+            .sidebar,
+            .sh-sidebar,
+            .admin-sidebar,
+            .topbar,
+            .stats,
+            .toolbar-flex,
+            .filter-grid-classes,
+            .btn-toolbar-group,
+            .btn-create-class,
+            .btn-export-pdf,
+            .page-footer,
+            .capacity-bar-wrap,
+            .error-message,
+            .account-notice {
+                display: none !important;
+            }
+            .print-header-only {
+                display: block !important;
+            }
+            .account-table {
+                border: none !important;
+                box-shadow: none !important;
+                overflow: visible !important;
+            }
+            .account-table table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 10pt !important;
+            }
+            .account-table th,
+            .account-table td {
+                border: 1px solid #333333 !important;
+                padding: 6px 8px !important;
+                color: #000000 !important;
+            }
+            .account-table th {
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-weight: 700 !important;
+            }
+            .account-table th:nth-child(8),
+            .account-table td:nth-child(8),
+            .account-table th:nth-child(9),
+            .account-table td:nth-child(9) {
+                display: none !important;
+            }
+            .class-code-badge {
+                border: none !important;
+                background: transparent !important;
+                color: #000 !important;
+                padding: 0 !important;
+                font-weight: 700 !important;
+            }
+            .badge-status-open,
+            .badge-status-locked {
+                border: none !important;
+                background: transparent !important;
+                color: #000 !important;
+                padding: 0 !important;
+                font-weight: 600 !important;
+            }
+            .print-footer-signature {
+                display: flex !important;
+                justify-content: space-between;
+                margin-top: 30px;
+                page-break-inside: avoid;
+            }
         }
         .btn-toggle-switch {
             border: none;
@@ -245,9 +337,16 @@
                     <a href="lop_hoc_phan.php?action=create" class="btn-create-class">
                         <span>+ Thêm lớp học phần mới</span>
                     </a>
-                    <a href="lop_hoc_phan.php?action=export_csv&<?= http_build_query($filters) ?>" class="btn-export-csv" title="Xuất dữ liệu Excel UTF-8">
-                        <span>⬇ Xuất danh sách (CSV)</span>
-                    </a>
+                    <button type="button" onclick="exportPDF()" class="btn-export-pdf" title="Xuất danh sách dạng PDF / In ấn trực tiếp">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>⬇ Xuất danh sách (PDF)</span>
+                    </button>
                 </div>
             </div>
 
@@ -314,6 +413,26 @@
                     <?php endif; ?>
                 </div>
             </form>
+
+            <!-- KHỐI TIÊU ĐỀ BÁO CÁO KHI IN HOẶC XUẤT PDF -->
+            <div class="print-header-only" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <strong style="font-size: 13px; text-transform: uppercase;">TRƯỜNG ĐẠI HỌC STUDENTHUB</strong><br>
+                        <span style="font-size: 12px; font-weight: 600;">PHÒNG ĐÀO TẠO &amp; QUẢN LÝ HỌC VỤ</span>
+                    </div>
+                    <div style="text-align: center;">
+                        <strong style="font-size: 13px; text-transform: uppercase;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>
+                        <span style="font-size: 12px; font-style: italic;">Độc lập - Tự do - Hạnh phúc</span>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-bottom: 18px;">
+                    <h2 style="font-size: 18px; font-weight: 800; text-transform: uppercase; margin: 0 0 6px 0; color: #000;">DANH SÁCH LỚP HỌC PHẦN ĐÀO TẠO</h2>
+                    <p style="font-size: 12px; font-style: italic; margin: 0; color: #333;">
+                        Thời điểm xuất: <?= date('d/m/Y H:i') ?> • Người xuất: <?= htmlspecialchars((string)$tenAdmin, ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+                </div>
+            </div>
 
             <!-- 4. BẢNG DỮ LIỆU LỚP HỌC PHẦN (MAIN DATA TABLE) -->
             <div class="account-table">
@@ -463,6 +582,18 @@
                 </table>
             </div>
 
+            <!-- CHỮ KÝ XÁC NHẬN KHI IN / XUẤT PDF -->
+            <div class="print-footer-signature" style="display: none;">
+                <div style="text-align: center; width: 250px;">
+                    <strong>NGƯỜI LẬP BIỂU</strong><br>
+                    <span style="font-size: 11px; font-style: italic;">(Ký và ghi rõ họ tên)</span>
+                </div>
+                <div style="text-align: center; width: 250px;">
+                    <strong>TRƯỞNG PHÒNG ĐÀO TẠO</strong><br>
+                    <span style="font-size: 11px; font-style: italic;">(Ký và đóng dấu)</span>
+                </div>
+            </div>
+
             <!-- Chân trang quản trị -->
             <div class="page-footer">
                 Hệ thống Quản lý khóa học &amp; Đăng ký học phần (StudentHub) • Phân hệ Quản trị viên
@@ -471,5 +602,19 @@
         </div>
     </main>
 </div>
+
+<script>
+    function exportPDF() {
+        window.print();
+    }
+
+    // Tự động mở hộp thoại in nếu có tham số export=pdf hoặc print=1 trên URL
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('export') === 'pdf' || urlParams.get('print') === '1' || urlParams.get('action') === 'export_pdf') {
+            window.print();
+        }
+    });
+</script>
 </body>
 </html>
