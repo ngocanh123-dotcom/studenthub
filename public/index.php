@@ -135,7 +135,23 @@ $demoAccounts = [
     'sv011' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đinh Trọng Hiếu', 'id' => 17],
     'SV011' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đinh Trọng Hiếu', 'id' => 17],
     'sv012' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Thanh Hằng', 'id' => 18],
-    'SV012' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Thanh Hằng', 'id' => 18]
+    'SV012' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Thanh Hằng', 'id' => 18],
+    'sv013' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Võ Minh Khang', 'id' => 19],
+    'SV013' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Võ Minh Khang', 'id' => 19],
+    'sv014' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Bảo Ngọc', 'id' => 20],
+    'SV014' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Bảo Ngọc', 'id' => 20],
+    'sv015' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Gia Huy', 'id' => 21],
+    'SV015' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Gia Huy', 'id' => 21],
+    'sv016' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phan Thảo Vy', 'id' => 22],
+    'SV016' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phan Thảo Vy', 'id' => 22],
+    'sv017' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đặng Quốc Khánh', 'id' => 23],
+    'SV017' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đặng Quốc Khánh', 'id' => 23],
+    'sv018' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lý Mỹ Linh', 'id' => 24],
+    'SV018' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lý Mỹ Linh', 'id' => 24],
+    'sv019' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hồ Nhật Nam', 'id' => 25],
+    'SV019' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hồ Nhật Nam', 'id' => 25],
+    'sv020' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Cao Hoài An', 'id' => 26],
+    'SV020' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Cao Hoài An', 'id' => 26]
 ];
 
 // 4. XỬ LÝ ĐĂNG NHẬP (AUTHENTICATION CONTROLLER)

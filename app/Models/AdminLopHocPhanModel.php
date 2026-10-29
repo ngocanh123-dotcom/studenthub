@@ -157,6 +157,40 @@ class AdminLopHocPhanModel {
     }
 
     /**
+     * Tìm lớp cùng học kỳ có lịch học và phòng học trùng nhau
+     */
+    public function findScheduleRoomConflict(
+        int $hocKyId,
+        string $lichHoc,
+        string $phongHoc,
+        ?int $excludeId = null
+    ): ?array {
+        $sql = "SELECT id, ma_lop, lich_hoc, phong_hoc
+                FROM lop_hoc_phan
+                WHERE hoc_ky_id = :hoc_ky_id
+                  AND LOWER(TRIM(lich_hoc)) = LOWER(TRIM(:lich_hoc))
+                  AND LOWER(TRIM(phong_hoc)) = LOWER(TRIM(:phong_hoc))";
+        $params = [
+            ':hoc_ky_id' => $hocKyId,
+            ':lich_hoc' => trim($lichHoc),
+            ':phong_hoc' => trim($phongHoc),
+        ];
+
+        if ($excludeId !== null && $excludeId > 0) {
+            $sql .= " AND id <> :exclude_id";
+            $params[':exclude_id'] = $excludeId;
+        }
+
+        $sql .= " LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        $conflict = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $conflict ?: null;
+    }
+
+    /**
      * Tạo lớp học phần mới
      */
     public function createClass(array $data): bool {

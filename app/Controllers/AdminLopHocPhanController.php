@@ -184,6 +184,22 @@ class AdminLopHocPhanController {
             $this->redirectBackWithError('Vui lòng chọn Học kỳ áp dụng.', $_POST);
         }
 
+        if ($lichHoc !== '' && $phongHoc !== '') {
+            try {
+                $conflict = $this->model->findScheduleRoomConflict($hocKyId, $lichHoc, $phongHoc);
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch/phòng khi tạo lớp học phần: " . $e->getMessage());
+                $this->redirectBackWithError('Không thể kiểm tra trùng lịch và phòng học. Vui lòng thử lại.', $_POST);
+            }
+
+            if ($conflict) {
+                $this->redirectBackWithError(
+                    "Lịch học và phòng học này đã được xếp cho lớp '{$conflict['ma_lop']}' trong học kỳ đã chọn.",
+                    $_POST
+                );
+            }
+        }
+
         if ($siSoToiDa <= 0 || $siSoToiDa > 500) {
             $this->redirectBackWithError('Sĩ số tối đa phải là số nguyên dương từ 1 đến 500 sinh viên.', $_POST);
         }
@@ -309,6 +325,22 @@ class AdminLopHocPhanController {
 
         if ($hocKyId <= 0) {
             $this->redirectEditWithError($id, 'Vui lòng chọn Học kỳ.');
+        }
+
+        if ($lichHoc !== '' && $phongHoc !== '') {
+            try {
+                $conflict = $this->model->findScheduleRoomConflict($hocKyId, $lichHoc, $phongHoc, $id);
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch/phòng khi cập nhật lớp học phần: " . $e->getMessage());
+                $this->redirectEditWithError($id, 'Không thể kiểm tra trùng lịch và phòng học. Vui lòng thử lại.');
+            }
+
+            if ($conflict) {
+                $this->redirectEditWithError(
+                    $id,
+                    "Lịch học và phòng học này đã được xếp cho lớp '{$conflict['ma_lop']}' trong học kỳ đã chọn."
+                );
+            }
         }
 
         // Ràng buộc an toàn sĩ số: Không được giảm sĩ số tối đa xuống thấp hơn số sinh viên hiện tại
