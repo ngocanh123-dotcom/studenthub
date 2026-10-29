@@ -5,32 +5,42 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * Nhận diện sinh viên từ session của StudentHub.
+ * [TC 4] Kiểm tra phiên đăng nhập ($_SESSION['user_id'] và $_SESSION['vai_tro'] === 'sinh_vien').
+ * Nếu chưa đăng nhập hoặc không phải sinh viên, lập tức dừng xử lý và chuyển hướng về trang login.
  */
 $sinhVienId = (int) (
-    $_SESSION['nguoi_dung_id']
-    ?? $_SESSION['user_id']
+    $_SESSION['user_id']
+    ?? $_SESSION['nguoi_dung_id']
     ?? 0
 );
 
 $vaiTro = strtolower(trim((string) (
-    $_SESSION['role']
-    ?? $_SESSION['vai_tro']
+    $_SESSION['vai_tro']
+    ?? $_SESSION['role']
     ?? ''
 )));
 
-if ($sinhVienId <= 0) {
-    exit('Không tìm thấy phiên đăng nhập. Vui lòng đăng nhập lại.');
+if ($sinhVienId <= 0 || !in_array($vaiTro, ['sinh_vien', 'sinhvien'], true)) {
+    header('Location: /studenthub/public/index.php');
+    exit;
 }
 
-if (!in_array($vaiTro, ['sinhvien', 'sinh_vien'], true)) {
-    exit(
-        'Tài khoản hiện tại không có quyền đăng ký học phần. Vai trò: '
-        . htmlspecialchars($vaiTro ?: 'chưa xác định', ENT_QUOTES, 'UTF-8')
-    );
+/**
+ * [TC 8] Bảo mật CSRF Token: Kiểm tra mã CSRF trên mọi form gửi phương thức POST.
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
+        die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
+    }
 }
 
-$lopId = filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
+/**
+ * [TC 5] Kiểm soát dữ liệu: Sĩ số tối đa (si_so_toi_da) và số chỗ còn lại BẮT BUỘC phải được tính toán
+ * trực tiếp từ CSDL. Tuyệt đối KHÔNG nhận bất kỳ tham số sĩ số nào từ $_GET hoặc $_POST.
+ * Chỉ nhận duy nhất tham số định danh lớp học phần (lop_hoc_phan_id).
+ */
+$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT)
+    ?: filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
 $thongBao = '';
 $loaiThongBao = 'error';
 
@@ -90,14 +100,17 @@ if (!$lopId || $lopId <= 0) {
             PDO::FETCH_ASSOC
         );
 
-        // Bắt đầu giao dịch.
+        // Bắt đầu giao dịch bảo vệ toàn vẹn dữ liệu
         $pdo->beginTransaction();
 
-        // Lấy thông tin lớp và mã học phần của lớp được chọn.
+        // [TC 1 & TC 5]: Lấy thông tin lớp học phần trực tiếp từ CSDL (khóa dòng FOR UPDATE)
         $stmtLop = $pdo->prepare("
-            SELECT id, ma_lop, hoc_phan_id, trang_thai, si_so_toi_da
-            FROM lop_hoc_phan
-            WHERE id = :lop_id
+            SELECT lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.trang_thai, 
+                   lhp.si_so_toi_da, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
+                   hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
+            FROM lop_hoc_phan lhp
+            INNER JOIN hoc_ky hk ON hk.id = lhp.hoc_ky_id
+            WHERE lhp.id = :lop_id
             LIMIT 1
             FOR UPDATE
         ");
@@ -114,26 +127,24 @@ if (!$lopId || $lopId <= 0) {
             );
         }
 
-        // Kiểm tra sinh viên đã đăng ký lớp đang chọn chưa.
-        $stmtTrung = $pdo->prepare("
-            SELECT id, trang_thai
+        // [TC 2]: Kiểm tra trùng lớp bằng câu truy vấn nghiệp vụ chuẩn:
+        // SELECT COUNT(*) FROM dang_ky_hoc WHERE sinh_vien_id = :sv_id AND lop_hoc_phan_id = :lhp_id AND trang_thai = 'dang_ky'
+        $stmtCheckTrung = $pdo->prepare("
+            SELECT COUNT(*)
             FROM dang_ky_hoc
-            WHERE lop_hoc_phan_id = :lop_id
-              AND sinh_vien_id = :sv_id
-            ORDER BY id DESC
-            LIMIT 1
-            FOR UPDATE
+            WHERE sinh_vien_id = :sv_id
+              AND lop_hoc_phan_id = :lhp_id
+              AND trang_thai = 'dang_ky'
         ");
 
-        $stmtTrung->execute([
-            'lop_id' => $lopId,
-            'sv_id' => $sinhVienId
+        $stmtCheckTrung->execute([
+            'sv_id'  => $sinhVienId,
+            'lhp_id' => $lopId
         ]);
 
-        $dangKyCu = $stmtTrung->fetch();
+        $daDangKyLopNay = (int) $stmtCheckTrung->fetchColumn();
 
-        // Kiểm tra sinh viên đã đăng ký mã học phần này
-        // ở một lớp khác hay chưa.
+        // Kiểm tra sinh viên đã đăng ký mã học phần này ở một lớp khác hay chưa
         $stmtTrungHocPhan = $pdo->prepare("
             SELECT dk.id, lhp.ma_lop
             FROM dang_ky_hoc AS dk
@@ -147,18 +158,57 @@ if (!$lopId || $lopId <= 0) {
         ");
 
         $stmtTrungHocPhan->execute([
-            'sv_id' => $sinhVienId,
+            'sv_id'       => $sinhVienId,
             'hoc_phan_id' => $lop['hoc_phan_id'],
-            'lop_id' => $lopId
+            'lop_id'      => $lopId
         ]);
 
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
-        // Xử lý các điều kiện đăng ký.
-        if (
-            $dangKyCu
-            && $dangKyCu['trang_thai'] === 'dang_ky'
-        ) {
+        // [TC 3 & TC 5]: Đếm sĩ số hiện tại của lớp trực tiếp từ CSDL
+        $stmtSiSo = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM dang_ky_hoc
+            WHERE lop_hoc_phan_id = :lhp_id
+              AND trang_thai = 'dang_ky'
+        ");
+
+        $stmtSiSo->execute([
+            'lhp_id' => $lopId
+        ]);
+
+        $siSoHienTai = (int) $stmtSiSo->fetchColumn();
+        $siSoToiDa = (int) $lop['si_so_toi_da'];
+
+        // [TC 1]: Kiểm tra khung thời gian mở đăng ký
+        $now = new DateTimeImmutable();
+        $coHanRieng = !empty($lop['thoi_gian_mo_rieng']) || !empty($lop['thoi_gian_dong_rieng']);
+        $trongHanDangKy = true;
+        $lyDoHetHan = '';
+
+        if ($coHanRieng) {
+            $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? new DateTimeImmutable($lop['thoi_gian_mo_rieng']) : null;
+            $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? new DateTimeImmutable($lop['thoi_gian_dong_rieng']) : null;
+            if (($moRieng && $now < $moRieng) || ($dongRieng && $now > $dongRieng)) {
+                $trongHanDangKy = false;
+                $lyDoHetHan = 'Hiện không nằm trong thời gian mở đăng ký riêng của lớp học phần này.';
+            }
+        } else {
+            if ((int)$lop['trang_thai_dang_ky'] !== 1) {
+                $trongHanDangKy = false;
+                $lyDoHetHan = 'Cổng đăng ký của học kỳ hiện đang đóng.';
+            } else {
+                $moHK = !empty($lop['thoi_gian_mo_dk']) ? new DateTimeImmutable($lop['thoi_gian_mo_dk']) : null;
+                $dongHK = !empty($lop['thoi_gian_dong_dk']) ? new DateTimeImmutable($lop['thoi_gian_dong_dk']) : null;
+                if (($moHK && $now < $moHK) || ($dongHK && $now > $dongHK)) {
+                    $trongHanDangKy = false;
+                    $lyDoHetHan = 'Hiện không nằm trong khung thời gian đăng ký của học kỳ.';
+                }
+            }
+        }
+
+        // [TC 2]: Kiểm tra nếu đã đăng ký lớp này rồi
+        if ($daDangKyLopNay > 0) {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
 
         } elseif ($lopTrungHocPhan) {
@@ -166,68 +216,67 @@ if (!$lopId || $lopId <= 0) {
                 . $lopTrungHocPhan['ma_lop']
                 . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
 
-        } elseif (
-            strtolower(trim((string) $lop['trang_thai'])) !== 'mo'
-        ) {
+        } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';
 
+        } elseif (!$trongHanDangKy) {
+            $thongBao = $lyDoHetHan;
+
+        // [TC 3]: Kiểm tra đầy sĩ số (si_so_hien_tai >= si_so_toi_da)
+        } elseif ($siSoToiDa > 0 && $siSoHienTai >= $siSoToiDa) {
+            $thongBao = 'Lớp học phần đã đủ sĩ số.';
+
         } else {
-            // Đếm số đăng ký đang còn hiệu lực của lớp.
-            $stmtSiSo = $pdo->prepare("
-                SELECT COUNT(*)
+            // [TC 1]: Khi thỏa mãn toàn bộ điều kiện -> Đăng ký thành công!
+            $stmtDangKyCu = $pdo->prepare("
+                SELECT id
                 FROM dang_ky_hoc
-                WHERE lop_hoc_phan_id = :lop_id
-                  AND trang_thai = 'dang_ky'
+                WHERE sinh_vien_id = :sv_id
+                  AND lop_hoc_phan_id = :lhp_id
+                ORDER BY id DESC
+                LIMIT 1
             ");
-
-            $stmtSiSo->execute([
-                'lop_id' => $lopId
+            $stmtDangKyCu->execute([
+                'sv_id'  => $sinhVienId,
+                'lhp_id' => $lopId
             ]);
+            $banGhiCu = $stmtDangKyCu->fetch();
 
-            $siSoHienTai = (int) $stmtSiSo->fetchColumn();
-            $siSoToiDa = (int) $lop['si_so_toi_da'];
+            if ($banGhiCu) {
+                // Khôi phục bản ghi nếu sinh viên từng hủy lớp này
+                $stmt = $pdo->prepare("
+                    UPDATE dang_ky_hoc
+                    SET trang_thai = 'dang_ky',
+                        ngay_dang_ky = NOW(),
+                        ngay_huy = NULL
+                    WHERE id = :id
+                      AND sinh_vien_id = :sv_id
+                      AND lop_hoc_phan_id = :lop_id
+                ");
 
-            if (
-                $siSoToiDa > 0
-                && $siSoHienTai >= $siSoToiDa
-            ) {
-                $thongBao = 'Lớp học phần đã đủ sĩ số.';
+                $stmt->execute([
+                    'id'     => $banGhiCu['id'],
+                    'sv_id'  => $sinhVienId,
+                    'lop_id' => $lopId
+                ]);
 
             } else {
-                if ($dangKyCu) {
-                    // Khôi phục bản ghi nếu sinh viên đã hủy lớp này.
-                    $stmt = $pdo->prepare("
-                        UPDATE dang_ky_hoc
-                        SET trang_thai = 'dang_ky'
-                        WHERE id = :id
-                          AND sinh_vien_id = :sv_id
-                          AND lop_hoc_phan_id = :lop_id
-                    ");
+                // Tạo bản ghi đăng ký mới
+                $stmt = $pdo->prepare("
+                    INSERT INTO dang_ky_hoc
+                        (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
+                    VALUES
+                        (:lop_id, :sv_id, 'dang_ky', NOW())
+                ");
 
-                    $stmt->execute([
-                        'id' => $dangKyCu['id'],
-                        'sv_id' => $sinhVienId,
-                        'lop_id' => $lopId
-                    ]);
-
-                } else {
-                    // Tạo bản ghi đăng ký mới.
-                    $stmt = $pdo->prepare("
-                        INSERT INTO dang_ky_hoc
-                            (lop_hoc_phan_id, sinh_vien_id, trang_thai)
-                        VALUES
-                            (:lop_id, :sv_id, 'dang_ky')
-                    ");
-
-                    $stmt->execute([
-                        'lop_id' => $lopId,
-                        'sv_id' => $sinhVienId
-                    ]);
-                }
-
-                $thongBao = 'Đăng ký học phần thành công!';
-                $loaiThongBao = 'success';
+                $stmt->execute([
+                    'lop_id' => $lopId,
+                    'sv_id'  => $sinhVienId
+                ]);
             }
+
+            $thongBao = 'Đăng ký học phần thành công!';
+            $loaiThongBao = 'success';
         }
 
         $pdo->commit();
