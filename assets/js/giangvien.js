@@ -1,6 +1,6 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Hiển thị ngày hiện tại nếu trang có phần tử #today
+    // Hiển thị ngày hiện tại
     const today = document.getElementById("today");
 
     if (today) {
@@ -40,6 +40,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     .toLocaleLowerCase("vi")
                     .includes(tuKhoa);
             });
+        });
+    }
+
+    // Xuất danh sách sinh viên ra PDF
+    const btnExportPDF = document.getElementById("btnExportPDF");
+
+    if (btnExportPDF) {
+        btnExportPDF.addEventListener("click", function () {
+            window.print();
         });
     }
 });

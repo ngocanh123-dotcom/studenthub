@@ -129,7 +129,10 @@ function e($value): string
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Sinh viên theo lớp - StudentHub</title>
+
+    <!-- Giữ nguyên đường dẫn CSS hiện tại -->
     <link rel="stylesheet" href="../../../assets/css/giangvien.css">
 </head>
 
@@ -220,12 +223,59 @@ function e($value): string
                     </p>
                 </div>
 
-                <input
-                    type="search"
-                    id="searchStudent"
-                    placeholder="Tìm mã SV hoặc họ tên..."
-                    aria-label="Tìm sinh viên"
-                >
+                <div class="student-actions">
+                    <input
+                        type="search"
+                        id="searchStudent"
+                        placeholder="Tìm mã SV hoặc họ tên..."
+                        aria-label="Tìm sinh viên"
+                    >
+
+                    <!-- NÚT XUẤT PDF -->
+                    <button
+                        type="button"
+                        id="btnExportPDF"
+                        class="btn-export"
+                    >
+                        ⬇ Xuất PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- TIÊU ĐỀ CHỈ HIỆN KHI IN / XUẤT PDF -->
+            <div class="pdf-header">
+                <h1>STUDENTHUB</h1>
+                <h2>DANH SÁCH SINH VIÊN THEO LỚP HỌC PHẦN</h2>
+
+                <p>
+                    <strong>Mã lớp:</strong>
+                    <?= e($lop['ma_lop']) ?>
+                </p>
+
+                <p>
+                    <strong>Mã học phần:</strong>
+                    <?= e($lop['ma_hoc_phan']) ?>
+                </p>
+
+                <p>
+                    <strong>Tên học phần:</strong>
+                    <?= e($lop['ten_hoc_phan']) ?>
+                </p>
+
+                <p>
+                    <strong>Học kỳ:</strong>
+                    <?= e($lop['ten_hoc_ky']) ?>
+                </p>
+
+                <p>
+                    <strong>Tổng số sinh viên:</strong>
+                    <?= $tongSinhVien ?>
+                </p>
+
+                <p>
+                    <strong>Ngày xuất:</strong>
+                    <?= date('d/m/Y') ?>
+                </p>
             </div>
 
             <!-- DANH SÁCH SINH VIÊN -->
@@ -263,7 +313,7 @@ function e($value): string
                 </table>
             </div>
 
-            <div style="margin-top: 20px;">
+            <div class="panel-footer" style="margin-top: 20px;">
                 <a href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
                    class="menu-item">
                     ← Quay lại danh sách lớp học phần
@@ -300,8 +350,21 @@ function e($value): string
                         .includes(keyword);
                 });
         });
+
+    // XUẤT DANH SÁCH SINH VIÊN THÀNH PDF
+    document.getElementById('btnExportPDF')
+        ?.addEventListener('click', function () {
+            const titleCu = document.title;
+
+            document.title =
+                'Danh_sach_sinh_vien_' +
+                <?= json_encode($lop['ma_lop']) ?>;
+
+            window.print();
+
+            document.title = titleCu;
+        });
 </script>
 
 </body>
 </html>
-```
