@@ -1,7 +1,10 @@
 
-/* ==============================
-   STUDENTHUB - ADMIN DASHBOARD
-   ============================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   STUDENTHUB - ADMIN DASHBOARD & SIDEBAR DESIGN SYSTEM
+   Đồng bộ phong cách trực quan 100% theo Cổng Sinh viên
+   ========================================================================== */
 
 * {
     box-sizing: border-box;
@@ -10,22 +13,27 @@
 }
 
 :root {
-    --navy: #172554;
-    --navy-light: #1e3a5f;
+    --navy-sidebar: #0c192c;
+    --navy-sidebar-hover: rgba(255, 255, 255, 0.06);
+    --blue-active: #2563eb;
+    --navy: #0c192c;
+    --navy-light: #16263d;
     --primary: #2563eb;
-    --text: #172033;
+    --text: #0f172a;
     --muted: #64748b;
-    --border: #e5eaf2;
-    --background: #f5f7fb;
+    --border: #e2e8f0;
+    --background: #f8fafc;
     --white: #ffffff;
+    --green-status: #10b981;
 }
 
 body {
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     background: var(--background);
     color: var(--text);
     font-size: 14px;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -38,123 +46,220 @@ a {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* ==========================================================================
+   SIDEBAR QUẢN TRỊ VIÊN (ADMIN SIDEBAR) - DEEP NAVY MODERN THEME
+   ========================================================================== */
 
-.sidebar {
-    width: 255px;
+.sidebar,
+.sh-sidebar {
+    width: 260px;
+    min-height: 100vh;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    padding: 25px 16px 18px;
-    background: var(--navy);
-    color: #e2e8f0;
+    justify-content: space-between;
+    padding: 24px 16px;
+    background-color: var(--navy-sidebar);
+    color: #ffffff;
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 8px;
-    margin-bottom: 38px;
-}
-
-.brand-icon {
-    width: 43px;
-    height: 43px;
-    display: grid;
-    place-items: center;
-    border-radius: 13px;
-    background: #3b82f6;
-    color: white;
-    font-size: 25px;
-    font-weight: 800;
-}
-
-.brand strong {
-    display: block;
-    color: white;
-    font-size: 20px;
-    letter-spacing: 0.2px;
-}
-
-.brand small {
-    display: block;
-    color: #a5b4fc;
-    font-size: 11px;
-}
-
-.menu-title {
-    padding: 0 12px;
-    margin: 0 0 12px;
-    color: #94a3b8;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.menu {
+.sidebar-top-group {
     display: flex;
     flex-direction: column;
-    gap: 7px;
 }
 
-.menu-link {
-    min-height: 46px;
+/* Khối Logo & Thương hiệu Brand */
+.brand,
+.sidebar-brand-box {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 11px 13px;
-    border-radius: 9px;
-    color: #cbd5e1;
-    font-size: 13px;
-    transition: background 0.2s, color 0.2s;
+    padding: 4px 8px 24px 8px;
+    margin-bottom: 0;
+    text-decoration: none;
 }
 
-.menu-link:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
+.brand-icon,
+.brand-icon-s {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--blue-active);
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
 }
 
-.menu-link.active {
-    background: #2563eb;
-    color: white;
-    font-weight: 600;
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+.brand-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand strong,
+.brand-info h2,
+.brand-info strong {
+    display: block;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.brand small,
+.brand-info p,
+.brand-info small {
+    display: block;
+    color: #94a3b8;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+/* Tiêu đề phân mục menu */
+.menu-title,
+.sidebar-category-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 24px 0 12px 12px;
+    padding: 0;
+}
+
+/* Danh sách Menu Items */
+.menu,
+.sidebar-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-link,
+.sh-nav-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #94a3b8;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.menu-link svg,
+.sh-nav-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: currentColor;
+    stroke: currentColor;
 }
 
 .menu-icon {
-    width: 22px;
-    text-align: center;
-    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    font-size: 18px;
 }
 
-.sidebar-bottom {
+.menu-link:hover,
+.sh-nav-item:hover {
+    background: var(--navy-sidebar-hover);
+    color: #ffffff;
+}
+
+.menu-link.active,
+.sh-nav-item.active {
+    background: var(--blue-active);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Khu vực chân Sidebar (Footer Action) */
+.sidebar-bottom,
+.sidebar-footer-action {
     margin-top: auto;
-    padding-top: 35px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 16px;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.logout:hover {
-    background: rgba(239, 68, 68, 0.13);
-    color: #fecaca;
+.menu-link.logout,
+.sh-nav-item.logout-link {
+    color: #f87171;
+    font-weight: 600;
+    margin-top: 0;
+    padding: 12px 16px;
+    border-radius: 12px;
 }
 
+.menu-link.logout svg,
+.sh-nav-item.logout-link svg {
+    color: #ef4444;
+    stroke: #ef4444;
+}
+
+.menu-link.logout:hover,
+.sh-nav-item.logout-link:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+}
+
+.sidebar-semester-pill,
 .sidebar-note {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #94a3b8;
+    font-size: 11.5px;
+    margin: 0;
+}
+
+.semester-status-line {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 25px 8px 0;
-    padding-top: 17px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    color: #94a3b8;
-    font-size: 11px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
 }
 
-.status-dot {
+.sidebar-semester-pill p,
+.sidebar-note p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+.status-dot,
+.green-dot {
     width: 8px;
     height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--green-status);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 /* MAIN CONTENT */
@@ -535,27 +640,35 @@ a {
         flex-direction: column;
     }
 
-    .sidebar {
+    .sidebar,
+    .sh-sidebar {
         width: 100%;
-        padding: 15px;
+        min-height: auto;
+        padding: 16px;
     }
 
-    .brand {
-        margin-bottom: 20px;
+    .brand,
+    .sidebar-brand-box {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
     }
 
-    .menu {
+    .menu,
+    .sidebar-menu-list {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
     }
 
-    .menu-title {
-        margin-top: 10px;
+    .menu-title,
+    .sidebar-category-title {
+        margin: 10px 0 6px 4px;
     }
 
-    .sidebar-bottom {
-        margin-top: 18px;
-        padding-top: 0;
+    .sidebar-bottom,
+    .sidebar-footer-action {
+        margin-top: 16px;
+        padding-top: 12px;
     }
 
     .sidebar-note {
@@ -595,7 +708,8 @@ a {
         grid-template-columns: 1fr;
     }
 
-    .menu {
+    .menu,
+    .sidebar-menu-list {
         grid-template-columns: 1fr;
     }
 

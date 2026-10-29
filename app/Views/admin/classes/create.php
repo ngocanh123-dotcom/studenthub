@@ -105,52 +105,10 @@
 <div class="layout">
 
     <!-- THANH MENU BÊN TRÁI -->
-    <aside class="sidebar">
-        <a href="index.php" class="brand">
-            <span class="brand-icon">S</span>
-            <span>
-                <strong>StudentHub</strong>
-                <small>Quản trị hệ thống</small>
-            </span>
-        </a>
-
-        <div class="menu-title">DANH MỤC QUẢN TRỊ</div>
-
-        <nav class="menu">
-            <a href="index.php" class="menu-link">
-                <span class="menu-icon">⌂</span>
-                <span>Tổng quan</span>
-            </a>
-            <a href="tai_khoan.php" class="menu-link">
-                <span class="menu-icon">♙</span>
-                <span>Quản lý tài khoản</span>
-            </a>
-            <a href="hoc_phan.php" class="menu-link">
-                <span class="menu-icon">▤</span>
-                <span>Quản lý học phần</span>
-            </a>
-            <a href="hoc_ky.php" class="menu-link">
-                <span class="menu-icon">▦</span>
-                <span>Quản lý học kỳ</span>
-            </a>
-            <a href="lop_hoc_phan.php" class="menu-link active">
-                <span class="menu-icon">▣</span>
-                <span>Quản lý lớp học phần</span>
-            </a>
-        </nav>
-
-        <div class="sidebar-bottom">
-            <div class="menu-title">TÀI KHOẢN</div>
-            <a href="/studenthub/public/index.php?action=logout" class="menu-link logout">
-                <span class="menu-icon">↪</span>
-                <span>Đăng xuất</span>
-            </a>
-            <div class="sidebar-note">
-                <span class="status-dot"></span>
-                Phiên làm việc Quản trị viên
-            </div>
-        </div>
-    </aside>
+    <?php 
+    $activeMenu = 'lop_hoc_phan';
+    require __DIR__ . '/../../layouts/admin_sidebar.php'; 
+    ?>
 
     <!-- KHU VỰC CHÍNH -->
     <main class="main">
