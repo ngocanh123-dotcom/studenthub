@@ -87,7 +87,7 @@ if (!$lopId || $lopId <= 0) {
 
         // Lấy thông tin lớp được chọn và mã học phần của lớp.
         $stmtLop = $pdo->prepare("
-            SELECT id, ma_lop, hoc_phan_id, trang_thai, si_so_toi_da
+            SELECT id, ma_lop, hoc_phan_id, trang_thai, si_so_toi_da, thoi_gian_mo_rieng, thoi_gian_dong_rieng
             FROM lop_hoc_phan
             WHERE id = :lop_id
             LIMIT 1
@@ -136,12 +136,20 @@ if (!$lopId || $lopId <= 0) {
         ]);
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
+        $nowTime = time();
+        $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? strtotime($lop['thoi_gian_mo_rieng']) : null;
+        $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? strtotime($lop['thoi_gian_dong_rieng']) : null;
+
         if ($dangKyCu && $dangKyCu['trang_thai'] === 'dang_ky') {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
         } elseif ($lopTrungHocPhan) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
                 . $lopTrungHocPhan['ma_lop']
                 . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
+        } elseif ($moRieng && $nowTime < $moRieng) {
+            $thongBao = 'Lớp học phần chưa đến hạn mở đăng ký (Đã khóa).';
+        } elseif ($dongRieng && $nowTime > $dongRieng) {
+            $thongBao = 'Lớp học phần đã hết hạn đăng ký (Đã khóa).';
         } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';
         } else {

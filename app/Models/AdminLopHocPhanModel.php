@@ -397,6 +397,51 @@ class AdminLopHocPhanModel {
     /**
      * Thống kê tổng quan cho trang quản trị
      */
+    /**
+     * Tính toán trạng thái thời gian thực của lớp học phần
+     * Dựa trên thoi_gian_mo_rieng, thoi_gian_dong_rieng và trang_thai thủ công
+     * 
+     * @param array $class Dữ liệu lớp học phần có các key: trang_thai, thoi_gian_mo_rieng, thoi_gian_dong_rieng
+     * @return array ['code' => 'mo'|'khoa', 'label' => string, 'is_dang_mo' => bool, 'can_register' => bool]
+     */
+    public static function getRealtimeClassStatus(array $class): array {
+        $now = time();
+        $moRieng = !empty($class['thoi_gian_mo_rieng']) ? strtotime($class['thoi_gian_mo_rieng']) : null;
+        $dongRieng = !empty($class['thoi_gian_dong_rieng']) ? strtotime($class['thoi_gian_dong_rieng']) : null;
+
+        // 1. Kiểm tra nếu có cấu hình thời gian riêng - Chưa đến hạn mở
+        if ($moRieng && $now < $moRieng) {
+            return [
+                'code' => 'khoa',
+                'label' => 'Đã khóa (Chưa đến hạn)',
+                'is_dang_mo' => false,
+                'can_register' => false
+            ];
+        }
+
+        // 3. Quá hạn đóng riêng
+        if ($dongRieng && $now > $dongRieng) {
+            return [
+                'code' => 'khoa',
+                'label' => 'Đã khóa (Hết hạn đăng ký)',
+                'is_dang_mo' => false,
+                'can_register' => false
+            ];
+        }
+
+        // 2. Nếu không vướng thời gian riêng, tuân theo trạng thái thủ công của Admin
+        $isManualOpen = (($class['trang_thai'] ?? 'mo') === 'mo');
+        return [
+            'code' => $isManualOpen ? 'mo' : 'khoa',
+            'label' => $isManualOpen ? 'Đang mở' : 'Đã khóa',
+            'is_dang_mo' => $isManualOpen,
+            'can_register' => $isManualOpen
+        ];
+    }
+
+    /**
+     * Thống kê tổng quan cho trang quản trị (áp dụng Real-time Validation)
+     */
     public function getStatistics(): array {
         $stats = [
             'tong_lop'         => 0,
@@ -406,17 +451,19 @@ class AdminLopHocPhanModel {
         ];
 
         try {
-            // Tổng lớp
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan");
-            $stats['tong_lop'] = (int)$stmt->fetchColumn();
+            // Lấy tất cả lớp học phần để tính toán trạng thái thời gian thực chuẩn xác
+            $stmt = $this->conn->query("SELECT id, trang_thai, thoi_gian_mo_rieng, thoi_gian_dong_rieng FROM lop_hoc_phan");
+            $allClasses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $stats['tong_lop'] = count($allClasses);
 
-            // Lớp đang mở
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan WHERE trang_thai = 'mo'");
-            $stats['lop_dang_mo'] = (int)$stmt->fetchColumn();
-
-            // Lớp đang khóa
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan WHERE trang_thai = 'khoa'");
-            $stats['lop_dang_khoa'] = (int)$stmt->fetchColumn();
+            foreach ($allClasses as $c) {
+                $status = self::getRealtimeClassStatus($c);
+                if ($status['is_dang_mo']) {
+                    $stats['lop_dang_mo']++;
+                } else {
+                    $stats['lop_dang_khoa']++;
+                }
+            }
 
             // Tổng lượt sinh viên ghi danh hợp lệ
             $stmt = $this->conn->query("SELECT COUNT(*) FROM dang_ky_hoc WHERE trang_thai = 'dang_ky'");
@@ -426,5 +473,14 @@ class AdminLopHocPhanModel {
         }
 
         return $stats;
+    }
+}
+
+if (!function_exists('getRealtimeClassStatus')) {
+    /**
+     * Helper toàn cục tính trạng thái thời gian thực cho lớp học phần
+     */
+    function getRealtimeClassStatus(array $class): array {
+        return AdminLopHocPhanModel::getRealtimeClassStatus($class);
     }
 }
