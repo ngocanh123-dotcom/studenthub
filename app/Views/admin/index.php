@@ -15,6 +15,7 @@ if (!in_array($vaiTro, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true))
     exit;
 }
 
+
 // Kết nối cơ sở dữ liệu.
 require_once __DIR__ . '/../../../config/database.php';
 
@@ -29,32 +30,34 @@ $tongLopHocPhan = 0;
 $loi = '';
 
 try {
-    $stmt = $conn->query(
+    // File database.php của dự án khởi tạo kết nối PDO bằng biến $pdo.
+    if (!isset($pdo) || !$pdo instanceof PDO) {
+        throw new RuntimeException('Không tìm thấy kết nối cơ sở dữ liệu PDO.');
+    }
+
+    $stmt = $pdo->query(
         "SELECT COUNT(*) FROM nguoi_dung
          WHERE vai_tro = 'sinh_vien'"
     );
     $tongSinhVien = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
+    $stmt = $pdo->query(
         "SELECT COUNT(*) FROM nguoi_dung
          WHERE vai_tro = 'giang_vien'"
     );
     $tongGiangVien = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
-        "SELECT COUNT(*) FROM hoc_phan"
-    );
+    $stmt = $pdo->query("SELECT COUNT(*) FROM hoc_phan");
     $tongHocPhan = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
-        "SELECT COUNT(*) FROM lop_hoc_phan"
-    );
+    $stmt = $pdo->query("SELECT COUNT(*) FROM lop_hoc_phan");
     $tongLopHocPhan = (int) $stmt->fetchColumn();
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log('StudentHub Admin: ' . $e->getMessage());
     $loi = 'Không thể tải số liệu. Vui lòng kiểm tra cấu trúc cơ sở dữ liệu.';
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">

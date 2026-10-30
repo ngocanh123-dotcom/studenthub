@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $thamSoTrung[':id'] = $id;
                 }
 
-                $stmt = $conn->prepare($sqlTrung);
+                $stmt = $pdo->prepare($sqlTrung);
                 $stmt->execute($thamSoTrung);
 
                 if ((int) $stmt->fetchColumn() > 0) {
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($hanhDong === 'them') {
                     // Đã bổ sung cột so_tin_chi
-                    $stmt = $conn->prepare(
+                    $stmt = $pdo->prepare(
                         "INSERT INTO hoc_phan
                             (ma_hoc_phan, ten_hoc_phan, so_tin_chi)
                          VALUES
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $thongBao = 'Thêm học phần thành công.';
                 } else {
                     // Cập nhật cả số tín chỉ
-                    $stmt = $conn->prepare(
+                    $stmt = $pdo->prepare(
                         "UPDATE hoc_phan
                          SET ma_hoc_phan = :ma,
                              ten_hoc_phan = :ten,
@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Mã học phần không hợp lệ.');
                 }
 
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "SELECT id FROM hoc_phan
                      WHERE id = :id
                      LIMIT 1"
@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 // Không xóa nếu lớp học phần đang sử dụng học phần này
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "SELECT COUNT(*) FROM lop_hoc_phan
                      WHERE hoc_phan_id = :id"
                 );
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
 
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "DELETE FROM hoc_phan WHERE id = :id"
                 );
                 $stmt->execute([':id' => $idXoa]);
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
 
     if ($idSua > 0) {
         try {
-            $stmt = $conn->prepare(
+            $stmt = $pdo->prepare(
                 "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi
                  FROM hoc_phan
                  WHERE id = :id
@@ -268,11 +268,11 @@ try {
 
     $sql .= " ORDER BY id DESC";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($thamSo);
     $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtTong = $conn->query("SELECT COUNT(*) FROM hoc_phan");
+    $stmtTong = $pdo->query("SELECT COUNT(*) FROM hoc_phan");
     $tongHocPhan = (int) $stmtTong->fetchColumn();
 
 } catch (PDOException $e) {
