@@ -67,6 +67,10 @@ if (!$pdo) {
     }
 }
 
+if (!isset($conn) || !($conn instanceof PDO)) {
+    $conn = $pdo;
+}
+
 // Ánh xạ vai trò hiển thị và vai trò CSDL
 $tenVaiTroMap = [
     'sinhvien'  => 'Sinh viên',
@@ -154,8 +158,120 @@ $demoAccounts = [
     'SV020' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Cao Hoài An', 'id' => 26]
 ];
 
+// 3.5. XỬ LÝ QUÊN MẬT KHẨU 3 BƯỚC (FORGOT PASSWORD CONTROLLER)
+$fp_step = 0;
+$fp_error = '';
+$fp_success = '';
+$fp_username = '';
+$fp_email = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
+    $forgot_action = trim($_POST['forgot_action']);
+
+    // Bước 1: Xác thực tài khoản & Email
+    if ($forgot_action === 'step1_verify') {
+        $fp_username = trim($_POST['fp_username'] ?? '');
+        $fp_email = trim($_POST['fp_email'] ?? '');
+
+        if ($fp_username === '' || $fp_email === '') {
+            $fp_error = "Vui lòng nhập đầy đủ tên đăng nhập và email!";
+            $fp_step = 1;
+        } else {
+            $user = null;
+            if ($conn instanceof PDO) {
+                try {
+                    $stmt = $conn->prepare("SELECT id, ten_dang_nhap, email FROM nguoi_dung WHERE LOWER(ten_dang_nhap) = LOWER(:u) AND LOWER(email) = LOWER(:e) LIMIT 1");
+                    $stmt->execute([':u' => $fp_username, ':e' => $fp_email]);
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    error_log("Lỗi kiểm tra quên mật khẩu: " . $e->getMessage());
+                }
+            }
+
+            // Hỗ trợ kiểm thử dự phòng nếu CSDL chưa kết nối
+            if (!$user && (isset($demoAccounts[$fp_username]) || isset($demoAccounts[strtolower($fp_username)]))) {
+                $accKey = isset($demoAccounts[$fp_username]) ? $fp_username : strtolower($fp_username);
+                $expectedEmail = strtolower($accKey) . '@studenthub.edu.vn';
+                if (strtolower($fp_email) === $expectedEmail || strtolower($fp_email) === 'admin@studenthub.edu.vn' || strpos($fp_email, '@') !== false) {
+                    $user = [
+                        'id' => $demoAccounts[$accKey]['id'] ?? 1,
+                        'ten_dang_nhap' => $accKey,
+                        'email' => $fp_email
+                    ];
+                }
+            }
+
+            if (!$user) {
+                $fp_error = "Thông tin tài khoản hoặc email không tồn tại trong hệ thống!";
+                $fp_step = 1;
+            } else {
+                $_SESSION['fp_user_id']  = $user['id'];
+                $_SESSION['fp_username'] = $user['ten_dang_nhap'];
+                $_SESSION['fp_email']    = $user['email'] ?? $fp_email;
+                $_SESSION['fp_otp']      = '123456';
+                $fp_step = 2;
+                $fp_success = "Mã xác thực đã được gửi về email của bạn (Mã demo: 123456)";
+            }
+        }
+    }
+    // Bước 2: Xác nhận OTP mô phỏng
+    elseif ($forgot_action === 'step2_otp') {
+        $otp = trim($_POST['fp_otp'] ?? '');
+        $sessionOtp = (string)($_SESSION['fp_otp'] ?? '123456');
+
+        if ($otp === '' || ($otp !== $sessionOtp && $otp !== '123456')) {
+            $fp_step = 2;
+            $fp_error = "Mã xác thực OTP không chính xác. Vui lòng nhập mã demo: 123456";
+        } else {
+            $fp_step = 3;
+            $_SESSION['fp_verified'] = true;
+            $fp_success = "Xác thực OTP thành công! Vui lòng đặt mật khẩu mới.";
+        }
+    }
+    // Bước 3: Đặt lại mật khẩu mới
+    elseif ($forgot_action === 'step3_reset') {
+        if (empty($_SESSION['fp_user_id']) || empty($_SESSION['fp_verified'])) {
+            $fp_step = 1;
+            $fp_error = "Phiên làm việc đã hết hạn. Vui lòng thực hiện lại từ bước 1.";
+        } else {
+            $new_pass     = (string)($_POST['fp_new_password'] ?? '');
+            $confirm_pass = (string)($_POST['fp_confirm_password'] ?? '');
+
+            if (strlen($new_pass) < 6 || $new_pass !== $confirm_pass) {
+                $fp_step = 3;
+                $fp_error = "Mật khẩu xác nhận không khớp hoặc ngắn hơn 6 ký tự!";
+            } else {
+                $hash = password_hash($new_pass, PASSWORD_DEFAULT);
+                if ($conn instanceof PDO) {
+                    try {
+                        $stmt = $conn->prepare("UPDATE nguoi_dung SET mat_khau_hash = :hash WHERE id = :id");
+                        $stmt->execute([':hash' => $hash, ':id' => (int)$_SESSION['fp_user_id']]);
+                    } catch (PDOException $e) {
+                        error_log("Lỗi cập nhật mật khẩu mới: " . $e->getMessage());
+                    }
+                }
+
+                // Cập nhật mảng tài khoản demo để kiểm thử thông suốt
+                $uName = $_SESSION['fp_username'] ?? '';
+                if ($uName !== '' && isset($demoAccounts[$uName])) {
+                    $demoAccounts[$uName]['password'] = $new_pass;
+                }
+
+                unset($_SESSION['fp_user_id'], $_SESSION['fp_username'], $_SESSION['fp_email'], $_SESSION['fp_otp'], $_SESSION['fp_verified']);
+                $fp_step = 0;
+                $thongBao = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.";
+                $loaiThongBao = "success";
+            }
+        }
+    }
+    // Hủy bỏ / Đóng Modal
+    elseif ($forgot_action === 'cancel') {
+        unset($_SESSION['fp_user_id'], $_SESSION['fp_username'], $_SESSION['fp_email'], $_SESSION['fp_otp'], $_SESSION['fp_verified']);
+        $fp_step = 0;
+    }
+}
 // 4. XỬ LÝ ĐĂNG NHẬP (AUTHENTICATION CONTROLLER)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = (string)($_POST['password'] ?? '');
     $role = trim($_POST['role'] ?? 'sinhvien');
@@ -305,6 +421,329 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/login.css?v=<?= time() ?>">
+    <style>
+        /* Tùy chỉnh thông báo thành công cho form đăng nhập */
+        .notification-banner.success {
+            display: block !important;
+            background: #ecfdf5 !important;
+            color: #065f46 !important;
+            border: 1px solid #a7f3d0 !important;
+        }
+
+        /* MODAL QUÊN MẬT KHẨU 3 BƯỚC */
+        .fp-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fpFadeIn 0.2s ease-out;
+        }
+
+        @keyframes fpFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fp-modal-card {
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.8);
+            width: 100%;
+            max-width: 460px;
+            padding: 30px 32px;
+            position: relative;
+            animation: fpSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fpSlideUp {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .fp-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            line-height: 1;
+        }
+
+        .fp-close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .fp-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .fp-header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+
+        .fp-header h3 {
+            font-size: 19px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 5px 0;
+            letter-spacing: -0.01em;
+        }
+
+        .fp-header p {
+            font-size: 12.5px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Thanh tiến trình Stepper */
+        .fp-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            padding: 0 6px;
+        }
+
+        .fp-step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .fp-step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .fp-step-item.active .fp-step-circle {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .fp-step-item.completed .fp-step-circle {
+            background: #10b981;
+            color: #ffffff;
+            border-color: #10b981;
+        }
+
+        .fp-step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .fp-step-item.active .fp-step-label {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .fp-step-item.completed .fp-step-label {
+            color: #10b981;
+        }
+
+        .fp-step-line {
+            flex: 1;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 6px;
+            margin-bottom: 18px;
+            transition: background 0.2s;
+        }
+
+        .fp-step-line.active {
+            background: #10b981;
+        }
+
+        /* Banner thông báo trong Modal */
+        .fp-alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.45;
+        }
+
+        .fp-alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .fp-alert-success {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Các trường nhập liệu Modal */
+        .fp-field {
+            margin-bottom: 15px;
+        }
+
+        .fp-field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .fp-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .fp-input-icon {
+            position: absolute;
+            left: 12px;
+            color: #94a3b8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .fp-input {
+            width: 100%;
+            height: 42px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0 12px 0 38px;
+            font-size: 13.5px;
+            font-family: inherit;
+            color: #0f172a;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #f8fafc;
+        }
+
+        .fp-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .fp-otp-input {
+            letter-spacing: 6px;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            padding: 0 12px;
+            height: 46px;
+        }
+
+        .fp-btn-submit {
+            width: 100%;
+            height: 44px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+            margin-top: 18px;
+        }
+
+        .fp-btn-submit:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+        }
+
+        .fp-btn-link {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            transition: color 0.15s;
+        }
+
+        .fp-btn-link:hover {
+            color: #2563eb;
+        }
+
+        .fp-footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        .fp-demo-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px dashed #93c5fd;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body class="login-page">
@@ -330,11 +769,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="showcase-body">
-            <div class="semester-pill-badge">
-                <span class="pulse-indicator"></span>
-                <span>Học kỳ I (2026 – 2027) • Cổng đăng ký mở</span>
-            </div>
-
             <h1 class="showcase-main-title">
                 Cổng Đăng Ký Học Phần &amp; Quản Trị Học Vụ
             </h1>
@@ -513,14 +947,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>Ghi nhớ phiên đăng nhập</span>
                     </label>
 
-                    <a href="#" class="forgot-link" id="linkForgotPassword">
+                    <a href="javascript:void(0)" onclick="openForgotModal()" class="forgot-link">
                         Quên mật khẩu?
                     </a>
                 </div>
 
-                <!-- THÔNG BÁO LỖI NẾU CÓ -->
+                <!-- THÔNG BÁO LỖI HOẶC THÀNH CÔNG NẾU CÓ -->
                 <?php if (!empty($thongBao)): ?>
-                    <div class="notification-banner error" id="statusBanner">
+                    <div class="notification-banner <?= $loaiThongBao === 'success' ? 'success' : 'error' ?>" id="statusBanner">
                         <?= htmlspecialchars($thongBao, ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 <?php else: ?>
@@ -539,6 +973,218 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </main>
 </div>
+
+<!-- MODAL QUÊN MẬT KHẨU 3 BƯỚC -->
+<?php 
+$activeFpStep = ($fp_step > 0) ? $fp_step : 1;
+?>
+<div id="forgotPasswordModal" class="fp-modal-overlay" style="<?= $fp_step > 0 ? 'display: flex;' : 'display: none;' ?>">
+    <div class="fp-modal-card">
+        <button type="button" class="fp-close-btn" onclick="closeForgotModal()" title="Đóng">&times;</button>
+
+        <div class="fp-header">
+            <div class="fp-header-icon">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h3>Khôi phục mật khẩu</h3>
+            <p>Quy trình xác thực bảo mật 3 bước tài khoản StudentHub</p>
+        </div>
+
+        <!-- THANH TIẾN TRÌNH (STEPPER) -->
+        <div class="fp-stepper">
+            <div class="fp-step-item <?= $activeFpStep >= 1 ? ($activeFpStep > 1 ? 'completed' : 'active') : '' ?>">
+                <div class="fp-step-circle"><?= $activeFpStep > 1 ? '✓' : '1' ?></div>
+                <div class="fp-step-label">Tài khoản</div>
+            </div>
+            <div class="fp-step-line <?= $activeFpStep >= 2 ? 'active' : '' ?>"></div>
+            <div class="fp-step-item <?= $activeFpStep >= 2 ? ($activeFpStep > 2 ? 'completed' : 'active') : '' ?>">
+                <div class="fp-step-circle"><?= $activeFpStep > 2 ? '✓' : '2' ?></div>
+                <div class="fp-step-label">Mã OTP</div>
+            </div>
+            <div class="fp-step-line <?= $activeFpStep >= 3 ? 'active' : '' ?>"></div>
+            <div class="fp-step-item <?= $activeFpStep >= 3 ? 'active' : '' ?>">
+                <div class="fp-step-circle">3</div>
+                <div class="fp-step-label">Mật khẩu mới</div>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO LỖI NẾU CÓ -->
+        <?php if (!empty($fp_error)): ?>
+            <div class="fp-alert fp-alert-error">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span><?= htmlspecialchars($fp_error, ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+        <?php endif; ?>
+
+        <!-- THÔNG BÁO THÀNH CÔNG NẾU CÓ -->
+        <?php if (!empty($fp_success)): ?>
+            <div class="fp-alert fp-alert-success">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span><?= htmlspecialchars($fp_success, ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+        <?php endif; ?>
+
+        <!-- NỘI DUNG TỪNG BƯỚC -->
+        <?php if ($activeFpStep === 1): ?>
+            <!-- BƯỚC 1: XÁC THỰC TÀI KHOẢN & EMAIL -->
+            <form method="POST" action="index.php">
+                <input type="hidden" name="forgot_action" value="step1_verify">
+
+                <div class="fp-field">
+                    <label for="fp_username">Tên đăng nhập / Mã định danh</label>
+                    <div class="fp-input-wrap">
+                        <span class="fp-input-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <input type="text" id="fp_username" name="fp_username" class="fp-input"
+                               value="<?= htmlspecialchars($fp_username, ENT_QUOTES, 'UTF-8') ?>"
+                               placeholder="Ví dụ: sv001, gv001, admin..." required autofocus>
+                    </div>
+                </div>
+
+                <div class="fp-field">
+                    <label for="fp_email">Địa chỉ Email đã đăng ký</label>
+                    <div class="fp-input-wrap">
+                        <span class="fp-input-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </span>
+                        <input type="email" id="fp_email" name="fp_email" class="fp-input"
+                               value="<?= htmlspecialchars($fp_email, ENT_QUOTES, 'UTF-8') ?>"
+                               placeholder="Ví dụ: trang.nt@studenthub.edu.vn" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="fp-btn-submit">
+                    <span>Tiếp tục &amp; Gửi mã xác thực</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+
+                <div class="fp-footer-actions" style="justify-content: center;">
+                    <button type="button" onclick="closeForgotModal()" class="fp-btn-link">Quay lại đăng nhập</button>
+                </div>
+            </form>
+
+        <?php elseif ($activeFpStep === 2): ?>
+            <!-- BƯỚC 2: XÁC NHẬN MÃ OTP -->
+            <form method="POST" action="index.php">
+                <input type="hidden" name="forgot_action" value="step2_otp">
+
+                <div class="fp-field">
+                    <label for="fp_otp" style="text-align: center; display: block;">Nhập mã OTP 6 chữ số</label>
+                    <div class="fp-input-wrap">
+                        <input type="text" id="fp_otp" name="fp_otp" class="fp-input fp-otp-input"
+                               maxlength="6" placeholder="123456" autocomplete="one-time-code" required autofocus>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span class="fp-demo-tag">🔑 Mã OTP kiểm thử: <strong>123456</strong></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="fp-btn-submit">
+                    <span>Xác thực mã OTP</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+
+                <div class="fp-footer-actions">
+                    <button type="submit" name="forgot_action" value="cancel" class="fp-btn-link" style="color: #64748b;">
+                        &larr; Nhập tài khoản khác
+                    </button>
+                    <button type="button" onclick="closeForgotModal()" class="fp-btn-link">Đóng</button>
+                </div>
+            </form>
+
+        <?php elseif ($activeFpStep === 3): ?>
+            <!-- BƯỚC 3: ĐẶT LẠI MẬT KHẨU MỚI -->
+            <form method="POST" action="index.php">
+                <input type="hidden" name="forgot_action" value="step3_reset">
+
+                <div class="fp-field">
+                    <label for="fp_new_password">Mật khẩu mới</label>
+                    <div class="fp-input-wrap">
+                        <span class="fp-input-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <input type="password" id="fp_new_password" name="fp_new_password" class="fp-input"
+                               placeholder="Tối thiểu 6 ký tự" minlength="6" required autofocus>
+                        <button type="button" class="btn-eye-toggle" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #64748b;"
+                                onclick="toggleFpPassword('fp_new_password', this)" title="Hiện mật khẩu">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="fp-field">
+                    <label for="fp_confirm_password">Xác nhận mật khẩu mới</label>
+                    <div class="fp-input-wrap">
+                        <span class="fp-input-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </span>
+                        <input type="password" id="fp_confirm_password" name="fp_confirm_password" class="fp-input"
+                               placeholder="Nhập lại mật khẩu mới" minlength="6" required>
+                        <button type="button" class="btn-eye-toggle" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #64748b;"
+                                onclick="toggleFpPassword('fp_confirm_password', this)" title="Hiện mật khẩu">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="fp-btn-submit">
+                    <span>Lưu mật khẩu mới &amp; Hoàn tất</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+
+                <div class="fp-footer-actions">
+                    <button type="submit" name="forgot_action" value="cancel" class="fp-btn-link" style="color: #64748b;">
+                        &larr; Hủy bỏ
+                    </button>
+                    <button type="button" onclick="closeForgotModal()" class="fp-btn-link">Đóng</button>
+                </div>
+            </form>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script>
+function openForgotModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const input = modal.querySelector('input[type="text"], input[type="password"], input[type="email"]');
+        if (input) input.focus();
+    }
+}
+
+function closeForgotModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function toggleFpPassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    btn.title = isPass ? 'Ẩn mật khẩu' : 'Hiện mật khẩu';
+}
+
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal && e.target === modal) {
+        closeForgotModal();
+    }
+});
+
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeForgotModal();
+    }
+});
+</script>
 
 <script src="../assets/js/login.js"></script>
 </body>
