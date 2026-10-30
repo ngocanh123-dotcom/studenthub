@@ -117,48 +117,53 @@ class DangKyHocModel
                 );
             }
 
-            if ($lop['trang_thai'] !== 'mo') {
+            // Real-time Validation: Kiểm tra thời gian riêng của lớp theo 3 quy tắc
+            $nowTime = time();
+            $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? strtotime($lop['thoi_gian_mo_rieng']) : null;
+            $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? strtotime($lop['thoi_gian_dong_rieng']) : null;
+
+            // Quy tắc 1: Chưa đến hạn mở riêng (Chặn hoàn toàn thao tác đăng ký)
+            if ($moRieng && $nowTime < $moRieng) {
+                throw new RuntimeException(
+                    'Lớp học phần chưa đến hạn mở đăng ký (Đã khóa).'
+                );
+            }
+
+            // Quy tắc 3: Quá hạn đóng riêng (Chặn hoàn toàn thao tác đăng ký)
+            if ($dongRieng && $nowTime > $dongRieng) {
+                throw new RuntimeException(
+                    'Lớp học phần đã hết hạn đăng ký (Đã khóa).'
+                );
+            }
+
+            // Quy tắc 2: Kiểm tra trạng thái đóng/mở thủ công của lớp
+            if (($lop['trang_thai'] ?? 'mo') !== 'mo') {
                 throw new RuntimeException(
                     'Lớp học phần hiện không mở đăng ký.'
                 );
             }
 
-            // Ưu tiên thời gian riêng của lớp nếu được thiết lập.
-            $gioMo = !empty($lop['thoi_gian_mo_rieng'])
-                ? $lop['thoi_gian_mo_rieng']
-                : $lop['thoi_gian_mo_dk'];
+            // Nếu không có thời gian riêng, kiểm tra theo học kỳ
+            $coThoiGianRieng = ($moRieng !== null || $dongRieng !== null);
+            if (!$coThoiGianRieng) {
+                if ((int)($lop['trang_thai_dang_ky'] ?? 0) !== 1) {
+                    throw new RuntimeException(
+                        'Học kỳ hiện chưa mở đăng ký.'
+                    );
+                }
 
-            $gioDong = !empty($lop['thoi_gian_dong_rieng'])
-                ? $lop['thoi_gian_dong_rieng']
-                : $lop['thoi_gian_dong_dk'];
+                $gioMo = $lop['thoi_gian_mo_dk'] ?? null;
+                $gioDong = $lop['thoi_gian_dong_dk'] ?? null;
 
-            $coThoiGianRieng =
-                !empty($lop['thoi_gian_mo_rieng']) ||
-                !empty($lop['thoi_gian_dong_rieng']);
-
-            if (
-                !$coThoiGianRieng &&
-                (int) $lop['trang_thai_dang_ky'] !== 1
-            ) {
-                throw new RuntimeException(
-                    'Học kỳ hiện chưa mở đăng ký.'
-                );
-            }
-
-            if (empty($gioMo) || empty($gioDong)) {
-                throw new RuntimeException(
-                    'Chưa thiết lập thời gian mở và đóng đăng ký.'
-                );
-            }
-
-            $now = new DateTimeImmutable();
-            $start = new DateTimeImmutable($gioMo);
-            $end = new DateTimeImmutable($gioDong);
-
-            if ($now < $start || $now > $end) {
-                throw new RuntimeException(
-                    'Hiện không nằm trong thời gian đăng ký học phần.'
-                );
+                if (!empty($gioMo) && !empty($gioDong)) {
+                    $start = strtotime($gioMo);
+                    $end = strtotime($gioDong);
+                    if ($nowTime < $start || $nowTime > $end) {
+                        throw new RuntimeException(
+                            'Hiện không nằm trong thời gian đăng ký học phần của học kỳ.'
+                        );
+                    }
+                }
             }
 
             // [TC 2]: Kiểm tra trùng lớp
