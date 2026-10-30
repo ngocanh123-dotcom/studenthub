@@ -606,6 +606,11 @@ gap: 6px;
                     <span>Lịch sử đăng ký</span>
                 </a>
 
+                <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
+                    <span style="font-size: 16px; width: 18px; text-align: center;">🔑</span>
+                    <span>Đổi mật khẩu</span>
+                </a>
+
                 <a href="/studenthub/public/index.php?action=logout" class="sh-nav-item logout-link">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -625,6 +630,7 @@ gap: 6px;
             <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
         </div>
     </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
 
     <!-- 2. NỘI DUNG CHÍNH -->
     <main class="sh-main-content">

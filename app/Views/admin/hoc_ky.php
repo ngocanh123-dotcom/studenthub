@@ -211,8 +211,12 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             <a class="menu-link active" href="hoc_ky.php"><span class="menu-icon">▣</span> Quản lý học kỳ</a>
             <a class="menu-link" href="lop_hoc_phan.php"><span class="menu-icon">▦</span> Quản lý lớp học phần</a>
         </nav>
-        <div class="sidebar-bottom"><a class="menu-link logout" href="../../../app/auth/logout.php"><span class="menu-icon">↪</span> Đăng xuất</a></div>
+        <div class="sidebar-bottom">
+            <a class="menu-link change-pass-link" href="javascript:void(0)" onclick="openChangePasswordModal()" style="color: #38bdf8;"><span class="menu-icon">🔑</span> Đổi mật khẩu</a>
+            <a class="menu-link logout" href="/studenthub/public/index.php?action=logout"><span class="menu-icon">↪</span> Đăng xuất</a>
+        </div>
     </aside>
+    <script src="/studenthub/assets/js/change_password.js"></script>
 
     <main class="main">
         <header class="topbar">
