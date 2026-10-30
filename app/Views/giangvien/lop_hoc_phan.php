@@ -18,7 +18,7 @@ $tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = 'Quynh@24012006'; // Mật khẩu mặc định của XAMPP
+$dbPass = '123456'; // Mật khẩu mặc định của XAMPP
 
 try {
     $pdo = new PDO(
