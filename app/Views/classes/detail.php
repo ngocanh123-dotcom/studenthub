@@ -185,12 +185,27 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                     </p>
                 </div>
                 <div>
-                    <?php if ($trangThaiLop === 'mo' && $conLai > 0): ?>
+                    <?php 
+                        $nowTime = time();
+                        $moRieng = !empty($thoiGianMoRieng) ? strtotime($thoiGianMoRieng) : null;
+                        $dongRieng = !empty($thoiGianDongRieng) ? strtotime($thoiGianDongRieng) : null;
+                        if ($moRieng && $nowTime < $moRieng) {
+                            $rtStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Chưa đến hạn)', 'is_dang_mo' => false];
+                        } elseif ($dongRieng && $nowTime > $dongRieng) {
+                            $rtStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Hết hạn đăng ký)', 'is_dang_mo' => false];
+                        } else {
+                            $isManualOpen = ($trangThaiLop === 'mo');
+                            $rtStatus = ['code' => $isManualOpen ? 'mo' : 'khoa', 'label' => $isManualOpen ? 'Đang mở đăng ký' : 'Đã khóa đăng ký', 'is_dang_mo' => $isManualOpen];
+                        }
+                    ?>
+                    <?php if ($rtStatus['is_dang_mo'] && $conLai > 0): ?>
                         <span class="badge-status-open">● Đang mở đăng ký</span>
-                    <?php elseif ($trangThaiLop === 'mo' && $conLai <= 0): ?>
+                    <?php elseif ($rtStatus['is_dang_mo'] && $conLai <= 0): ?>
                         <span class="badge-status-full">● Đã đủ sĩ số</span>
+                    <?php elseif (str_contains($rtStatus['label'], 'Chưa đến hạn')): ?>
+                        <span class="badge-status-locked" style="background:#fffbeb; color:#b45309; border-color:#fde68a;">● <?= htmlspecialchars($rtStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                     <?php else: ?>
-                        <span class="badge-status-locked">● Đã khóa đăng ký</span>
+                        <span class="badge-status-locked">● <?= htmlspecialchars($rtStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                     <?php endif; ?>
                 </div>
             </div>

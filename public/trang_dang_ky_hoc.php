@@ -787,7 +787,19 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
                     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
                     $tiLe = $toiDa > 0 ? min(100, $siSo / $toiDa * 100) : 0;
-                    $dangMo = ($lop['trang_thai'] ?? '') === 'mo';
+                    $nowTime = time();
+                    $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? strtotime($lop['thoi_gian_mo_rieng']) : null;
+                    $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? strtotime($lop['thoi_gian_dong_rieng']) : null;
+                    if ($moRieng && $nowTime < $moRieng) {
+                        $realtimeStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Chưa đến hạn)', 'is_dang_mo' => false];
+                    } elseif ($dongRieng && $nowTime > $dongRieng) {
+                        $realtimeStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Hết hạn đăng ký)', 'is_dang_mo' => false];
+                    } else {
+                        $isManualOpen = (($lop['trang_thai'] ?? 'mo') === 'mo');
+                        $realtimeStatus = ['code' => $isManualOpen ? 'mo' : 'khoa', 'label' => $isManualOpen ? 'Đang mở' : 'Đã khóa', 'is_dang_mo' => $isManualOpen];
+                    }
+
+                    $dangMo = $realtimeStatus['is_dang_mo'];
                     $conCho = $toiDa > 0 && $siSo < $toiDa;
                     $coTheDangKy = $dangMo && $conCho;
                     $trangThaiLoc = $coTheDangKy ? 'open' : (!$dangMo ? 'closed' : 'full');
@@ -830,7 +842,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                             <?php if ($coTheDangKy): ?>
                                 <span class="registration-status registration-status-open">Đang mở</span>
                             <?php elseif (!$dangMo): ?>
-                                <span class="registration-status registration-status-closed">Đã khóa</span>
+                                <span class="registration-status registration-status-closed"><?= htmlspecialchars($realtimeStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                             <?php else: ?>
                                 <span class="registration-status registration-status-full">Đủ sĩ số</span>
                             <?php endif; ?>

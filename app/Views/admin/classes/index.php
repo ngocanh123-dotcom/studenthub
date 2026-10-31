@@ -30,6 +30,20 @@
             border-radius: 20px;
             font-size: 11.5px;
             font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-status-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            white-space: nowrap;
         }
         .badge-status-locked {
             display: inline-flex;
@@ -42,6 +56,7 @@
             border-radius: 20px;
             font-size: 11.5px;
             font-weight: 700;
+            white-space: nowrap;
         }
         .capacity-bar-wrap {
             width: 110px;
@@ -445,7 +460,7 @@
                             <th>Giảng viên</th>
                             <th>Lịch học &amp; Phòng</th>
                             <th style="width: 140px;">Sĩ số / Chỗ</th>
-                            <th style="width: 130px; text-align: center;">Trạng thái</th>
+                            <th style="width: 180px; text-align: center;">Trạng thái</th>
                             <th style="width: 140px; text-align: center;">Cầu dao Mở/Khóa</th>
                             <th style="width: 120px; text-align: center;">Hành động</th>
                         </tr>
@@ -465,6 +480,7 @@
                                     $conLai = max(0, $siSoToiDa - $siSoHienTai);
                                     $percent = ($siSoToiDa > 0) ? min(100, round(($siSoHienTai / $siSoToiDa) * 100)) : 0;
                                     $isFull = ($conLai === 0);
+                                    $realtimeStatus = AdminLopHocPhanModel::getRealtimeClassStatus($c);
                                     $isLocked = ($c['trang_thai'] === 'khoa');
                                 ?>
                                 <tr>
@@ -528,12 +544,14 @@
                                         </div>
                                     </td>
 
-                                    <!-- Huy hiệu Trạng thái -->
+                                    <!-- Huy hiệu Trạng thái (Real-time Validation) -->
                                     <td style="text-align: center;">
-                                        <?php if (!$isLocked): ?>
-                                            <span class="badge-status-open">● Đang mở</span>
+                                        <?php if ($realtimeStatus['is_dang_mo']): ?>
+                                            <span class="badge-status-open">● <?= htmlspecialchars($realtimeStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        <?php elseif (str_contains($realtimeStatus['label'], 'Chưa đến hạn')): ?>
+                                            <span class="badge-status-warning">● <?= htmlspecialchars($realtimeStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php else: ?>
-                                            <span class="badge-status-locked">● Đã khóa</span>
+                                            <span class="badge-status-locked">● <?= htmlspecialchars($realtimeStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php endif; ?>
                                     </td>
 

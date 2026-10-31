@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 -- ==========================================
 -- DỮ LIỆU MẪU BỔ SUNG (Do Kim Anh thêm)
 -- ==========================================
@@ -238,4 +237,3 @@ INSERT INTO `dang_ky_hoc` (`id`, `sinh_vien_id`, `lop_hoc_phan_id`, `trang_thai`
 (37, 11, 12, 'da_huy', '2026-10-09 14:00:00', '2026-10-11 11:15:30');
 
 SET FOREIGN_KEY_CHECKS = 1;
->>>>>>> ecf41f69be407f3cf84945b67f61f8da7f50cd82

@@ -18,7 +18,7 @@ $tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = 'Quynh@24012006';
+$dbPass = '123456';
 
 try {
     $pdo = new PDO(
@@ -168,10 +168,15 @@ function trangThaiLop($status): string
         <span>♙</span> Sinh viên theo lớp
     </a>
 
-    <a href="../../../public/index.php" class="menu-item logout">
-        <span>⇥</span> Quay lại đăng nhập
+    <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-item change-pass-link" style="color: #38bdf8;">
+        <span>🔑</span> Đổi mật khẩu
+    </a>
+
+    <a href="../../../public/index.php?action=logout" class="menu-item logout">
+        <span>⇥</span> Đăng xuất
     </a>
 </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
 
 
     <main class="main-content">
