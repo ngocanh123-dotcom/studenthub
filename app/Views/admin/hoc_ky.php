@@ -201,6 +201,13 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 </head>
 <body>
 <div class="layout">
+<<<<<<< HEAD
+    <!-- THANH MENU BÊN TRÁI -->
+    <?php 
+    $activeMenu = 'hoc_ky';
+    require __DIR__ . '/../layouts/admin_sidebar.php'; 
+    ?>
+=======
     <aside class="sidebar">
         <div class="brand"><div class="brand-icon">S</div><div><strong>StudentHub</strong><small>Quản lý học phần</small></div></div>
         <nav class="menu">
@@ -217,6 +224,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
         </div>
     </aside>
     <script src="/studenthub/assets/js/change_password.js"></script>
+>>>>>>> 0cd1de15a90e55912994249ab1f8b623fa34d3df
 
     <main class="main">
         <header class="topbar">

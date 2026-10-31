@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$currentUri = $_SERVER['REQUEST_URI'];
+$currentUri = $_SERVER['REQUEST_URI'] ?? '';
 ?>
 
 <aside class="sh-sidebar">
@@ -52,7 +52,11 @@ $currentUri = $_SERVER['REQUEST_URI'];
                 <span>Đăng ký học phần</span>
             </a>
 
+<<<<<<< HEAD
+            <!-- 4. Lịch sử đăng ký -->
+=======
             <!-- 5. Lịch sử đăng ký -->
+>>>>>>> 0cd1de15a90e55912994249ab1f8b623fa34d3df
             <a href="/studenthub/public/lich_su_dang_ky.php" 
                class="sh-nav-item <?= (strpos($currentUri, 'lich_su_dang_ky') !== false || strpos($currentUri, 'lichsu') !== false || (isset($activeSidebar) && $activeSidebar === 'lich_su')) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -62,13 +66,23 @@ $currentUri = $_SERVER['REQUEST_URI'];
                 <span>Lịch sử đăng ký</span>
             </a>
 
+<<<<<<< HEAD
+            <!-- 5. Đổi mật khẩu -->
+=======
             <!-- 6. Đổi mật khẩu -->
+>>>>>>> 0cd1de15a90e55912994249ab1f8b623fa34d3df
             <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
-                <span style="font-size: 16px; width: 18px; text-align: center;">🔑</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                </svg>
                 <span>Đổi mật khẩu</span>
             </a>
 
+<<<<<<< HEAD
+            <!-- 6. Đăng xuất -->
+=======
             <!-- 7. Đăng xuất -->
+>>>>>>> 0cd1de15a90e55912994249ab1f8b623fa34d3df
             <a href="/studenthub/public/index.php?action=logout" class="sh-nav-item logout-link" title="Đăng xuất khỏi hệ thống">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
