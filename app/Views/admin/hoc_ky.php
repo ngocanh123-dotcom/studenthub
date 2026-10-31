@@ -201,18 +201,11 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 </head>
 <body>
 <div class="layout">
-    <aside class="sidebar">
-        <div class="brand"><div class="brand-icon">S</div><div><strong>StudentHub</strong><small>Quản lý học phần</small></div></div>
-        <nav class="menu">
-            <div class="menu-title">QUẢN TRỊ HỆ THỐNG</div>
-            <a class="menu-link" href="index.php"><span class="menu-icon">⌂</span> Tổng quan</a>
-            <a class="menu-link" href="tai_khoan.php"><span class="menu-icon">♙</span> Quản lý tài khoản</a>
-            <a class="menu-link" href="hoc_phan.php"><span class="menu-icon">▤</span> Quản lý học phần</a>
-            <a class="menu-link active" href="hoc_ky.php"><span class="menu-icon">▣</span> Quản lý học kỳ</a>
-            <a class="menu-link" href="lop_hoc_phan.php"><span class="menu-icon">▦</span> Quản lý lớp học phần</a>
-        </nav>
-        <div class="sidebar-bottom"><a class="menu-link logout" href="../../../app/auth/logout.php"><span class="menu-icon">↪</span> Đăng xuất</a></div>
-    </aside>
+    <!-- THANH MENU BÊN TRÁI -->
+    <?php 
+    $activeMenu = 'hoc_ky';
+    require __DIR__ . '/../layouts/admin_sidebar.php'; 
+    ?>
 
     <main class="main">
         <header class="topbar">
