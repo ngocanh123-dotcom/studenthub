@@ -13,7 +13,12 @@ $hoTenSv       = (string)($_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang');
 $maSv          = (string)($_SESSION['ten_dang_nhap'] ?? ($_SESSION['username'] ?? 'SV001'));
 
 // 2. Nhận ID hoặc Mã lớp học phần từ URL (mặc định lấy lớp 1 nếu không truyền)
-$classId = $_GET['id'] ?? ($_GET['ma_lop'] ?? 1);
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id) {
+    header('Location: /studenthub/public/danh_sach_lop_hoc_phan.php');
+    exit;
+}
+$classId = $id;
 
 // 3. Nạp Model và kết nối CSDL an toàn
 require_once __DIR__ . '/../../Models/LopHocPhanModel.php';

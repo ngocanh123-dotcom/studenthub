@@ -13,7 +13,8 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'sinhvien') {
 // 2. Khai báo các biến cho Header
 $breadcrumb = 'Trang chủ / Lịch sử đăng ký';
 $pageTitle = 'Lịch sử đăng ký học phần';
-$pageSubtitle = 'Theo dõi các lớp đã đăng ký trong học kỳ.';
+$pageSubtitle = 'Theo dõi các lớp đã đăng ký và thực hiện hủy nếu còn trong thời gian quy định.';
+$activeSidebar = 'lich_su';
 
 // 3. Nhúng Header (Bao gồm cả Sidebar)
 require_once __DIR__ . '/../layouts/header.php';

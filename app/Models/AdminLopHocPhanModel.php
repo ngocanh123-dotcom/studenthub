@@ -310,27 +310,38 @@ class AdminLopHocPhanModel {
      * @return array ['can_delete' => bool, 'enrollment_count' => int]
      */
     public function checkCanDelete(int $id): array {
-        $sql = "SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id";
         try {
-            $stmt = $this->conn->prepare($sql);
+            $class = $this->getClassById($id);
+            if (!$class) {
+                return ['can_delete' => false, 'enrollment_count' => 0, 'trang_thai' => ''];
+            }
+
+            $stmt = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id");
             $stmt->execute([':id' => $id]);
             $count = (int)$stmt->fetchColumn();
 
+            $isKhoa = (($class['trang_thai'] ?? '') === 'khoa');
+            $canDelete = ($count === 0 && $isKhoa);
+
             return [
-                'can_delete'       => ($count === 0),
-                'enrollment_count' => $count
+                'can_delete'       => $canDelete,
+                'enrollment_count' => $count,
+                'trang_thai'       => $class['trang_thai'] ?? '',
+                'is_khoa'          => $isKhoa
             ];
         } catch (PDOException $e) {
             error_log("Lỗi AdminLopHocPhanModel::checkCanDelete: " . $e->getMessage());
             return [
                 'can_delete'       => false,
-                'enrollment_count' => 999
+                'enrollment_count' => 999,
+                'trang_thai'       => 'mo',
+                'is_khoa'          => false
             ];
         }
     }
 
     /**
-     * Xóa lớp học phần (Chỉ khi chưa có sinh viên đăng ký)
+     * Xóa lớp học phần (Nguyên tắc kép: Sĩ số == 0 VÀ Trạng thái == 'khoa')
      */
     public function deleteClass(int $id): bool {
         $check = $this->checkCanDelete($id);
@@ -338,10 +349,12 @@ class AdminLopHocPhanModel {
             return false;
         }
 
-        $sql = "DELETE FROM lop_hoc_phan WHERE id = :id";
+        // Chặn Race Condition tại tầng cơ sở dữ liệu: chỉ xóa khi lớp đang khóa
+        $sql = "DELETE FROM lop_hoc_phan WHERE id = :id AND trang_thai = 'khoa'";
         try {
             $stmt = $this->conn->prepare($sql);
-            return $stmt->execute([':id' => $id]);
+            $success = $stmt->execute([':id' => $id]);
+            return $success && ($stmt->rowCount() > 0);
         } catch (PDOException $e) {
             error_log("Lỗi AdminLopHocPhanModel::deleteClass: " . $e->getMessage());
             return false;

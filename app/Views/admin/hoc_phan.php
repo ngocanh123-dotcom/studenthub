@@ -17,6 +17,25 @@ if (!in_array($vaiTroSession, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'],
 
 require_once __DIR__ . '/../../../config/database.php';
 
+// Tự động kiểm tra và bổ sung 2 cột (nếu chưa có) vào bảng hoc_phan (Migration idempotent)
+try {
+    $pdo->exec("ALTER TABLE hoc_phan 
+                ADD COLUMN IF NOT EXISTS dieu_kien_tien_quyet VARCHAR(255) NULL DEFAULT NULL,
+                ADD COLUMN IF NOT EXISTS mo_ta TEXT NULL DEFAULT NULL");
+} catch (PDOException $e) {
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM hoc_phan")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('dieu_kien_tien_quyet', $cols, true)) {
+            $pdo->exec("ALTER TABLE hoc_phan ADD COLUMN dieu_kien_tien_quyet VARCHAR(255) NULL DEFAULT NULL");
+        }
+        if (!in_array('mo_ta', $cols, true)) {
+            $pdo->exec("ALTER TABLE hoc_phan ADD COLUMN mo_ta TEXT NULL DEFAULT NULL");
+        }
+    } catch (PDOException $e2) {
+        error_log("StudentHub hoc_phan migration check error: " . $e2->getMessage());
+    }
+}
+
 // Tạo CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -293,6 +312,16 @@ function e($value)
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý học phần | StudentHub</title>
     <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
+    <style>
+        .col-12 { grid-column: 1 / -1; width: 100%; }
+        .mt-3 { margin-top: 10px; }
+        .form-label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #334155; }
+        .form-control { display: block; width: 100%; min-width: 0; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; color: #172033; background: #fff; box-sizing: border-box; }
+        .form-control:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+        .text-slate-400 { color: #94a3b8; font-size: 12.5px; display: block; margin-top: 5px; }
+        .font-medium { font-weight: 600; }
+        .text-slate-700 { color: #334155; }
+    </style>
 </head>
 <body>
 <div class="layout">
@@ -393,6 +422,20 @@ function e($value)
                                 value="<?= e($duLieuSua['so_tin_chi']) ?>"
                                 placeholder="Ví dụ: 3"
                             >
+                        </div>
+
+                        <!-- 1. Điều kiện tiên quyết (Tùy chọn) -->
+                        <div class="col-12 mt-3 form-field" style="grid-column: 1 / -1;">
+                            <label class="form-label font-medium text-slate-700">Điều kiện tiên quyết</label>
+                            <input type="text" name="dieu_kien_tien_quyet" class="form-control" value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>" placeholder="Ví dụ: WEB102 - Lập Trình Web Cơ Bản">
+                            <small class="text-slate-400">Để trống nếu học phần không có môn tiên quyết bắt buộc.</small>
+                        </div>
+
+                        <!-- 2. Mô tả & Mục tiêu học phần (Tùy chọn) -->
+                        <div class="col-12 mt-3 form-field" style="grid-column: 1 / -1;">
+                            <label class="form-label font-medium text-slate-700">Mô tả &amp; Mục tiêu học phần</label>
+                            <textarea name="mo_ta" rows="3" class="form-control" placeholder="Nhập mục tiêu học thuật, kiến thức trọng tâm của học phần..."><?= e($duLieuSua['mo_ta'] ?? '') ?></textarea>
+                            <small class="text-slate-400">Để trống nếu học phần chưa có mô tả hoặc đề cương chi tiết.</small>
                         </div>
                     </div>
 
