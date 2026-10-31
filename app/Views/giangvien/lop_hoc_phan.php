@@ -18,7 +18,7 @@ $tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = 'Quynh@24012006'; // Mật khẩu mặc định của XAMPP
+$dbPass = '123456'; // Mật khẩu mặc định của XAMPP
 
 try {
     $pdo = new PDO(
@@ -192,12 +192,17 @@ function trangThaiLop($status): string
         </a>
 
         <div class="sidebar-bottom">
-            <a href="../../../public/index.php"
+            <a href="javascript:void(0)" onclick="openChangePasswordModal()"
+               class="menu-item change-pass-link" style="color: #38bdf8;">
+                <span>🔑</span> Đổi mật khẩu
+            </a>
+            <a href="../../../public/index.php?action=logout"
                class="menu-item logout">
-                <span>⇥</span> Quay lại đăng nhập
+                <span>⇥</span> Đăng xuất
             </a>
         </div>
     </aside>
+    <script src="/studenthub/assets/js/change_password.js"></script>
 
     <main class="main-content">
 

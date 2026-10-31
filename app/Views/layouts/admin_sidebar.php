@@ -98,6 +98,9 @@ if (!isset($activeMenu) || empty($activeMenu)) {
 
     <!-- Khu vực chân Sidebar (Footer Action) -->
     <div class="sidebar-bottom sidebar-footer-action">
+        <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-link change-pass-link sh-nav-item" style="color: #38bdf8;">
+            <span style="font-size: 16px;">🔑</span> <span>Đổi mật khẩu</span>
+        </a>
         <a href="/studenthub/public/index.php?action=logout" class="menu-link logout sh-nav-item logout-link" title="Đăng xuất khỏi hệ thống">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -117,3 +120,4 @@ if (!isset($activeMenu) || empty($activeMenu)) {
         </div>
     </div>
 </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>

@@ -72,7 +72,7 @@ if ($hoc_ky_id !== '' && ctype_digit($hoc_ky_id)) {
 
 if ($giang_vien_id !== '' && ctype_digit($giang_vien_id)) {
     $where[] = "lhp.giang_vien_id = :giang_vien_id";
-    $params[':giang_vien_id'] = (int)$giang_vien_id;
+$params[':giang_vien_id'] = (int)$giang_vien_id;
 }
 
 $where_sql = implode(' AND ', $where);
@@ -266,7 +266,7 @@ foreach ($ds_hoc_ky as $hk_item) {
             border-radius: 16px;
             padding: 18px 22px;
             display: flex;
-            align-items: center;
+align-items: center;
             gap: 16px;
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
         }
@@ -364,7 +364,7 @@ foreach ($ds_hoc_ky as $hk_item) {
         .course-title-group h4 {
             font-size: 16px;
             font-weight: 700;
-            color: #0f172a;
+color: #0f172a;
             margin: 0;
             display: flex;
             align-items: center;
@@ -469,7 +469,7 @@ foreach ($ds_hoc_ky as $hk_item) {
             color: #0f172a;
             display: flex;
             align-items: center;
-            gap: 6px;
+gap: 6px;
         }
         .lecturer-name i {
             color: #2563eb;
@@ -596,6 +596,14 @@ foreach ($ds_hoc_ky as $hk_item) {
                     <span>Lịch sử đăng ký</span>
                 </a>
 
+                <!-- 5. Đổi mật khẩu -->
+                <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                    </svg>
+                    <span>Đổi mật khẩu</span>
+                </a>
+
                 <a href="/studenthub/public/index.php?action=logout" class="sh-nav-item logout-link">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -610,11 +618,12 @@ foreach ($ds_hoc_ky as $hk_item) {
         <div class="sidebar-semester-pill">
             <div class="semester-status-line">
                 <span class="green-dot"></span>
-                <span>Học kỳ 1 (2026 - 2027)</span>
+<span>Học kỳ 1 (2026 - 2027)</span>
             </div>
             <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
         </div>
     </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
 
     <!-- 2. NỘI DUNG CHÍNH -->
     <main class="sh-main-content">
@@ -671,7 +680,7 @@ foreach ($ds_hoc_ky as $hk_item) {
                     <button type="button" onclick="toggleAllCourses(true)" class="btn-outline-custom" style="height:36px; font-size:12.5px;">
                         <i class="fa-solid fa-angles-down"></i> Mở tất cả lớp
                     </button>
-                    <button type="button" onclick="toggleAllCourses(false)" class="btn-outline-custom" style="height:36px; font-size:12.5px;">
+<button type="button" onclick="toggleAllCourses(false)" class="btn-outline-custom" style="height:36px; font-size:12.5px;">
                         <i class="fa-solid fa-angles-up"></i> Thu gọn
                     </button>
                 </div>
@@ -723,7 +732,7 @@ foreach ($ds_hoc_ky as $hk_item) {
                         <?php if ($tu_khoa !== ''): ?>
                             • Từ khóa: <strong>"<?= htmlspecialchars($tu_khoa) ?>"</strong>
                         <?php endif; ?>
-                        (Tìm thấy <strong><?= $tong_so_mon ?></strong> môn học phần / <strong><?= $tong_so_lop ?></strong> lớp)
+(Tìm thấy <strong><?= $tong_so_mon ?></strong> môn học phần / <strong><?= $tong_so_lop ?></strong> lớp)
                     </div>
                     <a href="danh_sach_lop_hoc_phan.php" style="color:#1e40af; font-weight:600; text-decoration:none;">
                         <i class="fa-solid fa-xmark"></i> Xem tất cả
@@ -771,7 +780,7 @@ foreach ($ds_hoc_ky as $hk_item) {
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </div>
                                 </div>
-                            </div>
+</div>
 
                             <!-- DANH SÁCH CÁC LỚP CON -->
                             <div class="course-classes-body">
@@ -812,8 +821,7 @@ foreach ($ds_hoc_ky as $hk_item) {
                                                 Sĩ số: <?= (int)$lop['si_so_toi_da'] ?>
                                             </div>
                                         </div>
-
-                                        <!-- Cột 4: Nút Chi tiết (Truyền đúng ID của từng lớp) -->
+<!-- Cột 4: Nút Chi tiết (Truyền đúng ID của từng lớp) -->
                                         <div class="class-col-actions">
                                             <a href="/studenthub/app/Views/classes/detail.php?id=<?= (int)$lop['id'] ?>" class="btn-detail-main" title="Xem chi tiết lớp học phần">
                                                 <i class="fa-regular fa-eye" style="color:#2563eb;"></i> Chi tiết
