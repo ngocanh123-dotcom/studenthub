@@ -543,33 +543,7 @@ Các chức năng và công việc cụ thể:
 | **Bảo trì và phát triển** | Khi thay đổi chức năng có thể phải chỉnh sửa nhiều đoạn mã trong cùng một file. | Có thể chỉnh sửa riêng Repository, Controller hoặc View tùy theo yêu cầu. |
 | **Quản lý tài nguyên giao diện** | CSS và JavaScript có thể nằm chung với mã HTML/PHP. | Tách CSS vào `assets/css` và JavaScript vào `assets/js`. |
 
-## 4. Mô tả luồng xử lý sau khi Refactor
-Chức năng quản lý tài khoản được tổ chức theo luồng:
-Người dùng (Quản trị viên)
-          |
-          v
-       index.php
-          |
-          v
- NguoiDungController
-          |
-          v
- NguoiDungRepository
-          |
-          v
-    MySQL Database
-          |
-          v
- NguoiDungController
-          |
-          v
-    tai_khoan_view.php
-          |
-          v
- Hiển thị kết quả
-
 **Vai trò từng thành phần:**
-
 - `index.php`: Điểm truy cập chính, khởi tạo các thành phần cần thiết.
 - `NguoiDungRepository`: Thực hiện các thao tác truy vấn và làm việc với dữ liệu tài khoản thông qua PDO.
 - `NguoiDungController`: Tiếp nhận yêu cầu, gọi Repository và chuẩn bị dữ liệu cho giao diện.
