@@ -443,3 +443,47 @@ Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có 
 | **Tách biệt hiển thị** | File View vừa lo giao diện HTML vừa nạp kết nối PDO và query database. | View là file thuần giao diện, chỉ nhận dữ liệu được Controller truyền vào. |
 | **Bảo trì & Tái sử dụng** | Khi câu lệnh SQL cần sửa phải tìm trong code giao diện, dễ gây xung đột Git. | Toàn bộ truy vấn gom vào `LopHocPhanRepository`, dễ dàng mở rộng và viết Unit Test. |
 | **Bảo mật dữ liệu** | Xử lý tham số `id` trực tiếp, tiềm ẩn nguy cơ SQL Injection. | Ràng buộc chặt chẽ qua PDO Prepared Statements và Guard Clause kiểm tra dữ liệu đầu vào. |
+
+## BÁO CÁO PHÂN CÔNG ĐÓNG GÓP CÁ NHÂN: TẠ NHƯ QUỲNH
+
+### 1. Phạm vi nghiệp vụ & Chức năng phụ trách
+Phụ trách trọn vẹn 4 mảng chức năng trọng tâm trong hệ thống:
+1. **Giao diện Xác thực & Đăng nhập (Authentication UI):**
+   - Thiết kế giao diện form Đăng nhập hiện đại, tối ưu trải nghiệm người dùng trên đa thiết bị.
+   - Kiểm tra tính hợp lệ của dữ liệu đầu vào (Client-side validation) cho tên đăng nhập và mật khẩu.
+2. **Quản trị Lớp học phần (Admin Module):**
+   - Xây dựng giao diện và luồng xử lý CRUD bảng `lop_hoc_phan`.
+   - Cơ chế Cầu dao Mở/Khóa lớp thủ công phục vụ điều phối giảng dạy.
+   - Thắt chặt điều kiện xóa an toàn: Chỉ cho phép xóa khi lớp ở trạng thái "Đã khóa" và chưa có sinh viên đăng ký.
+3. **Chi tiết Lớp học phần & Refactor MVC (Student Module):**
+   - Xây dựng màn hình Chi tiết lớp học phần theo giao diện Bento Grid cho sinh viên.
+   - Áp dụng cơ chế kế thừa nội dung (Fallback) cho mục Điều kiện tiên quyết và Đề cương môn học.
+   - Tái cấu trúc (Refactor) toàn bộ luồng sang chuẩn mô hình MVC và Repository Pattern.
+4. **Cơ sở dữ liệu Học phần & Lớp học phần (Database):**
+   - Thiết kế schema cho bảng `hoc_phan`, `lop_hoc_phan` với ràng buộc khóa ngoại và toàn vẹn dữ liệu.
+   - Cung cấp dữ liệu mẫu (`seed.sql`) phục vụ kiểm thử phân trang và tìm kiếm.
+
+### 2. Danh mục các tệp phụ trách trong mã nguồn
+- **Giao diện Đăng nhập:**
+  * `assets/css/login.css`
+  * `assets/js/login.js`
+  * `public/index.php`
+- **Quản trị Lớp học phần (Admin):**
+  * `app/Views/admin/lop_hoc_phan.php`
+  * `app/Controllers/AdminLopHocPhanController.php`
+  * `app/Models/AdminLopHocPhanModel.php` (hoặc `LopHocPhanModel.php`)
+- **Tầng Kiến trúc Refactor MVC (Bài tập 6):**
+  * `views/classes/detail.php` (hoặc `app/Views/classes/detail.php`)
+  * `src/Controllers/LopHocPhanController.php`
+  * `src/Repositories/LopHocPhanRepository.php`
+- **Tệp Cơ sở dữ liệu:**
+  * `database/schema.sql` (phần định nghĩa `hoc_phan`, `lop_hoc_phan`)
+  * `database/seed.sql`
+
+### 3. Bảng đối chiếu Trước và Sau khi Refactor (Bài tập 6)
+| Tiêu chí | Trước khi Refactor | Sau khi Refactor |
+| :--- | :--- | :--- |
+| **Kiến trúc luồng** | Mã nguồn xử lý truy vấn SQL viết trực tiếp trong file view/giao diện. | Tách chuẩn 3 tầng: Route $\rightarrow$ `LopHocPhanController` $\rightarrow$ `LopHocPhanRepository` $\rightarrow$ `View`. |
+| **Tách biệt hiển thị** | Tệp giao diện vừa làm nhiệm vụ render HTML vừa gọi kết nối database. | Tệp View thuần túy làm nhiệm vụ hiển thị (Presentation), chỉ nhận dữ liệu từ Controller truyền sang. |
+| **Quản trị truy vấn** | Truy vấn SQL nằm rải rác, khó sửa đổi và dễ xung đột khi làm việc nhóm. | Toàn bộ câu lệnh SQL phức tạp (JOIN 5 bảng) gom gọn trong `LopHocPhanRepository`, 100% Prepared Statements. |
+| **Bảo mật & Kiểm tra** | Chưa kiểm soát chặt chẽ tham số `id` gửi lên từ URL. | Bổ sung Guard Clause chặn ID không hợp lệ và trả về điều hướng an toàn. |
