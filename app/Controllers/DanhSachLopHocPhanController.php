@@ -123,6 +123,9 @@ class DanhSachLopHocPhanController {
         $ds_hoc_ky     = $this->model->getAllHocKy();
         $ds_giang_vien = $this->model->getAllGiangVien();
 
+        // Lấy học kỳ đang mở cổng đăng ký từ Quản trị viên phục vụ hiển thị Sidebar
+        $hocKyHienTai = $this->model->getActiveHocKy();
+
         $ten_hk_dang_chon = '';
         foreach ($ds_hoc_ky as $hk_item) {
             if ($hoc_ky_id !== '' && (int)$hoc_ky_id === (int)$hk_item['id']) {

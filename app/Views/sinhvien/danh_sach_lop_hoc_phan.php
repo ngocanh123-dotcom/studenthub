@@ -257,7 +257,7 @@
             padding: 14px 18px;
             margin-bottom: 10px;
             display: grid;
-            grid-template-columns: 1.5fr 1.8fr 1.2fr auto;
+            grid-template-columns: 1.3fr 2fr 1fr auto;
             align-items: center;
             gap: 16px;
             transition: all 0.15s;
@@ -448,12 +448,34 @@
             </nav>
         </div>
 
+        <!-- HỌC KỲ ĐANG MỞ CỔNG ĐĂNG KÝ (ĐỒNG BỘ 100% TỪ QUẢN LÝ HỌC KỲ ADMIN) -->
         <div class="sidebar-semester-pill">
+            <?php 
+                $fmtSideTime = static function(?string $dt): string {
+                    if (empty($dt)) return '';
+                    $ts = strtotime($dt);
+                    return date('H:i', $ts) !== '00:00' ? date('d/m/Y H:i', $ts) : date('d/m/Y', $ts);
+                };
+                $isOpenSemester = !empty($hocKyHienTai) && (int)($hocKyHienTai['trang_thai_dang_ky'] ?? 0) === 1;
+                $sideMoDk   = !empty($hocKyHienTai['thoi_gian_mo_dk']) ? $fmtSideTime($hocKyHienTai['thoi_gian_mo_dk']) : '';
+                $sideDongDk = !empty($hocKyHienTai['thoi_gian_dong_dk']) ? $fmtSideTime($hocKyHienTai['thoi_gian_dong_dk']) : '';
+            ?>
             <div class="semester-status-line">
-                <span class="green-dot"></span>
-                <span>Học kỳ 1 (2026 - 2027)</span>
+                <span class="green-dot" <?= $isOpenSemester ? '' : 'style="background:#ef4444; box-shadow:0 0 0 3px rgba(239, 68, 68, 0.2);"' ?>></span>
+                <span><?= htmlspecialchars($hocKyHienTai['ten_hoc_ky'] ?? 'Học kỳ 1 (2026 - 2027)') ?></span>
             </div>
-            <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
+            <?php if ($isOpenSemester): ?>
+                <p>
+                    Cổng đăng ký đang mở:
+                    <?php if ($sideMoDk && $sideDongDk): ?>
+                        <br><span style="color:#ffffff; font-weight:700;"><?= $sideMoDk ?></span> - <span style="color:#ffffff; font-weight:700;"><?= $sideDongDk ?></span>
+                    <?php else: ?>
+                        <br>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.
+                    <?php endif; ?>
+                </p>
+            <?php else: ?>
+                <p style="color:#94a3b8;">Cổng đăng ký học phần hiện đang đóng.</p>
+            <?php endif; ?>
         </div>
     </aside>
     <script src="/studenthub/assets/js/change_password.js"></script>
@@ -618,9 +640,26 @@
                             <!-- DANH SÁCH CÁC LỚP CON -->
                             <div class="course-classes-body">
                                 <?php foreach ($mon['ds_lop'] as $lop): 
-                                    $lich_hk = date('d/m/Y', strtotime($lop['ngay_bat_dau'])) . ' - ' . date('d/m/Y', strtotime($lop['ngay_ket_thuc']));
-                                    $mo_dk   = $lop['thoi_gian_mo_rieng'] ?? $lop['thoi_gian_mo_dk'];
-                                    $dong_dk = $lop['thoi_gian_dong_rieng'] ?? $lop['thoi_gian_dong_dk'];
+                                    // 1. Lịch học cụ thể của lớp học phần (lhp.lich_hoc, lhp.phong_hoc)
+                                    $lichHoc = !empty($lop['lich_hoc']) ? trim($lop['lich_hoc']) : 'Chưa xếp lịch';
+                                    $phongHoc = !empty($lop['phong_hoc']) ? trim($lop['phong_hoc']) : '';
+
+                                    // 2. Khoảng thời gian diễn ra học kỳ (hk.ngay_bat_dau - hk.ngay_ket_thuc)
+                                    $ngayBatDau = !empty($lop['ngay_bat_dau']) ? date('d/m/Y', strtotime($lop['ngay_bat_dau'])) : '';
+                                    $ngayKetThuc = !empty($lop['ngay_ket_thuc']) ? date('d/m/Y', strtotime($lop['ngay_ket_thuc'])) : '';
+                                    $khoangHocKy = ($ngayBatDau && $ngayKetThuc) ? ($ngayBatDau . ' - ' . $ngayKetThuc) : '';
+
+                                    // 3. Thời gian mở & đóng đăng ký lấy trực tiếp từ Quản lý học kỳ của Admin (hk.thoi_gian_mo_dk & hk.thoi_gian_dong_dk)
+                                    $mo_dk   = !empty($lop['thoi_gian_mo_dk']) ? $lop['thoi_gian_mo_dk'] : ($lop['thoi_gian_mo_rieng'] ?? null);
+                                    $dong_dk = !empty($lop['thoi_gian_dong_dk']) ? $lop['thoi_gian_dong_dk'] : ($lop['thoi_gian_dong_rieng'] ?? null);
+
+                                    $fmtDk = static function(?string $dt): string {
+                                        if (empty($dt)) return '';
+                                        $ts = strtotime($dt);
+                                        return date('H:i', $ts) !== '00:00' ? date('d/m/Y H:i', $ts) : date('d/m/Y', $ts);
+                                    };
+                                    $strMoDk   = $fmtDk($mo_dk);
+                                    $strDongDk = $fmtDk($dong_dk);
                                 ?>
                                     <div class="class-row-card">
                                         <!-- Cột 1: Mã lớp + Giảng viên phụ trách -->
@@ -629,23 +668,30 @@
                                             <div class="lecturer-box">
                                                 <span class="lecturer-name">
                                                     <i class="fa-solid fa-user-tie"></i>
-                                                    <?= htmlspecialchars($lop['ho_ten_giang_vien']) ?>
+                                                    <?= htmlspecialchars($lop['ho_ten_giang_vien'] ?? 'Chưa phân công') ?>
                                                 </span>
-                                                <span class="lecturer-code">Mã GV: <?= htmlspecialchars($lop['ma_giang_vien']) ?></span>
+                                                <span class="lecturer-code">Mã GV: <?= htmlspecialchars($lop['ma_giang_vien'] ?? '---') ?></span>
                                             </div>
                                         </div>
 
-                                        <!-- Cột 2: Lịch học -->
+                                        <!-- Cột 2: Lịch học cụ thể & Thời hạn đăng ký từ Quản lý học kỳ của Admin -->
                                         <div class="class-col-schedule">
                                             <div class="schedule-main">
                                                 <i class="fa-regular fa-calendar-days" style="color:#2563eb;"></i>
-                                                <span>Lịch học: <?= $lich_hk ?></span>
+                                                <span><strong>Lịch học:</strong> <?= htmlspecialchars($lichHoc) ?><?= $phongHoc ? ' (' . htmlspecialchars($phongHoc) . ')' : '' ?></span>
                                             </div>
-                                            <?php if ($mo_dk && $dong_dk): ?>
-                                                <div class="schedule-sub">
-                                                    <i class="fa-regular fa-clock"></i> ĐK: <?= date('d/m/Y', strtotime($mo_dk)) ?> - <?= date('d/m/Y', strtotime($dong_dk)) ?>
-                                                </div>
-                                            <?php endif; ?>
+                                            <div class="schedule-sub" style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
+                                                <?php if ($khoangHocKy): ?>
+                                                    <span style="font-size:11.5px; color:#64748b;">
+                                                        <i class="fa-solid fa-calendar-day" style="font-size:11px;"></i> Khóa học: <?= $khoangHocKy ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                                <?php if ($strMoDk && $strDongDk): ?>
+                                                    <span style="font-size:12px; color:#0284c7; font-weight:600;">
+                                                        <i class="fa-regular fa-clock"></i> ĐK: <?= $strMoDk ?> - <?= $strDongDk ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
 
                                         <!-- Cột 3: Sĩ số tổng -->
