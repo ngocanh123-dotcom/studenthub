@@ -487,3 +487,65 @@ Phụ trách trọn vẹn 4 mảng chức năng trọng tâm trong hệ thống:
 | **Tách biệt hiển thị** | Tệp giao diện vừa làm nhiệm vụ render HTML vừa gọi kết nối database. | Tệp View thuần túy làm nhiệm vụ hiển thị (Presentation), chỉ nhận dữ liệu từ Controller truyền sang. |
 | **Quản trị truy vấn** | Truy vấn SQL nằm rải rác, khó sửa đổi và dễ xung đột khi làm việc nhóm. | Toàn bộ câu lệnh SQL phức tạp (JOIN 5 bảng) gom gọn trong `LopHocPhanRepository`, 100% Prepared Statements. |
 | **Bảo mật & Kiểm tra** | Chưa kiểm soát chặt chẽ tham số `id` gửi lên từ URL. | Bổ sung Guard Clause chặn ID không hợp lệ và trả về điều hướng an toàn. |
+
+
+# BÁO CÁO PHÂN CÔNG ĐÓNG GÓP CÁ NHÂN: PHẠM NGỌC ANH
+
+## 1. Phạm vi nghiệp vụ & Chức năng phụ trách
+Phụ trách Refactor chức năng **Quản lý tài khoản dành cho Quản trị viên** trong hệ thống StudentHub, chuyển đổi mã nguồn từ cách tổ chức tập trung sang mô hình MVC kết hợp Repository Pattern.
+Các chức năng và công việc cụ thể:
+1. **Quản lý tài khoản (CRUD):**
+   - Xây dựng chức năng hiển thị danh sách tài khoản người dùng.
+   - Xây dựng chức năng thêm tài khoản mới cho Sinh viên, Giảng viên và Quản trị viên.
+   - Xây dựng chức năng cập nhật thông tin tài khoản.
+   - Xây dựng chức năng xóa tài khoản.
+2. **Tìm kiếm & Lọc tài khoản:**
+   - Hỗ trợ tìm kiếm tài khoản theo thông tin người dùng.
+   - Xây dựng chức năng lọc danh sách tài khoản theo vai trò.
+   - Hiển thị danh sách kết quả phù hợp với điều kiện tìm kiếm và lọc.
+3. **Refactor kiến trúc MVC & Repository Pattern (Bài tập 6):**
+   - Chuyển toàn bộ các câu lệnh truy vấn dữ liệu tài khoản vào class `NguoiDungRepository`.
+   - Xây dựng `NguoiDungController` để tiếp nhận yêu cầu và điều phối xử lý nghiệp vụ.
+   - Tách giao diện quản lý tài khoản thành View riêng biệt.
+   - Tổ chức lại mã nguồn theo hướng phân chia trách nhiệm giữa Repository, Controller và View.
+   - Tách riêng CSS và JavaScript để thuận tiện cho việc quản lý và bảo trì giao diện.
+4. **Thiết kế giao diện quản trị:**
+   - Xây dựng giao diện quản lý tài khoản dành cho Quản trị viên.
+   - Thiết kế thanh điều hướng Sidebar riêng.
+   - Xây dựng biểu mẫu thêm tài khoản và khu vực hiển thị danh sách tài khoản.
+   - Sử dụng CSS và JavaScript để cải thiện trải nghiệm tương tác trên giao diện.
+
+## 2. Danh mục các tệp phụ trách trong mã nguồn
+**Điểm truy cập và cấu hình:**
+- `index.php`
+- `config/database.php`
+**Tầng xử lý dữ liệu – Repository:**
+- `src/Repositories/NguoiDungRepository.php`
+**Tầng điều khiển – Controller:**
+- `src/Controllers/NguoiDungController.php`
+**Tầng giao diện – View:**
+- `app/views/quantri/tai_khoan_view.php`
+- `app/views/quantri/tai_khoan.php`
+- `app/views/layouts/admin_sidebar.php`
+**Tài nguyên giao diện:**
+- `assets/css/quantrivien.css`
+- `assets/js/quantrivien.js`
+
+## 3. Bảng đối chiếu Trước và Sau khi Refactor (Bài tập 6)
+
+| Tiêu chí | Trước khi Refactor | Sau khi Refactor |
+|---|---|---|
+| **Kiến trúc mã nguồn** | Các chức năng quản lý tài khoản được xử lý tập trung trong một file PHP. | Tách mã nguồn thành các thành phần Repository, Controller và View. |
+| **Quản lý truy vấn dữ liệu** | Các câu lệnh SQL được viết trực tiếp trong file xử lý chính. | Tập trung các thao tác truy vấn dữ liệu vào `NguoiDungRepository`. |
+| **Xử lý nghiệp vụ** | Phần xử lý thêm, sửa, xóa và tìm kiếm nằm chung với giao diện. | Chuyển phần điều phối xử lý nghiệp vụ vào `NguoiDungController`. |
+| **Tách biệt giao diện** | HTML và PHP đan xen trong cùng một file, khó chỉnh sửa. | Tách giao diện quản lý tài khoản vào `tai_khoan_view.php`. |
+| **Tái sử dụng mã nguồn** | Khó tái sử dụng các đoạn xử lý dữ liệu và giao diện. | Các thành phần được phân chia theo trách nhiệm, thuận tiện cho việc tái sử dụng và mở rộng. |
+| **Bảo trì và phát triển** | Khi thay đổi chức năng có thể phải chỉnh sửa nhiều đoạn mã trong cùng một file. | Có thể chỉnh sửa riêng Repository, Controller hoặc View tùy theo yêu cầu. |
+| **Quản lý tài nguyên giao diện** | CSS và JavaScript có thể nằm chung với mã HTML/PHP. | Tách CSS vào `assets/css` và JavaScript vào `assets/js`. |
+
+**Vai trò từng thành phần:**
+- `index.php`: Điểm truy cập chính, khởi tạo các thành phần cần thiết.
+- `NguoiDungRepository`: Thực hiện các thao tác truy vấn và làm việc với dữ liệu tài khoản thông qua PDO.
+- `NguoiDungController`: Tiếp nhận yêu cầu, gọi Repository và chuẩn bị dữ liệu cho giao diện.
+- `tai_khoan_view.php`: Hiển thị biểu mẫu, danh sách và kết quả quản lý tài khoản.
+- `admin_sidebar.php`: Cung cấp thanh điều hướng cho khu vực quản trị.
