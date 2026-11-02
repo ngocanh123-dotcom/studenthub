@@ -422,3 +422,24 @@ Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có 
 * Học phần đại cương độc lập, không yêu cầu tiên quyết (`hoc_phan_tien_quyet_id = NULL`).
 * Cặp học phần có quan hệ tiên quyết (Ví dụ: môn *Giải tích 2* yêu cầu hoàn thành môn *Giải tích 1* trước).
 * Phân loại đa dạng theo các khối kiến thức: Đại cương, Cơ sở ngành, Chuyên ngành.
+
+
+---
+## BÁO CÁO REFACTOR CÁ NHÂN: TẠ NHƯ QUỲNH (BÀI TẬP 6)
+
+### 1. Phân công & File phụ trách
+- **Thành viên:** Tạ Như Quỳnh
+- **Chức năng phụ trách:** Chi tiết lớp học phần & Quy tắc hiển thị điều kiện tiên quyết.
+- **Route xử lý:** `GET /lop-hoc-phan/chi-tiet?id={id}`
+- **Các file tự xây dựng:**
+  * `src/Repositories/LopHocPhanRepository.php`
+  * `src/Controllers/LopHocPhanController.php`
+  * `views/classes/detail.php`
+
+### 2. Đối chiếu Trước và Sau khi Refactor
+| Tiêu chí | Trước khi Refactor (Cũ) | Sau khi Refactor (Mới) |
+| :--- | :--- | :--- |
+| **Kiến trúc mã nguồn** | Viết lẫn lộn câu lệnh SQL `SELECT ... JOIN` trực tiếp bên trong file giao diện/public. | Tách rời 3 lớp chuẩn MVC: Route $\rightarrow$ Controller $\rightarrow$ Repository $\rightarrow$ View. |
+| **Tách biệt hiển thị** | File View vừa lo giao diện HTML vừa nạp kết nối PDO và query database. | View là file thuần giao diện, chỉ nhận dữ liệu được Controller truyền vào. |
+| **Bảo trì & Tái sử dụng** | Khi câu lệnh SQL cần sửa phải tìm trong code giao diện, dễ gây xung đột Git. | Toàn bộ truy vấn gom vào `LopHocPhanRepository`, dễ dàng mở rộng và viết Unit Test. |
+| **Bảo mật dữ liệu** | Xử lý tham số `id` trực tiếp, tiềm ẩn nguy cơ SQL Injection. | Ràng buộc chặt chẽ qua PDO Prepared Statements và Guard Clause kiểm tra dữ liệu đầu vào. |
