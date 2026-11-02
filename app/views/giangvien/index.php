@@ -18,7 +18,7 @@ $tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = '';
+$dbPass = '123456';
 
 try {
     $pdo = new PDO(
@@ -152,28 +152,32 @@ function trangThaiLop($status): string
 
 <div class="layout">
 
-    <aside class="sidebar">
-        <p class="menu-title">MENU CHÍNH</p>
+    
+<aside class="sidebar">
+    <p class="menu-title">MENU CHÍNH</p>
 
-        <a href="index.php" class="menu-item active">
-            <span>▦</span> Tổng quan
-        </a>
+    <a href="index.php" class="menu-item active">
+        <span>▦</span> Tổng quan
+    </a>
 
-        <a href="lop_hoc_phan.php" class="menu-item">
-            <span>▤</span> Lớp học phần
-        </a>
+    <a href="lop_hoc_phan.php" class="menu-item">
+        <span>▤</span> Lớp học phần
+    </a>
 
-        <a href="sinh_vien.php" class="menu-item">
-            <span>♙</span> Sinh viên theo lớp
-        </a>
+    <a href="sinh_vien.php" class="menu-item">
+        <span>♙</span> Sinh viên theo lớp
+    </a>
 
-        <div class="sidebar-bottom">
-            <a href="../../../public/index.php"
-               class="menu-item logout">
-                <span>⇥</span> Quay lại đăng nhập
-            </a>
-        </div>
-    </aside>
+    <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-item change-pass-link" style="color: #38bdf8;">
+        <span>🔑</span> Đổi mật khẩu
+    </a>
+
+    <a href="../../../public/index.php?action=logout" class="menu-item logout">
+        <span>⇥</span> Đăng xuất
+    </a>
+</aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
+
 
     <main class="main-content">
 

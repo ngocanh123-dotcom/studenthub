@@ -184,6 +184,22 @@ class AdminLopHocPhanController {
             $this->redirectBackWithError('Vui lòng chọn Học kỳ áp dụng.', $_POST);
         }
 
+        if ($lichHoc !== '' && $phongHoc !== '') {
+            try {
+                $conflict = $this->model->findScheduleRoomConflict($hocKyId, $lichHoc, $phongHoc);
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch/phòng khi tạo lớp học phần: " . $e->getMessage());
+                $this->redirectBackWithError('Không thể kiểm tra trùng lịch và phòng học. Vui lòng thử lại.', $_POST);
+            }
+
+            if ($conflict) {
+                $this->redirectBackWithError(
+                    "Lịch học và phòng học này đã được xếp cho lớp '{$conflict['ma_lop']}' trong học kỳ đã chọn.",
+                    $_POST
+                );
+            }
+        }
+
         if ($siSoToiDa <= 0 || $siSoToiDa > 500) {
             $this->redirectBackWithError('Sĩ số tối đa phải là số nguyên dương từ 1 đến 500 sinh viên.', $_POST);
         }
@@ -311,6 +327,22 @@ class AdminLopHocPhanController {
             $this->redirectEditWithError($id, 'Vui lòng chọn Học kỳ.');
         }
 
+        if ($lichHoc !== '' && $phongHoc !== '') {
+            try {
+                $conflict = $this->model->findScheduleRoomConflict($hocKyId, $lichHoc, $phongHoc, $id);
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch/phòng khi cập nhật lớp học phần: " . $e->getMessage());
+                $this->redirectEditWithError($id, 'Không thể kiểm tra trùng lịch và phòng học. Vui lòng thử lại.');
+            }
+
+            if ($conflict) {
+                $this->redirectEditWithError(
+                    $id,
+                    "Lịch học và phòng học này đã được xếp cho lớp '{$conflict['ma_lop']}' trong học kỳ đã chọn."
+                );
+            }
+        }
+
         // Ràng buộc an toàn sĩ số: Không được giảm sĩ số tối đa xuống thấp hơn số sinh viên hiện tại
         $siSoHienTai = (int)$currentClass['si_so_hien_tai'];
         if ($siSoToiDa < $siSoHienTai) {
@@ -415,10 +447,20 @@ class AdminLopHocPhanController {
             exit;
         }
 
-        // Kiểm tra ràng buộc đăng ký
+        // [BẢO VỆ 2 LỚP - CHỐNG RACE CONDITION]
+        // LỚP 1: Kiểm tra trạng thái cầu dao. Lớp phải được KHÓA ('khoa') trước khi xóa
+        if (($class['trang_thai'] ?? '') === 'mo') {
+            $_SESSION['admin_notice'] = "Vui lòng ngắt cầu dao (Khóa lớp) trước khi thực hiện thao tác xóa để đảm bảo an toàn hệ thống.";
+            $_SESSION['admin_notice_type'] = 'error';
+            header('Location: lop_hoc_phan.php');
+            exit;
+        }
+
+        // LỚP 2: Kiểm tra sĩ số đăng ký hiện tại (sĩ số phải == 0). Tuyệt đối chặn xóa nếu đã có sinh viên
         $check = $this->model->checkCanDelete($id);
-        if (!$check['can_delete']) {
-            $_SESSION['admin_notice'] = "KHÔNG THỂ XÓA lớp '{$class['ma_lop']}' vì hiện đã có {$check['enrollment_count']} sinh viên đăng ký trên hệ thống. Để ngừng tiếp nhận, vui lòng dùng nút 'Khóa' đăng ký.";
+        $siSoHienTai = max((int)($class['si_so_hien_tai'] ?? 0), (int)($check['enrollment_count'] ?? 0));
+        if ($siSoHienTai > 0 || !$check['can_delete']) {
+            $_SESSION['admin_notice'] = "KHÔNG THỂ XÓA lớp '{$class['ma_lop']}' vì hiện đã có {$siSoHienTai} sinh viên đăng ký trên hệ thống. Để ngừng tiếp nhận, vui lòng dùng nút 'Khóa' đăng ký.";
             $_SESSION['admin_notice_type'] = 'error';
             header('Location: lop_hoc_phan.php');
             exit;
@@ -429,7 +471,7 @@ class AdminLopHocPhanController {
             $_SESSION['admin_notice'] = "Đã xóa vĩnh viễn lớp học phần '{$class['ma_lop']}' khỏi hệ thống.";
             $_SESSION['admin_notice_type'] = 'success';
         } else {
-            $_SESSION['admin_notice'] = "Không thể xóa lớp học phần do lỗi cơ sở dữ liệu.";
+            $_SESSION['admin_notice'] = "Không thể xóa lớp học phần do vi phạm điều kiện an toàn (Lớp phải ở trạng thái Khóa và chưa có sinh viên đăng ký).";
             $_SESSION['admin_notice_type'] = 'error';
         }
 

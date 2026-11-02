@@ -227,7 +227,7 @@
                             <input type="text" name="lich_hoc" id="lich_hoc" 
                                    value="<?= htmlspecialchars($oldData['lich_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
                                    placeholder="Ví dụ: Thứ 2 (Tiết 1 - 3)">
-                            <span class="form-hint">Lịch học cố định hàng tuần</span>
+                            <span class="form-hint">Lịch học cố định hàng tuần; lịch và phòng không được trùng với lớp khác trong cùng học kỳ</span>
                         </div>
 
                         <!-- Phòng học -->

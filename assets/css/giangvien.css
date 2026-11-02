@@ -1,182 +1,1441 @@
 /* =========================================
+
    STUDENTHUB - GIAO DIỆN TRANG GIẢNG VIÊN
+
 ========================================= */
 
 .lecturer-page {
+
     --primary: #2563eb;
+
     --primary-dark: #1d4ed8;
+
     --sidebar-bg: #172554;
+
     --text-main: #1e293b;
+
     --text-muted: #64748b;
+
     --border-color: #e2e8f0;
+
     --page-bg: #f4f7fb;
 
     margin: 0;
+
     min-height: 100vh;
+
     background: var(--page-bg);
+
     color: var(--text-main);
+
     font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 14px;
+
 }
 
 .lecturer-page *,
+
 .lecturer-page *::before,
+
 .lecturer-page *::after {
+
     box-sizing: border-box;
+
 }
 
 .lecturer-page a {
+
     text-decoration: none;
+
 }
 
 /* ===== THANH HEADER ===== */
 
 .lecturer-page .header {
+
     min-height: 76px;
+
     padding: 14px 30px;
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     gap: 20px;
+
     background: #fff;
+
     border-bottom: 1px solid var(--border-color);
+
     position: relative;
+
     z-index: 2;
+
 }
 
 .lecturer-page .brand {
+
     display: flex;
+
     align-items: center;
+
     gap: 12px;
+
 }
 
 .lecturer-page .brand-icon {
+
     width: 46px;
+
     height: 46px;
+
     display: grid;
+
     place-items: center;
+
     flex-shrink: 0;
+
     color: #fff;
+
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+
     border-radius: 13px;
+
     box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+
     font-size: 24px;
+
     font-weight: 800;
+
 }
 
 .lecturer-page .brand h1 {
+
     margin: 0;
+
     color: #172554;
+
     font-size: 23px;
+
     font-weight: 750;
+
     letter-spacing: -0.5px;
+
 }
 
 .lecturer-page .brand p {
+
     margin: 5px 0 0;
+
     color: var(--text-muted);
+
     font-size: 10px;
+
     font-weight: 700;
+
     letter-spacing: 1px;
+
 }
 
 .lecturer-page .user-info {
+
     display: flex;
+
     align-items: center;
+
     gap: 12px;
+
 }
 
 .lecturer-page .avatar {
+
     width: 43px;
+
     height: 43px;
+
     display: grid;
+
     place-items: center;
+
     flex-shrink: 0;
+
     color: #1d4ed8;
+
     background: #dbeafe;
+
     border: 1px solid #bfdbfe;
+
     border-radius: 50%;
+
     font-weight: 800;
+
 }
 
 .lecturer-page .user-info strong {
+
     display: block;
+
     margin-bottom: 5px;
+
     color: #1e293b;
+
     font-size: 13px;
+
 }
 
 .lecturer-page .user-info small {
+
     display: block;
+
     color: var(--text-muted);
+
     font-size: 12px;
+
 }
 
 /* ===== BỐ CỤC CHÍNH ===== */
 
 .lecturer-page .layout {
+
     display: flex;
+
     align-items: stretch;
+
     min-height: calc(100vh - 76px);
+
 }
 
 .lecturer-page .sidebar {
+
     width: 245px;
+
     min-width: 245px;
+
     padding: 27px 15px 18px;
+
     display: flex;
+
     flex-direction: column;
+
     background: var(--sidebar-bg);
+
     color: #fff;
+
 }
 
 .lecturer-page .menu-title {
+
     margin: 0 12px 16px;
+
     color: #94a3b8;
+
     font-size: 10px;
+
     font-weight: 750;
+
     letter-spacing: 1.3px;
+
 }
 
 .lecturer-page .menu-item {
+
     min-height: 46px;
+
     margin-bottom: 7px;
+
     padding: 0 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    color: #cbd5e1;
+
+    border: 1px solid transparent;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: background 0.2s, color 0.2s;
+
+}
+
+.lecturer-page .menu-item span {
+
+    width: 22px;
+
+    text-align: center;
+
+    font-size: 19px;
+
+}
+
+.lecturer-page .menu-item:hover {
+
+    color: #fff;
+
+    background: rgba(255, 255, 255, 0.09);
+
+}
+
+.lecturer-page .menu-item.active {
+
+    color: #fff;
+
+    background: var(--primary);
+
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+
+}
+
+.lecturer-page .sidebar-bottom {
+
+    margin-top: auto;
+
+    padding-top: 25px;
+
+}
+
+.lecturer-page .menu-item.logout {
+
+    color: #fecaca;
+
+}
+
+.lecturer-page .menu-item.logout:hover {
+
+    color: #fff;
+
+    background: rgba(239, 68, 68, 0.15);
+
+}
+
+/* ===== NỘI DUNG TRANG ===== */
+
+.lecturer-page .main-content {
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 30px;
+
+}
+
+.lecturer-page .page-heading {
+
+    margin-bottom: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 16px;
+
+}
+
+.lecturer-page .page-heading h2 {
+
+    margin: 0;
+
+    color: #172554;
+
+    font-size: 25px;
+
+    font-weight: 750;
+
+    letter-spacing: -0.5px;
+
+}
+
+.lecturer-page .page-heading p {
+
+    margin: 8px 0 0;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+
+}
+
+.lecturer-page .today {
+
+    flex-shrink: 0;
+
+    padding: 10px 13px;
+
+    color: #475569;
+
+    background: #fff;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 9px;
+
+    font-size: 12px;
+
+}
+
+/* ===== THẺ THỐNG KÊ ===== */
+
+.lecturer-page .stats {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+
+}
+
+.lecturer-page .stat-card {
+
+    min-height: 115px;
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    background: #fff;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 13px;
+
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.025);
+
+    transition: transform 0.2s, box-shadow 0.2s;
+
+}
+
+.lecturer-page .stat-card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+
+}
+
+.lecturer-page .stat-icon {
+
+    width: 49px;
+
+    height: 49px;
+
+    display: grid;
+
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    font-size: 24px;
+
+}
+
+.lecturer-page .stat-icon.blue {
+
+    color: #2563eb;
+
+    background: #eff6ff;
+
+}
+
+.lecturer-page .stat-icon.green {
+
+    color: #059669;
+
+    background: #ecfdf5;
+
+}
+
+.lecturer-page .stat-icon.orange {
+
+    color: #d97706;
+
+    background: #fffbeb;
+
+}
+
+.lecturer-page .stat-card p {
+
+    margin: 0 0 8px;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+.lecturer-page .stat-card h3 {
+
+    margin: 0;
+
+    color: #172554;
+
+    font-size: 28px;
+
+    font-weight: 750;
+
+    line-height: 1.2;
+
+}
+
+/* ===== KHUNG DANH SÁCH ===== */
+
+.lecturer-page .panel {
+
+    min-width: 0;
+
+    margin-bottom: 24px;
+
+    padding: 23px;
+
+    background: #fff;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 13px;
+
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.025);
+
+    scroll-margin-top: 20px;
+
+}
+
+.lecturer-page .panel-heading {
+
+    margin-bottom: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+}
+
+.lecturer-page .panel-heading h3 {
+
+    margin: 0;
+
+    color: #1e293b;
+
+    font-size: 17px;
+
+    font-weight: 750;
+
+}
+
+.lecturer-page .panel-heading p {
+
+    margin: 7px 0 0;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+.lecturer-page .panel-heading input[type="search"] {
+
+    width: 280px;
+
+    max-width: 100%;
+
+    min-height: 40px;
+
+    padding: 10px 13px;
+
+    color: #1e293b;
+
+    background: #fff;
+
+    border: 1px solid #dbe3ef;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+}
+
+.lecturer-page .panel-heading input[type="search"]::placeholder {
+
+    color: #94a3b8;
+
+}
+
+.lecturer-page .panel-heading input[type="search"]:focus {
+
+    border-color: #60a5fa;
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+
+}
+
+/* ===== BẢNG ===== */
+
+.lecturer-page .table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 9px;
+
+}
+
+.lecturer-page .table-wrapper table {
+
+    width: 100%;
+
+    min-width: 760px;
+
+    border-collapse: separate;
+
+    border-spacing: 0;
+
+    background: #fff;
+
+    font-size: 12px;
+
+    text-align: left;
+
+}
+
+.lecturer-page .table-wrapper thead th {
+
+    padding: 14px 13px;
+
+    color: #475569;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid var(--border-color);
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+
+}
+
+.lecturer-page .table-wrapper tbody td {
+
+    padding: 15px 13px;
+
+    color: #475569;
+
+    border-bottom: 1px solid #edf1f7;
+
+    line-height: 1.6;
+
+    vertical-align: middle;
+
+}
+
+.lecturer-page .table-wrapper tbody tr:last-child td {
+
+    border-bottom: none;
+
+}
+
+.lecturer-page .table-wrapper tbody tr:hover td {
+
+    background: #f8fbff;
+
+}
+
+.lecturer-page .table-wrapper td.empty {
+
+    padding: 30px 15px;
+
+    color: #94a3b8;
+
+    text-align: center;
+
+}
+
+/* NÚT THAO TÁC */
+
+.lecturer-page .table-wrapper button,
+
+.lecturer-page .table-wrapper .btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 32px;
+
+    padding: 7px 11px;
+
+    color: #1d4ed8;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 7px;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background 0.2s;
+
+}
+
+.lecturer-page .table-wrapper button:hover,
+
+.lecturer-page .table-wrapper .btn:hover {
+
+    background: #dbeafe;
+
+}
+
+/* NHÃN TRẠNG THÁI */
+
+.lecturer-page .table-wrapper .status,
+
+.lecturer-page .table-wrapper .badge {
+
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    color: #047857;
+
+    background: #ecfdf5;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+.lecturer-page .note {
+
+    margin: 14px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+}
+
+.lecturer-page footer {
+
+    padding: 4px 0 10px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    text-align: center;
+
+}
+
+/* ===== MÁY TÍNH BẢNG ===== */
+
+@media (max-width: 1100px) {
+
+    .lecturer-page .sidebar {
+
+        width: 210px;
+
+        min-width: 210px;
+
+    }
+
+    .lecturer-page .main-content {
+
+        padding: 22px;
+
+    }
+
+    .lecturer-page .stats {
+
+        gap: 12px;
+
+    }
+
+    .lecturer-page .stat-card {
+
+        padding: 16px;
+
+        gap: 11px;
+
+    }
+
+    .lecturer-page .stat-icon {
+
+        width: 42px;
+
+        height: 42px;
+
+    }
+
+    .lecturer-page .panel {
+
+        padding: 18px;
+
+    }
+
+}
+
+/* ===== ĐIỆN THOẠI ===== */
+
+@media (max-width: 760px) {
+
+    .lecturer-page .header {
+
+        padding: 13px 16px;
+
+        align-items: flex-start;
+
+    }
+
+    .lecturer-page .brand h1 {
+
+        font-size: 20px;
+
+    }
+
+    .lecturer-page .brand p {
+
+        font-size: 9px;
+
+    }
+
+    .lecturer-page .user-info {
+
+        gap: 8px;
+
+    }
+
+    .lecturer-page .user-info strong {
+
+        max-width: 120px;
+
+        font-size: 11px;
+
+        overflow-wrap: anywhere;
+
+    }
+
+    .lecturer-page .user-info small {
+
+        font-size: 10px;
+
+        overflow-wrap: anywhere;
+
+    }
+
+    .lecturer-page .avatar {
+
+        width: 35px;
+
+        height: 35px;
+
+        font-size: 11px;
+
+    }
+
+    .lecturer-page .layout {
+
+        display: block;
+
+    }
+
+    .lecturer-page .sidebar {
+
+        width: 100%;
+
+        min-width: 0;
+
+        padding: 12px;
+
+        flex-direction: row;
+
+        align-items: center;
+
+        gap: 7px;
+
+        overflow-x: auto;
+
+    }
+
+    .lecturer-page .menu-title {
+
+        display: none;
+
+    }
+
+    .lecturer-page .menu-item {
+
+        flex: 0 0 auto;
+
+        min-height: 40px;
+
+        margin: 0;
+
+        padding: 0 12px;
+
+        font-size: 11px;
+
+    }
+
+    .lecturer-page .menu-item span {
+
+        width: auto;
+
+        font-size: 15px;
+
+    }
+
+    .lecturer-page .sidebar-bottom {
+
+        margin: 0;
+
+        padding: 0;
+
+    }
+
+    .lecturer-page .main-content {
+
+        padding: 20px 14px;
+
+    }
+
+    .lecturer-page .page-heading {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        margin-bottom: 20px;
+
+    }
+
+    .lecturer-page .page-heading h2 {
+
+        font-size: 22px;
+
+    }
+
+    .lecturer-page .stats {
+
+        grid-template-columns: 1fr;
+
+        gap: 11px;
+
+    }
+
+    .lecturer-page .stat-card {
+
+        min-height: 88px;
+
+        padding: 16px;
+
+    }
+
+    .lecturer-page .stat-card h3 {
+
+        font-size: 25px;
+
+    }
+
+    .lecturer-page .panel {
+
+        padding: 15px;
+
+        margin-bottom: 17px;
+
+    }
+
+    .lecturer-page .panel-heading {
+
+        align-items: stretch;
+
+        flex-direction: column;
+
+        gap: 13px;
+
+        margin-bottom: 16px;
+
+    }
+
+    .lecturer-page .panel-heading h3 {
+
+        font-size: 16px;
+
+    }
+
+    .lecturer-page .panel-heading input[type="search"] {
+
+        width: 100%;
+
+    }
+
+}
+
+@media (max-width: 400px) {
+
+    .lecturer-page .header {
+
+        padding: 12px 10px;
+
+    }
+
+    .lecturer-page .brand {
+
+        gap: 7px;
+
+    }
+
+    .lecturer-page .brand-icon {
+
+        width: 35px;
+
+        height: 35px;
+
+        border-radius: 10px;
+
+    }
+
+    .lecturer-page .brand h1 {
+
+        font-size: 17px;
+
+    }
+
+    .lecturer-page .brand p {
+
+        letter-spacing: 0.5px;
+
+    }
+
+    .lecturer-page .user-info {
+
+        gap: 5px;
+
+    }
+
+    .lecturer-page .user-info strong {
+
+        max-width: 90px;
+
+    }
+
+    .lecturer-page .avatar {
+
+        display: none;
+
+    }
+
+}
+
+/* Tiêu đề PDF ẩn khi xem trang web */
+
+.pdf-header {
+
+    display: none;
+
+}
+
+/* ===== CHỈ IN DANH SÁCH SINH VIÊN ===== */
+
+@media print {
+
+    @page {
+
+        size: A4 landscape;
+
+        margin: 12mm;
+
+    }
+
+    /* Ẩn toàn bộ nội dung trang web */
+
+    body * {
+
+        visibility: hidden !important;
+
+    }
+
+    /* Chỉ hiện phần thông tin PDF và bảng */
+
+    .pdf-header,
+
+    .pdf-header *,
+
+    .table-wrapper,
+
+    .table-wrapper * {
+
+        visibility: visible !important;
+
+    }
+
+    /* Đưa nội dung cần in lên đầu trang */
+
+    .pdf-header {
+
+        display: block !important;
+
+        position: relative !important;
+
+        width: 100% !important;
+
+        margin: 0 0 18px 0 !important;
+
+        padding: 0 !important;
+
+        color: #000 !important;
+
+    }
+
+    .pdf-header h1 {
+
+        font-size: 22pt !important;
+
+        margin: 0 0 16px 0 !important;
+
+    }
+
+    .pdf-header h2 {
+
+        font-size: 15pt !important;
+
+        margin: 0 0 16px 0 !important;
+
+    }
+
+    .pdf-header p {
+
+        font-size: 10pt !important;
+
+        margin: 7px 0 !important;
+
+    }
+
+    /* Ẩn phần giao diện, tránh chiếm chỗ khi in */
+
+    .header,
+
+    .sidebar,
+
+    .page-heading,
+
+    .stats,
+
+    .panel-heading,
+
+    .panel-footer,
+
+    footer,
+
+    .student-actions,
+
+    #searchStudent,
+
+    #btnExportPDF,
+
+    .today {
+
+        display: none !important;
+
+    }
+
+    /* Bỏ khung và bố cục trang web */
+
+    body,
+
+    body.lecturer-page,
+
+    .layout,
+
+    .main-content,
+
+    .panel {
+
+        display: block !important;
+
+        position: static !important;
+
+        width: 100% !important;
+
+        max-width: none !important;
+
+        height: auto !important;
+
+        min-height: 0 !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        border: none !important;
+
+        box-shadow: none !important;
+
+        overflow: visible !important;
+
+        background: #fff !important;
+
+    }
+
+    /* Bảng chiếm toàn bộ chiều ngang trang giấy */
+
+    .table-wrapper {
+
+        display: block !important;
+
+        position: static !important;
+
+        width: 100% !important;
+
+        max-width: none !important;
+
+        height: auto !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        overflow: visible !important;
+
+        border: none !important;
+
+    }
+
+    table {
+
+        display: table !important;
+
+        width: 100% !important;
+
+        max-width: none !important;
+
+        border-collapse: collapse !important;
+
+        table-layout: fixed !important;
+
+        font-size: 9pt !important;
+
+    }
+
+    thead {
+
+        display: table-header-group !important;
+
+    }
+
+    tbody {
+
+        display: table-row-group !important;
+
+    }
+
+    tr {
+
+        display: table-row !important;
+
+        break-inside: avoid !important;
+
+        page-break-inside: avoid !important;
+
+    }
+
+    th,
+
+    td {
+
+        display: table-cell !important;
+
+        visibility: visible !important;
+
+        padding: 8px !important;
+
+        border: 1px solid #777 !important;
+
+        color: #000 !important;
+
+        background: #fff !important;
+
+        text-align: left !important;
+
+        overflow-wrap: anywhere !important;
+
+        word-break: break-word !important;
+
+    }
+
+    th {
+
+        font-weight: bold !important;
+
+        background: #eee !important;
+
+    }
+
+}
+
+/* ===== NÚT QUAY LẠI DANH SÁCH LỚP HỌC PHẦN ===== */
+/* Chỉ đổi nút ở cuối khung danh sách, không ảnh hưởng menu bên trái */
+.lecturer-page .main-content .panel > div[style*="margin-top"] > a.menu-item {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 11px 18px !important;
+    color: #ffffff !important;
+    background-color: #2563eb !important;
+    border: 1px solid #2563eb !important;
+    border-radius: 8px !important;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.lecturer-page .main-content .panel > div[style*="margin-top"] > a.menu-item:hover {
+    color: #ffffff !important;
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    transform: translateY(-1px);
+}
+
+.lecturer-page .main-content .panel > div[style*="margin-top"] > a.menu-item span {
+    color: #ffffff !important;
+}
+
+/* =====================================================
+   STUDENTHUB - DONG BO GIAO DIEN GIANG VIEN VOI SINH VIEN
+   Phan bo sung: sidebar, khung chao mung, co chu tong quan
+   ===================================================== */
+
+/* Sidebar */
+.lecturer-page .sidebar {
+    width: 335px;
+    min-width: 335px;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    background: #0f1b30;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.lecturer-page .menu-title {
+    margin: 12px 13px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+.lecturer-page .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
+    width: 100%;
+    min-height: 55px;
+    margin: 0 0 7px;
+    padding: 0 17px;
     color: #cbd5e1;
+    background: transparent;
     border: 1px solid transparent;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 13px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    box-sizing: border-box;
     transition: background 0.2s, color 0.2s;
 }
 
 .lecturer-page .menu-item span {
-    width: 22px;
+    width: 25px;
+    flex-shrink: 0;
     text-align: center;
-    font-size: 19px;
+    font-size: 21px;
 }
 
 .lecturer-page .menu-item:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .lecturer-page .menu-item.active {
     color: #fff;
-    background: var(--primary);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+    background: #2563eb;
+    box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+    font-weight: 700;
 }
 
-.lecturer-page .sidebar-bottom {
-    margin-top: auto;
-    padding-top: 25px;
+/* Dat nut dang xuat/quay lai ngay sau cac muc menu, khong day xuong day */
+.lecturer-page .sidebar .sidebar-bottom {
+    position: static;
+    margin-top: 12px;
+    padding-top: 0;
+    align-self: stretch;
+    flex-shrink: 0;
 }
 
 .lecturer-page .menu-item.logout {
-    color: #fecaca;
+    color: #ff6b6b;
 }
 
 .lecturer-page .menu-item.logout:hover {
@@ -184,349 +1443,104 @@
     background: rgba(239, 68, 68, 0.15);
 }
 
-/* ===== NỘI DUNG TRANG ===== */
-
-.lecturer-page .main-content {
-    flex: 1;
-    min-width: 0;
-    padding: 30px;
-}
-
-.lecturer-page .page-heading {
-    margin-bottom: 25px;
+/* Khung chao mung giang vien - tuong tu trang sinh vien */
+.lecturer-page .welcome-banner {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 28px;
+    min-height: 232px;
+    margin: 0 0 32px;
+    padding: 40px 50px;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(110deg, #214fe0 0%, #2446b5 58%, #30328b 100%);
+    border-radius: 24px;
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.13);
+    box-sizing: border-box;
 }
 
-.lecturer-page .page-heading h2 {
-    margin: 0;
-    color: #172554;
-    font-size: 25px;
+.lecturer-page .welcome-content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-width: 0;
+}
+
+.lecturer-page .welcome-label {
+    margin: 0 0 16px;
+    color: #bfdbfe;
+    font-size: 14px;
     font-weight: 750;
-    letter-spacing: -0.5px;
+    letter-spacing: 1.2px;
+}
+
+.lecturer-page .welcome-content h2 {
+    margin: 0 0 12px;
+    color: #fff;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.lecturer-page .welcome-description {
+    max-width: 850px;
+    margin: 0;
+    color: #eff6ff;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.lecturer-page .welcome-logo {
+    display: grid;
+    place-items: center;
+    width: 125px;
+    height: 125px;
+    flex-shrink: 0;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.23);
+    border-radius: 28px;
+    font-size: 36px;
+    font-weight: 900;
+    transform: rotate(-7deg);
+}
+
+/* Co chu phan tong quan */
+.lecturer-page .page-heading h2 {
+    font-size: 30px;
+    line-height: 1.35;
 }
 
 .lecturer-page .page-heading p {
-    margin: 8px 0 0;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.lecturer-page .today {
-    flex-shrink: 0;
-    padding: 10px 13px;
-    color: #475569;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 9px;
-    font-size: 12px;
-}
-
-/* ===== THẺ THỐNG KÊ ===== */
-
-.lecturer-page .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 25px;
-}
-
-.lecturer-page .stat-card {
-    min-height: 115px;
-    padding: 22px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 13px;
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.025);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.lecturer-page .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
-}
-
-.lecturer-page .stat-icon {
-    width: 49px;
-    height: 49px;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    border-radius: 12px;
-    font-size: 24px;
-}
-
-.lecturer-page .stat-icon.blue {
-    color: #2563eb;
-    background: #eff6ff;
-}
-
-.lecturer-page .stat-icon.green {
-    color: #059669;
-    background: #ecfdf5;
-}
-
-.lecturer-page .stat-icon.orange {
-    color: #d97706;
-    background: #fffbeb;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 .lecturer-page .stat-card p {
-    margin: 0 0 8px;
-    color: var(--text-muted);
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 15px;
 }
 
 .lecturer-page .stat-card h3 {
-    margin: 0;
-    color: #172554;
-    font-size: 28px;
-    font-weight: 750;
-    line-height: 1.2;
-}
-
-/* ===== KHUNG DANH SÁCH ===== */
-
-.lecturer-page .panel {
-    min-width: 0;
-    margin-bottom: 24px;
-    padding: 23px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 13px;
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.025);
-    scroll-margin-top: 20px;
-}
-
-.lecturer-page .panel-heading {
-    margin-bottom: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
+    font-size: 30px;
 }
 
 .lecturer-page .panel-heading h3 {
-    margin: 0;
-    color: #1e293b;
-    font-size: 17px;
-    font-weight: 750;
+    font-size: 20px;
 }
 
-.lecturer-page .panel-heading p {
-    margin: 7px 0 0;
-    color: var(--text-muted);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.lecturer-page .panel-heading input[type="search"] {
-    width: 280px;
-    max-width: 100%;
-    min-height: 40px;
-    padding: 10px 13px;
-    color: #1e293b;
-    background: #fff;
-    border: 1px solid #dbe3ef;
-    border-radius: 8px;
-    outline: none;
-    font-family: inherit;
-    font-size: 12px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.lecturer-page .panel-heading input[type="search"]::placeholder {
-    color: #94a3b8;
-}
-
-.lecturer-page .panel-heading input[type="search"]:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-}
-
-/* ===== BẢNG ===== */
-
-.lecturer-page .table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 9px;
-}
-
-.lecturer-page .table-wrapper table {
-    width: 100%;
-    min-width: 760px;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: #fff;
-    font-size: 12px;
-    text-align: left;
-}
-
-.lecturer-page .table-wrapper thead th {
-    padding: 14px 13px;
-    color: #475569;
-    background: #f8fafc;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 11px;
-    font-weight: 750;
-    white-space: nowrap;
-}
-
-.lecturer-page .table-wrapper tbody td {
-    padding: 15px 13px;
-    color: #475569;
-    border-bottom: 1px solid #edf1f7;
-    line-height: 1.6;
-    vertical-align: middle;
-}
-
-.lecturer-page .table-wrapper tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.lecturer-page .table-wrapper tbody tr:hover td {
-    background: #f8fbff;
-}
-
-.lecturer-page .table-wrapper td.empty {
-    padding: 30px 15px;
-    color: #94a3b8;
-    text-align: center;
-}
-
-/* NÚT THAO TÁC */
-
-.lecturer-page .table-wrapper button,
-.lecturer-page .table-wrapper .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 32px;
-    padding: 7px 11px;
-    color: #1d4ed8;
-    background: #eff6ff;
-    border: 1px solid #dbeafe;
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.lecturer-page .table-wrapper button:hover,
-.lecturer-page .table-wrapper .btn:hover {
-    background: #dbeafe;
-}
-
-/* NHÃN TRẠNG THÁI */
-
-.lecturer-page .table-wrapper .status,
-.lecturer-page .table-wrapper .badge {
-    display: inline-block;
-    padding: 5px 9px;
-    color: #047857;
-    background: #ecfdf5;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.lecturer-page .note {
-    margin: 14px 0 0;
-    color: #94a3b8;
-    font-size: 11px;
-    line-height: 1.7;
-}
-
-.lecturer-page footer {
-    padding: 4px 0 10px;
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-}
-
-/* ===== MÁY TÍNH BẢNG ===== */
-
+/* Tablet */
 @media (max-width: 1100px) {
     .lecturer-page .sidebar {
-        width: 210px;
-        min-width: 210px;
-    }
-
-    .lecturer-page .main-content {
-        padding: 22px;
-    }
-
-    .lecturer-page .stats {
-        gap: 12px;
-    }
-
-    .lecturer-page .stat-card {
-        padding: 16px;
-        gap: 11px;
-    }
-
-    .lecturer-page .stat-icon {
-        width: 42px;
-        height: 42px;
-    }
-
-    .lecturer-page .panel {
-        padding: 18px;
+        width: 260px;
+        min-width: 260px;
     }
 }
 
-/* ===== ĐIỆN THOẠI ===== */
-
+/* Mobile */
 @media (max-width: 760px) {
-    .lecturer-page .header {
-        padding: 13px 16px;
-        align-items: flex-start;
-    }
-
-    .lecturer-page .brand h1 {
-        font-size: 20px;
-    }
-
-    .lecturer-page .brand p {
-        font-size: 9px;
-    }
-
-    .lecturer-page .user-info {
-        gap: 8px;
-    }
-
-    .lecturer-page .user-info strong {
-        max-width: 120px;
-        font-size: 11px;
-        overflow-wrap: anywhere;
-    }
-
-    .lecturer-page .user-info small {
-        font-size: 10px;
-        overflow-wrap: anywhere;
-    }
-
-    .lecturer-page .avatar {
-        width: 35px;
-        height: 35px;
-        font-size: 11px;
-    }
-
-    .lecturer-page .layout {
-        display: block;
-    }
-
     .lecturer-page .sidebar {
         width: 100%;
         min-width: 0;
@@ -542,104 +1556,65 @@
     }
 
     .lecturer-page .menu-item {
-        flex: 0 0 auto;
-        min-height: 40px;
+        width: auto;
+        min-height: 45px;
         margin: 0;
         padding: 0 12px;
-        font-size: 11px;
+        flex: 0 0 auto;
+        font-size: 13px;
     }
 
     .lecturer-page .menu-item span {
         width: auto;
-        font-size: 15px;
-    }
-
-    .lecturer-page .sidebar-bottom {
-        margin: 0;
-        padding: 0;
-    }
-
-    .lecturer-page .main-content {
-        padding: 20px 14px;
-    }
-
-    .lecturer-page .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        margin-bottom: 20px;
-    }
-
-    .lecturer-page .page-heading h2 {
-        font-size: 22px;
-    }
-
-    .lecturer-page .stats {
-        grid-template-columns: 1fr;
-        gap: 11px;
-    }
-
-    .lecturer-page .stat-card {
-        min-height: 88px;
-        padding: 16px;
-    }
-
-    .lecturer-page .stat-card h3 {
-        font-size: 25px;
-    }
-
-    .lecturer-page .panel {
-        padding: 15px;
-        margin-bottom: 17px;
-    }
-
-    .lecturer-page .panel-heading {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 13px;
-        margin-bottom: 16px;
-    }
-
-    .lecturer-page .panel-heading h3 {
-        font-size: 16px;
-    }
-
-    .lecturer-page .panel-heading input[type="search"] {
-        width: 100%;
-    }
-}
-
-@media (max-width: 400px) {
-    .lecturer-page .header {
-        padding: 12px 10px;
-    }
-
-    .lecturer-page .brand {
-        gap: 7px;
-    }
-
-    .lecturer-page .brand-icon {
-        width: 35px;
-        height: 35px;
-        border-radius: 10px;
-    }
-
-    .lecturer-page .brand h1 {
         font-size: 17px;
     }
 
-    .lecturer-page .brand p {
-        letter-spacing: 0.5px;
+    .lecturer-page .sidebar .sidebar-bottom {
+        margin: 0;
+        padding: 0;
+        flex-shrink: 0;
     }
 
-    .lecturer-page .user-info {
-        gap: 5px;
+    .lecturer-page .welcome-banner {
+        min-height: auto;
+        padding: 28px 24px;
+        border-radius: 18px;
     }
 
-    .lecturer-page .user-info strong {
-        max-width: 90px;
+    .lecturer-page .welcome-content h2 {
+        font-size: 27px;
     }
 
-    .lecturer-page .avatar {
+    .lecturer-page .welcome-description {
+        font-size: 14px;
+    }
+
+    .lecturer-page .welcome-logo {
+        width: 75px;
+        height: 75px;
+        border-radius: 18px;
+        font-size: 24px;
+    }
+
+    .lecturer-page .page-heading h2 {
+        font-size: 24px;
+    }
+
+    .lecturer-page .page-heading p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lecturer-page .welcome-banner {
+        padding: 24px 18px;
+    }
+
+    .lecturer-page .welcome-logo {
         display: none;
+    }
+
+    .lecturer-page .welcome-content h2 {
+        font-size: 23px;
     }
 }

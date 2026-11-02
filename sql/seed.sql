@@ -15,7 +15,7 @@ TRUNCATE TABLE `hoc_ky`;
 TRUNCATE TABLE `nguoi_dung`;
 
 -- =============================================================================
--- 1. BẢNG NGƯỜI DÙNG (nguoi_dung) - 18 TÀI KHOẢN ĐẦY ĐỦ 3 PHÂN HỆ
+-- 1. BẢNG NGƯỜI DÙNG (nguoi_dung) - 26 TÀI KHOẢN ĐẦY ĐỦ 3 PHÂN HỆ
 -- =============================================================================
 INSERT INTO `nguoi_dung` (`id`, `ten_dang_nhap`, `mat_khau_hash`, `ho_ten`, `email`, `so_dien_thoai`, `vai_tro`, `ngay_tao`) VALUES
 -- 1.1. QUẢN TRỊ VIÊN HỆ THỐNG (Admin)
@@ -28,7 +28,7 @@ INSERT INTO `nguoi_dung` (`id`, `ten_dang_nhap`, `mat_khau_hash`, `ho_ten`, `ema
 (5, 'GV004', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'ThS Hoàng Bích Ngọc', 'ngoc.hb@studenthub.edu.vn', '0915678901', 'giang_vien', '2026-08-01 08:00:00'),
 (6, 'GV005', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'TS Vũ Đình Đạt', 'dat.vd@studenthub.edu.vn', '0916789012', 'giang_vien', '2026-08-01 08:00:00'),
 
--- 1.3. SINH VIÊN (12 Sinh viên đại diện các khóa K23, K24, K25)
+-- 1.3. SINH VIÊN (20 Sinh viên đại diện các khóa K23, K24, K25)
 (7,  'SV001', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Nguyễn Thu Trang', 'trang.nt@studenthub.edu.vn', '0934567890', 'sinh_vien', '2026-08-15 08:00:00'),
 (8,  'SV002', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Vũ Quốc Bảo', 'bao.vq@studenthub.edu.vn', '0945678901', 'sinh_vien', '2026-08-15 08:00:00'),
 (9,  'SV003', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Lê Hoàng Nam', 'nam.lh@studenthub.edu.vn', '0956789012', 'sinh_vien', '2026-08-15 08:00:00'),
@@ -40,7 +40,15 @@ INSERT INTO `nguoi_dung` (`id`, `ten_dang_nhap`, `mat_khau_hash`, `ho_ten`, `ema
 (15, 'SV009', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Dương Tuấn Kiệt', 'kiet.dt@studenthub.edu.vn', '0933445566', 'sinh_vien', '2026-08-15 08:00:00'),
 (16, 'SV010', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Ngô Phương Thảo', 'thao.np@studenthub.edu.vn', '0944556677', 'sinh_vien', '2026-08-15 08:00:00'),
 (17, 'SV011', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Đinh Trọng Hiếu', 'hieu.dt@studenthub.edu.vn', '0955667788', 'sinh_vien', '2026-08-15 08:00:00'),
-(18, 'SV012', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Lê Thanh Hằng', 'hang.lt@studenthub.edu.vn', '0966778899', 'sinh_vien', '2026-08-15 08:00:00');
+(18, 'SV012', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Lê Thanh Hằng', 'hang.lt@studenthub.edu.vn', '0966778899', 'sinh_vien', '2026-08-15 08:00:00'),
+(19, 'SV013', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Võ Minh Khang', 'khang.vm@studenthub.edu.vn', '0901122334', 'sinh_vien', '2026-08-15 08:00:00'),
+(20, 'SV014', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Nguyễn Bảo Ngọc', 'ngoc.nb@studenthub.edu.vn', '0902233445', 'sinh_vien', '2026-08-15 08:00:00'),
+(21, 'SV015', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Trần Gia Huy', 'huy.tg@studenthub.edu.vn', '0903344556', 'sinh_vien', '2026-08-15 08:00:00'),
+(22, 'SV016', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Phan Thảo Vy', 'vy.pt@studenthub.edu.vn', '0904455667', 'sinh_vien', '2026-08-15 08:00:00'),
+(23, 'SV017', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Đặng Quốc Khánh', 'khanh.dq@studenthub.edu.vn', '0905566778', 'sinh_vien', '2026-08-15 08:00:00'),
+(24, 'SV018', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Lý Mỹ Linh', 'linh.lm@studenthub.edu.vn', '0906677889', 'sinh_vien', '2026-08-15 08:00:00'),
+(25, 'SV019', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Hồ Nhật Nam', 'nam.hn@studenthub.edu.vn', '0907788990', 'sinh_vien', '2026-08-15 08:00:00'),
+(26, 'SV020', '$2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri', 'Cao Hoài An', 'an.ch@studenthub.edu.vn', '0908899001', 'sinh_vien', '2026-08-15 08:00:00');
 
 -- =============================================================================
 -- 2. BẢNG HỌC KỲ (hoc_ky) - KHUNG THỜI GIAN ĐÀO TẠO & CỔNG ĐĂNG KÝ
