@@ -12,13 +12,12 @@ if (
 }
 
 $username = $_SESSION['username'];
-$tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 
 // 2. Kết nối cơ sở dữ liệu
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = 'Quynh@24012006'; // Mật khẩu mặc định của XAMPP
+$dbPass = '03112006';
 
 try {
     $pdo = new PDO(
@@ -44,16 +43,34 @@ if (!$lopId || $lopId < 1) {
     exit;
 }
 
-// 4. Lấy thông tin lớp và kiểm tra quyền giảng viên
+// 4. Lấy thông tin giảng viên và kiểm tra quyền
 try {
-    // [TC 6]: Xác định ID giảng viên hiện tại từ Session
-    $currentLecturerId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
-    if ($currentLecturerId <= 0) {
-        $stmtGvId = $pdo->prepare("SELECT id FROM nguoi_dung WHERE ten_dang_nhap = :u AND vai_tro = 'giang_vien' LIMIT 1");
-        $stmtGvId->execute([':u' => $username]);
-        $currentLecturerId = (int)$stmtGvId->fetchColumn();
+    $stmtGiangVien = $pdo->prepare("
+        SELECT id, ho_ten, ten_dang_nhap
+        FROM nguoi_dung
+        WHERE ten_dang_nhap = :username
+          AND vai_tro = 'giang_vien'
+        LIMIT 1
+    ");
+
+    $stmtGiangVien->execute([
+        'username' => $username
+    ]);
+
+    $giangVien = $stmtGiangVien->fetch();
+
+    if (!$giangVien) {
+        http_response_code(403);
+        exit('Không tìm thấy tài khoản giảng viên.');
     }
 
+    $currentLecturerId = (int)$giangVien['id'];
+    $tenGiangVien = $giangVien['ho_ten'] ?: 'Giảng viên';
+
+    $_SESSION['user_id'] = $currentLecturerId;
+    $_SESSION['tenVaiTro'] = $tenGiangVien;
+
+    // Kiểm tra lớp có thuộc giảng viên hiện tại không
     $sqlLop = "
         SELECT
             lhp.id,
@@ -68,14 +85,15 @@ try {
         INNER JOIN hoc_ky hk
             ON hk.id = lhp.hoc_ky_id
         WHERE lhp.id = :lop_id
-          AND lhp.giang_vien_id = :current_lecturer_id
+          AND lhp.giang_vien_id = :giang_vien_id
         LIMIT 1
     ";
 
     $stmtLop = $pdo->prepare($sqlLop);
+
     $stmtLop->execute([
         'lop_id' => $lopId,
-        'current_lecturer_id' => $currentLecturerId
+        'giang_vien_id' => $currentLecturerId
     ]);
 
     $lop = $stmtLop->fetch();
@@ -99,11 +117,15 @@ try {
         WHERE dk.lop_hoc_phan_id = :lop_id
           AND dk.trang_thai = 'dang_ky'
           AND sv.vai_tro = 'sinh_vien'
-        ORDER BY sv.ten_dang_nhap
+        ORDER BY sv.ten_dang_nhap ASC
     ";
 
     $stmtSinhVien = $pdo->prepare($sqlSinhVien);
-    $stmtSinhVien->execute(['lop_id' => $lopId]);
+
+    $stmtSinhVien->execute([
+        'lop_id' => $lopId
+    ]);
+
     $sinhVienList = $stmtSinhVien->fetchAll();
 
     $tongSinhVien = count($sinhVienList);
@@ -113,7 +135,7 @@ try {
     exit('Không thể tải danh sách sinh viên. Vui lòng kiểm tra cấu trúc database.');
 }
 
-// 6. Hàm hỗ trợ hiển thị
+// 6. Hàm bảo vệ dữ liệu khi hiển thị
 function e($value): string
 {
     return htmlspecialchars(
@@ -132,59 +154,76 @@ function e($value): string
 
     <title>Sinh viên theo lớp - StudentHub</title>
 
-    <!-- Giữ nguyên đường dẫn CSS hiện tại -->
     <link rel="stylesheet" href="../../../assets/css/giangvien.css">
 </head>
 
 <body class="lecturer-page">
 
-<header class="header">
-    <div class="brand">
-        <div class="brand-icon">S</div>
-        <div>
-            <h1>StudentHub</h1>
-            <p>CỔNG THÔNG TIN GIẢNG VIÊN</p>
-        </div>
-    </div>
-
-    <div class="user-info">
-        <div class="avatar">GV</div>
-        <div>
-            <strong><?= e($tenGiangVien) ?></strong>
-            <small>Mã tài khoản: <?= e($username) ?></small>
-        </div>
-    </div>
-</header>
-
 <div class="layout">
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">S</div>
+            <div>
+                <h1>StudentHub</h1>
+                <p>CỔNG THÔNG TIN GIẢNG VIÊN</p>
+            </div>
+        </div>
+
         <p class="menu-title">MENU CHÍNH</p>
 
         <a href="index.php" class="menu-item">
-            <span>▦</span> Tổng quan
+            <span>▦</span>
+            Tổng quan
         </a>
 
         <a href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
            class="menu-item">
-            <span>▤</span> Lớp học phần
+            <span>▤</span>
+            Lớp học phần
         </a>
 
         <a href="sinh_vien.php?lop_id=<?= (int)$lop['id'] ?>"
            class="menu-item active">
-            <span>♙</span> Sinh viên theo lớp
+            <span>♙</span>
+            Sinh viên theo lớp
         </a>
 
         <div class="sidebar-bottom">
-            <a href="../../../public/index.php"
-               class="menu-item logout">
-                <span>⇥</span> Quay lại đăng nhập
+            <a href="../../../public/index.php" class="menu-item logout">
+                <span>⇥</span>
+                Quay lại đăng nhập
             </a>
         </div>
+
     </aside>
 
+    <!-- NỘI DUNG CHÍNH -->
     <main class="main-content">
 
+        <!-- TOPBAR -->
+        <header class="student-topbar">
+
+            <div class="breadcrumb">
+                <span>Giảng viên</span>
+                <span>/</span>
+                <strong>Sinh viên theo lớp</strong>
+            </div>
+
+            <div class="profile-pill">
+                <div class="profile-avatar">GV</div>
+
+                <div class="profile-details">
+                    <strong><?= e($tenGiangVien) ?></strong>
+                    <small>Mã tài khoản: <?= e($username) ?></small>
+                </div>
+            </div>
+
+        </header>
+
+        <!-- TIÊU ĐỀ TRANG -->
         <div class="page-heading">
             <div>
                 <h2>Danh sách sinh viên</h2>
@@ -197,23 +236,15 @@ function e($value): string
             <span class="today" id="today"></span>
         </div>
 
-        <!-- THỐNG KÊ SINH VIÊN -->
-        <section class="stats">
-            <div class="stat-card">
-                <div class="stat-icon blue">♙</div>
-                <div>
-                    <p>Sinh viên đã đăng ký</p>
-                    <h3><?= $tongSinhVien ?></h3>
-                </div>
-            </div>
-        </section>
 
-        <!-- THÔNG TIN LỚP -->
+        <!-- DANH SÁCH SINH VIÊN -->
         <section class="panel">
 
             <div class="panel-heading">
+
                 <div>
                     <h3>Thông tin lớp học phần</h3>
+
                     <p>
                         Mã lớp: <?= e($lop['ma_lop']) ?>
                         |
@@ -224,14 +255,14 @@ function e($value): string
                 </div>
 
                 <div class="student-actions">
+
                     <input
                         type="search"
                         id="searchStudent"
                         placeholder="Tìm mã SV hoặc họ tên..."
-                        aria-label="Tìm sinh viên"
+                        aria-label="Tìm kiếm sinh viên"
                     >
 
-                    <!-- NÚT XUẤT PDF -->
                     <button
                         type="button"
                         id="btnExportPDF"
@@ -239,12 +270,16 @@ function e($value): string
                     >
                         ⬇ Xuất PDF
                     </button>
+
                 </div>
+
             </div>
 
-            <!-- TIÊU ĐỀ CHỈ HIỆN KHI IN / XUẤT PDF -->
+            <!-- THÔNG TIN DÀNH CHO BẢN IN -->
             <div class="pdf-header">
+
                 <h1>STUDENTHUB</h1>
+
                 <h2>DANH SÁCH SINH VIÊN THEO LỚP HỌC PHẦN</h2>
 
                 <p>
@@ -276,11 +311,14 @@ function e($value): string
                     <strong>Ngày xuất:</strong>
                     <?= date('d/m/Y') ?>
                 </p>
+
             </div>
 
-            <!-- DANH SÁCH SINH VIÊN -->
+            <!-- BẢNG SINH VIÊN -->
             <div class="table-wrapper">
+
                 <table>
+
                     <thead>
                         <tr>
                             <th>STT</th>
@@ -292,14 +330,19 @@ function e($value): string
                     </thead>
 
                     <tbody id="studentTable">
+
                     <?php if (empty($sinhVienList)): ?>
+
                         <tr>
                             <td colspan="5" class="empty">
                                 Chưa có sinh viên đăng ký lớp học phần này.
                             </td>
                         </tr>
+
                     <?php else: ?>
+
                         <?php foreach ($sinhVienList as $index => $sv): ?>
+
                             <tr>
                                 <td><?= $index + 1 ?></td>
                                 <td><?= e($sv['ten_dang_nhap']) ?></td>
@@ -307,17 +350,27 @@ function e($value): string
                                 <td><?= e($sv['email']) ?></td>
                                 <td><?= e($sv['so_dien_thoai']) ?></td>
                             </tr>
+
                         <?php endforeach; ?>
+
                     <?php endif; ?>
+
                     </tbody>
+
                 </table>
+
             </div>
 
-            <div class="panel-footer" style="margin-top: 20px;">
-                <a href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
-                   class="menu-item">
+            <!-- QUAY LẠI -->
+            <div class="back-action">
+
+                <a
+                    href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
+                    class="back-button"
+                >
                     ← Quay lại danh sách lớp học phần
                 </a>
+
             </div>
 
         </section>
@@ -327,6 +380,7 @@ function e($value): string
         </footer>
 
     </main>
+
 </div>
 
 <script>
@@ -334,26 +388,29 @@ function e($value): string
     const today = document.getElementById('today');
 
     if (today) {
-        today.textContent =
-            new Date().toLocaleDateString('vi-VN');
+        today.textContent = new Date().toLocaleDateString('vi-VN');
     }
 
     // Tìm kiếm sinh viên
-    document.getElementById('searchStudent')
-        ?.addEventListener('input', function () {
+    const searchStudent = document.getElementById('searchStudent');
+
+    if (searchStudent) {
+        searchStudent.addEventListener('input', function () {
             const keyword = this.value.toLocaleLowerCase('vi');
 
-            document.querySelectorAll('#studentTable tr')
-                .forEach(function (row) {
-                    row.hidden = !row.textContent
-                        .toLocaleLowerCase('vi')
-                        .includes(keyword);
-                });
+            document.querySelectorAll('#studentTable tr').forEach(function (row) {
+                row.hidden = !row.textContent
+                    .toLocaleLowerCase('vi')
+                    .includes(keyword);
+            });
         });
+    }
 
-    // XUẤT DANH SÁCH SINH VIÊN THÀNH PDF
-    document.getElementById('btnExportPDF')
-        ?.addEventListener('click', function () {
+    // Xuất danh sách sinh viên thành PDF
+    const btnExportPDF = document.getElementById('btnExportPDF');
+
+    if (btnExportPDF) {
+        btnExportPDF.addEventListener('click', function () {
             const titleCu = document.title;
 
             document.title =
@@ -364,6 +421,7 @@ function e($value): string
 
             document.title = titleCu;
         });
+    }
 </script>
 
 </body>

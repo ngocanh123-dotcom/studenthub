@@ -1,5 +1,4 @@
-<<<<<<< HEAD
--- ==========================================
+
 -- DỮ LIỆU MẪU BỔ SUNG (Do Kim Anh thêm)
 -- ==========================================
 
@@ -18,14 +17,6 @@ INSERT INTO lop_hoc_phan (ma_lop, hoc_phan_id, hoc_ky_id, giang_vien_id, si_so_t
 INSERT INTO lop_hoc_phan (ma_lop, hoc_phan_id, hoc_ky_id, giang_vien_id, si_so_toi_da, trang_thai) VALUES
 ('WEB102-03', 3, 3, 3, 30, 'mo'),
 ('MAT101-03', 1, 3, 2, 40, 'mo');
-=======
--- =============================================================================
--- CSDL HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
--- File: seed.sql (Dữ liệu mẫu chuẩn hóa đại học thực tế)
--- Phiên bản: 2.0 - Phục vụ kiểm thử toàn diện 3 vai trò (Sinh viên, Giảng viên, Admin)
--- Mật khẩu mặc định đồng nhất cho TẤT CẢ tài khoản: 123456 (hoặc password)
--- Hash Bcrypt: $2y$10$Knpw6PuRu8HeFmmuvzjzUOmK4IMoR03PcaOxqZ53TnuMRR0BxF2ri
--- =============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 

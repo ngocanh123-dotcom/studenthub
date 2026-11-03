@@ -260,7 +260,7 @@ if (!$lopId || $lopId <= 0) {
                 ]);
 
             } else {
-<<<<<<< HEAD
+
                 if ($dangKyCu) {
 
                     $stmt = $pdo->prepare("
@@ -296,7 +296,7 @@ if (!$lopId || $lopId <= 0) {
 
                 $thongBao = 'Đăng ký học phần thành công!';
                 $loaiThongBao = 'success';
-=======
+
                 // Tạo bản ghi đăng ký mới
                 $stmt = $pdo->prepare("
                     INSERT INTO dang_ky_hoc
@@ -309,7 +309,7 @@ if (!$lopId || $lopId <= 0) {
                     'lop_id' => $lopId,
                     'sv_id'  => $sinhVienId
                 ]);
->>>>>>> ecf41f69be407f3cf84945b67f61f8da7f50cd82
+
             }
 
             $thongBao = 'Đăng ký học phần thành công!';

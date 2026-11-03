@@ -23,7 +23,7 @@ if (!isset($pdo) || !($pdo instanceof PDO)) {
         $pdo = new PDO(
             'mysql:host=localhost;dbname=studenthub;charset=utf8mb4',
             'root',
-            getenv('STUDENTHUB_DB_PASS') ?: '',
+            getenv('STUDENTHUB_DB_PASS') ?: '03112006',
             [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
