@@ -64,16 +64,12 @@ class DanhSachLopHocPhanController {
      * Hiển thị danh sách lớp học phần theo môn cho sinh viên
      */
     public function index(): void {
-        // Thông tin sinh viên đang đăng nhập
-        if (!isset($_SESSION['nguoi_dung_id']) && !isset($_SESSION['user_id'])) {
-            $_SESSION['nguoi_dung_id'] = 4;
-            $_SESSION['username']      = 'SV001';
-            $_SESSION['ho_ten']        = 'Nguyễn Thu Trang';
-            $_SESSION['role']          = 'sinhvien';
-        }
-        $sinh_vien_id_hien_tai = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 4);
-        $hoTen                 = $_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang';
-        $maSinhVien            = $_SESSION['username'] ?? 'SV001';
+        // Thông tin người dùng: chỉ tin vào session thật, không tự gán đăng nhập giả
+        $isStudent = (($_SESSION['role'] ?? '') === 'sinhvien') && (int)($_SESSION['user_id'] ?? 0) > 0;
+        $isGuest   = !$isStudent;
+        $sinh_vien_id_hien_tai = $isStudent ? (int)$_SESSION['user_id'] : 0;
+        $hoTen                 = $isStudent ? ($_SESSION['ho_ten'] ?? 'Sinh viên') : 'Khách';
+        $maSinhVien            = $isStudent ? ($_SESSION['username'] ?? '') : 'Chưa đăng nhập';
 
         // Nhận tham số tìm kiếm & bộ lọc từ $_GET
         $tu_khoa       = trim($_GET['tu_khoa'] ?? '');

@@ -5,6 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $sinhVienId = (int)($_SESSION['nguoi_dung_id'] ?? $_SESSION['user_id'] ?? 0);
+if ($sinhVienId <= 0) {
+    header('Location: /studenthub/public/index.php?error=login_required');
+    exit;
+}
 // Tạo mã bảo mật cho thao tác hủy đăng ký
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -850,7 +854,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                             <?php if ($sinhVienId <= 0): ?>
                                 <a class="registration-button registration-button-primary"
-                                   href="/studenthub/public/dang_nhap.php">Đăng nhập</a>
+                                   href="/studenthub/public/index.php">Đăng nhập</a>
                             <?php elseif ($coTheDangKy): ?>
                                 <a class="registration-button registration-button-primary"
                                    href="dang_ky_hoc.php?lop_hoc_phan_id=<?= $idLop ?>">

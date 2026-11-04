@@ -1,6 +1,4 @@
--- ==========================================
--- DỮ LIỆU MẪU BỔ SUNG (Do Kim Anh thêm)
--- ==========================================
+
 
 -- 1. Thêm 2 học kỳ mới
 INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky) VALUES 

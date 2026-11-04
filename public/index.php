@@ -95,6 +95,14 @@ $roleAliases = [
 
 $thongBao = '';
 $loaiThongBao = '';
+$loiGet = (string)($_GET['error'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $loiGet !== '') {
+    $thongBaoGet = ['login_required' => 'Vui lòng đăng nhập để sử dụng chức năng này.', 'forbidden' => 'Bạn không có quyền truy cập khu vực này.'];
+    if (isset($thongBaoGet[$loiGet])) {
+        $thongBao = $thongBaoGet[$loiGet];
+        $loaiThongBao = 'error';
+    }
+}
 $username = '';
 $role = 'sinhvien';
 
@@ -315,18 +323,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Chuẩn 1: Xác thực bằng password_verify
             if (!empty($dbHash) && password_verify($password, $dbHash)) {
                 $isPasswordValid = true;
-            } 
-            // Chuẩn 2 (Tương thích dự phòng): Mật khẩu dạng Plain-text hoặc MD5 hoặc pass dùng chung '123456' / 'password'
-            elseif ($password === $dbHash || md5($password) === $dbHash || $password === '123456' || $password === 'password') {
-                $isPasswordValid = true;
-                // Tự động nâng cấp băm mật khẩu chuẩn bảo mật BCRYPT vào CSDL
-                try {
-                    $newHash = password_hash($password, PASSWORD_DEFAULT);
-                    $updateStmt = $pdo->prepare("UPDATE nguoi_dung SET mat_khau_hash = :hash WHERE id = :id");
-                    $updateStmt->execute([':hash' => $newHash, ':id' => $userDb['id']]);
-                } catch (PDOException $e) {
-                    error_log('Lỗi tự động rehash mật khẩu: ' . $e->getMessage());
-                }
             }
 
             if ($isPasswordValid) {

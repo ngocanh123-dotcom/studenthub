@@ -29,7 +29,8 @@ if (!in_array($vaiTro, ['sinhvien', 'sinh_vien'], true)) {
     );
 }
 
-$lopId = filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
+$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT)
+    ?: filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
 $thongBao = '';
 $loaiThongBao = 'error';
 
@@ -85,11 +86,15 @@ if (!$lopId || $lopId <= 0) {
         // Bắt đầu giao dịch để kiểm tra và cập nhật dữ liệu.
         $pdo->beginTransaction();
 
-        // Lấy thông tin lớp được chọn và mã học phần của lớp.
+        // Lấy thông tin lớp được chọn kèm trạng thái và thời gian mở cổng của HỌC KỲ.
         $stmtLop = $pdo->prepare("
-            SELECT id, ma_lop, hoc_phan_id, trang_thai, si_so_toi_da, thoi_gian_mo_rieng, thoi_gian_dong_rieng
-            FROM lop_hoc_phan
-            WHERE id = :lop_id
+            SELECT 
+                lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.trang_thai, lhp.si_so_toi_da, 
+                lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
+                hk.trang_thai_dang_ky AS hk_status, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
+            FROM lop_hoc_phan AS lhp
+            INNER JOIN hoc_ky AS hk ON hk.id = lhp.hoc_ky_id
+            WHERE lhp.id = :lop_id
             LIMIT 1
             FOR UPDATE
         ");
@@ -136,9 +141,15 @@ if (!$lopId || $lopId <= 0) {
         ]);
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
+        $now = date('Y-m-d H:i:s');
         $nowTime = time();
+
         $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? strtotime($lop['thoi_gian_mo_rieng']) : null;
         $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? strtotime($lop['thoi_gian_dong_rieng']) : null;
+
+        $hkStatus = strtolower(trim((string) ($lop['hk_status'] ?? 'mo')));
+        $moHK = !empty($lop['thoi_gian_mo_dk']) ? $lop['thoi_gian_mo_dk'] : null;
+        $dongHK = !empty($lop['thoi_gian_dong_dk']) ? $lop['thoi_gian_dong_dk'] : null;
 
         if ($dangKyCu && $dangKyCu['trang_thai'] === 'dang_ky') {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
@@ -146,12 +157,22 @@ if (!$lopId || $lopId <= 0) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
                 . $lopTrungHocPhan['ma_lop']
                 . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
+        } elseif ($hkStatus !== 'mo') {
+            // Chặn khi học kỳ đang đóng cổng đăng ký
+            $thongBao = 'Học kỳ của lớp học phần này hiện đang đóng cổng đăng ký.';
+        } elseif ($moHK && $now < $moHK) {
+            // Chặn khi chưa đến ngày mở cổng của học kỳ
+            $thongBao = 'Học kỳ chưa đến thời gian mở cổng đăng ký học phần.';
+        } elseif ($dongHK && $now > $dongHK) {
+            // Chặn khi đã quá hạn đăng ký của học kỳ
+            $thongBao = 'Học kỳ đã kết thúc thời gian đăng ký học phần.';
+        } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
+            // Chặn khi lớp bị khóa riêng bởi Admin
+            $thongBao = 'Lớp học phần hiện không mở đăng ký (đã khóa).';
         } elseif ($moRieng && $nowTime < $moRieng) {
             $thongBao = 'Lớp học phần chưa đến hạn mở đăng ký (Đã khóa).';
         } elseif ($dongRieng && $nowTime > $dongRieng) {
             $thongBao = 'Lớp học phần đã hết hạn đăng ký (Đã khóa).';
-        } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
-            $thongBao = 'Lớp học phần hiện không mở đăng ký.';
         } else {
             // Đếm số sinh viên đã đăng ký và chưa hủy trong lớp.
             $stmtSiSo = $pdo->prepare("
@@ -183,7 +204,7 @@ if (!$lopId || $lopId <= 0) {
                         'lop_id' => $lopId,
                     ]);
                 } else {
-                    // Chưa có bản ghi: tạo đăng ký mới.
+                    // Chưa có bản ghi: tạo đăng ký mới (chỉ 1 lần duy nhất).
                     $stmt = $pdo->prepare("
                         INSERT INTO dang_ky_hoc
                             (lop_hoc_phan_id, sinh_vien_id, trang_thai)
