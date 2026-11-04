@@ -88,8 +88,8 @@ if (!$lopId || $lopId <= 0) {
 
         // Lấy thông tin lớp được chọn kèm trạng thái và thời gian mở cổng của HỌC KỲ.
         $stmtLop = $pdo->prepare("
-            SELECT 
-                lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.trang_thai, lhp.si_so_toi_da, 
+            SELECT
+                lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.trang_thai, lhp.si_so_toi_da,
                 lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
                 hk.trang_thai_dang_ky AS hk_status, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
             FROM lop_hoc_phan AS lhp
