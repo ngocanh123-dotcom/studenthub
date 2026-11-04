@@ -2,7 +2,6 @@
 /**
  * app/Views/layouts/admin_sidebar.php
  * Thanh điều hướng Sidebar cho Quản trị viên (Admin)
- * Phong cách thẩm mỹ đồng bộ 100% với Cổng Sinh viên
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -11,15 +10,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $currentUri = $_SERVER['REQUEST_URI'] ?? '';
 
-// Tự động nhận diện trang active nếu biến $activeMenu chưa được truyền từ View cha
+// Tự động nhận diện trang active
 if (!isset($activeMenu) || empty($activeMenu)) {
-    if (strpos($currentUri, 'tai_khoan.php') !== false) {
+    if (strpos($currentUri, 'tai_khoan') !== false) {
         $activeMenu = 'tai_khoan';
-    } elseif (strpos($currentUri, 'hoc_phan.php') !== false) {
+    } elseif (strpos($currentUri, 'hoc_phan') !== false && strpos($currentUri, 'lop') === false) {
         $activeMenu = 'hoc_phan';
-    } elseif (strpos($currentUri, 'hoc_ky.php') !== false) {
+    } elseif (strpos($currentUri, 'hoc_ky') !== false) {
         $activeMenu = 'hoc_ky';
-    } elseif (strpos($currentUri, 'lop_hoc_phan.php') !== false || strpos($currentUri, '/classes/') !== false || strpos($currentUri, 'admin_lop_hoc_phan') !== false) {
+    } elseif (strpos($currentUri, 'lop_hoc_phan') !== false) {
         $activeMenu = 'lop_hoc_phan';
     } else {
         $activeMenu = 'index';
@@ -29,8 +28,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
 
 <aside class="sidebar sh-sidebar">
     <div class="sidebar-top-group">
-        <!-- Khối Logo & Tiêu đề Brand -->
-        <a href="/studenthub/app/Views/admin/index.php" class="brand sidebar-brand-box">
+        <!-- Logo -->
+       <a href="/studenthub/app/Views/admin/index.php" class="brand sidebar-brand-box">
             <div class="brand-icon brand-icon-s">S</div>
             <div class="brand-info">
                 <strong>StudentHub</strong>
@@ -38,10 +37,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
             </div>
         </a>
 
-        <!-- Tiêu đề phân mục -->
         <div class="menu-title sidebar-category-title">QUẢN TRỊ HỆ THỐNG</div>
 
-        <!-- Danh sách 5 Menu Items chính của Quản trị viên -->
         <nav class="menu sidebar-menu-list">
             <!-- 1. Tổng quan -->
             <a href="/studenthub/app/Views/admin/index.php" class="menu-link sh-nav-item <?= $activeMenu === 'index' ? 'active' : '' ?>">
@@ -52,7 +49,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Tổng quan</span>
             </a>
 
-            <!-- 2. Quản lý tài khoản -->
+            <!-- 2. Quản lý tài khoản (Trỏ về app/Views vì chưa chuyển MVC) -->
             <a href="/studenthub/app/Views/admin/tai_khoan.php" class="menu-link sh-nav-item <?= $activeMenu === 'tai_khoan' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -63,7 +60,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Quản lý tài khoản</span>
             </a>
 
-            <!-- 3. Quản lý học phần -->
+            <!-- 3. Quản lý học phần (Trỏ về app/Views vì chưa chuyển MVC) -->
             <a href="/studenthub/app/Views/admin/hoc_phan.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_phan' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -74,8 +71,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Quản lý học phần</span>
             </a>
 
-            <!-- 4. Quản lý học kỳ -->
-            <a href="/studenthub/app/Views/admin/hoc_ky.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_ky' ? 'active' : '' ?>">
+            <!-- 4. Quản lý học kỳ (ĐÃ CHUYỂN MVC -> Trỏ về public) -->
+            <a href="/studenthub/public/index.php?route=admin_hoc_ky.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_ky' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
@@ -85,8 +82,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Quản lý học kỳ</span>
             </a>
 
-            <!-- 5. Quản lý lớp học phần -->
-            <a href="/studenthub/app/Views/admin/lop_hoc_phan.php" class="menu-link sh-nav-item <?= $activeMenu === 'lop_hoc_phan' ? 'active' : '' ?>">
+            <!-- 5. Quản lý lớp học phần (ĐÃ CHUYỂN MVC -> Trỏ về public) -->
+            <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php" class="menu-link sh-nav-item <?= $activeMenu === 'lop_hoc_phan' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
                     <path d="M6 12v5c3 3 9 3 12 0v-5"/>
@@ -96,7 +93,6 @@ if (!isset($activeMenu) || empty($activeMenu)) {
         </nav>
     </div>
 
-    <!-- Khu vực chân Sidebar (Footer Action) -->
     <div class="sidebar-bottom sidebar-footer-action">
         <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-link change-pass-link sh-nav-item" style="color: #38bdf8;">
             <span style="font-size: 16px;">🔑</span> <span>Đổi mật khẩu</span>
@@ -110,7 +106,6 @@ if (!isset($activeMenu) || empty($activeMenu)) {
             <span>Đăng xuất</span>
         </a>
 
-        <!-- Thẻ thông tin phiên làm việc -->
         <div class="sidebar-semester-pill sidebar-note">
             <div class="semester-status-line">
                 <span class="status-dot green-dot"></span>

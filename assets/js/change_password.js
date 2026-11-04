@@ -377,7 +377,7 @@ function submitChangePassword(event) {
     payload.append('new_password', newPass);
     payload.append('confirm_password', confirmPass);
 
-    fetch('/studenthub/public/doi_mat_khau.php', {
+    fetch('/studenthub/public/index.php?route=doi_mat_khau.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

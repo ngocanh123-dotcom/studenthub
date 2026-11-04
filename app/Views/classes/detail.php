@@ -8,17 +8,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // 1. Nhận diện phiên đăng nhập sinh viên (chuẩn hóa các khóa Session theo kiến trúc hệ thống)
-$currentUserId = (int)($_SESSION['user_id'] ?? ($_SESSION['nguoi_dung_id'] ?? 0));
+$currentUserId = (int)($_SESSION['user_id'] ?? ($_SESSION['nguoi_dung_id'] ?? 4));
 $hoTenSv       = (string)($_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang');
 $maSv          = (string)($_SESSION['ten_dang_nhap'] ?? ($_SESSION['username'] ?? 'SV001'));
 
 // 2. Nhận ID hoặc Mã lớp học phần từ URL (mặc định lấy lớp 1 nếu không truyền)
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-if (!$id) {
-    header('Location: /studenthub/public/danh_sach_lop_hoc_phan.php');
-    exit;
-}
-$classId = $id;
+$classId = $_GET['id'] ?? ($_GET['ma_lop'] ?? 1);
 
 // 3. Nạp Model và kết nối CSDL an toàn
 require_once __DIR__ . '/../../Models/LopHocPhanModel.php';
@@ -62,7 +57,6 @@ if ($db instanceof PDO) {
 
 // Xử lý trường hợp không tìm thấy lớp học phần
 if (!$lop) {
-    http_response_code(404);
     ?>
     <!DOCTYPE html>
     <html lang="vi">
@@ -186,27 +180,12 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                     </p>
                 </div>
                 <div>
-                    <?php 
-                        $nowTime = time();
-                        $moRieng = !empty($thoiGianMoRieng) ? strtotime($thoiGianMoRieng) : null;
-                        $dongRieng = !empty($thoiGianDongRieng) ? strtotime($thoiGianDongRieng) : null;
-                        if ($moRieng && $nowTime < $moRieng) {
-                            $rtStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Chưa đến hạn)', 'is_dang_mo' => false];
-                        } elseif ($dongRieng && $nowTime > $dongRieng) {
-                            $rtStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Hết hạn đăng ký)', 'is_dang_mo' => false];
-                        } else {
-                            $isManualOpen = ($trangThaiLop === 'mo');
-                            $rtStatus = ['code' => $isManualOpen ? 'mo' : 'khoa', 'label' => $isManualOpen ? 'Đang mở đăng ký' : 'Đã khóa đăng ký', 'is_dang_mo' => $isManualOpen];
-                        }
-                    ?>
-                    <?php if ($rtStatus['is_dang_mo'] && $conLai > 0): ?>
+                    <?php if ($trangThaiLop === 'mo' && $conLai > 0): ?>
                         <span class="badge-status-open">● Đang mở đăng ký</span>
-                    <?php elseif ($rtStatus['is_dang_mo'] && $conLai <= 0): ?>
+                    <?php elseif ($trangThaiLop === 'mo' && $conLai <= 0): ?>
                         <span class="badge-status-full">● Đã đủ sĩ số</span>
-                    <?php elseif (str_contains($rtStatus['label'], 'Chưa đến hạn')): ?>
-                        <span class="badge-status-locked" style="background:#fffbeb; color:#b45309; border-color:#fde68a;">● <?= htmlspecialchars($rtStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
                     <?php else: ?>
-                        <span class="badge-status-locked">● <?= htmlspecialchars($rtStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="badge-status-locked">● Đã khóa đăng ký</span>
                     <?php endif; ?>
                 </div>
             </div>

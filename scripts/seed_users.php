@@ -1,5 +1,10 @@
 
 <?php
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
 require_once __DIR__ . '/../config/database.php';
 
 $taiKhoanMau = [
@@ -31,7 +36,7 @@ try {
             (ten_dang_nhap, mat_khau_hash, ho_ten, email, vai_tro)
             VALUES (:username, :password, :name, :email, :role)";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     foreach ($taiKhoanMau as $tk) {
         $stmt->execute([

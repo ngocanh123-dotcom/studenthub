@@ -406,7 +406,7 @@
                     <span>Danh sách lớp học phần</span>
                 </a>
 
-                <a href="<?= $isGuest ? '/studenthub/public/index.php?error=login_required' : '/studenthub/public/trang_dang_ky_hoc.php' ?>" class="sh-nav-item">
+                <a href="<?= $isGuest ? '/studenthub/public/index.php?error=login_required' : '/studenthub/public/index.php?route=trang_dang_ky_hoc.php' ?>" class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -414,7 +414,7 @@
                     <span>Đăng ký học phần</span>
                 </a>
 
-                <a href="<?= $isGuest ? '/studenthub/public/index.php?error=login_required' : '/studenthub/public/lich_su_dang_ky.php' ?>" class="sh-nav-item">
+                <a href="<?= $isGuest ? '/studenthub/public/index.php?error=login_required' : '/studenthub/public/index.php?route=lich_su_dang_ky.php' ?>" class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 14 14"></polyline>
@@ -440,7 +440,7 @@
 
         <!-- HỌC KỲ ĐANG MỞ CỔNG ĐĂNG KÝ (ĐỒNG BỘ 100% TỪ QUẢN LÝ HỌC KỲ ADMIN) -->
         <div class="sidebar-semester-pill">
-            <?php 
+            <?php
                 $fmtSideTime = static function(?string $dt): string {
                     if (empty($dt)) return '';
                     $ts = strtotime($dt);
@@ -535,6 +535,7 @@
 
             <!-- THANH TÌM KIẾM & BỘ LỌC -->
             <form method="GET" action="/studenthub/public/index.php" class="filter-bar">
+                <input type="hidden" name="route" value="danh_sach_lop_hoc_phan.php">
                 <input type="hidden" name="route" value="danh_sach_lop_hoc_phan">
                 <input type="text" name="tu_khoa" class="input-control"
                        placeholder="Tìm mã HP, tên môn học (có thể để trống để lọc theo học kỳ)..."
@@ -595,9 +596,9 @@
                         Không tìm thấy môn học phần nào mở trong học kỳ hoặc điều kiện lọc này.
                     </div>
                 <?php else: ?>
-                    <?php 
+                    <?php
                     $index = 0;
-                    foreach ($nhom_hoc_phan as $group_key => $mon): 
+                    foreach ($nhom_hoc_phan as $group_key => $mon):
                         $index++;
                         $is_open = ($index === 1 || $hoc_ky_id !== '' || $tu_khoa !== '' || $giang_vien_id !== '');
                     ?>
@@ -632,7 +633,7 @@
 
                             <!-- DANH SÁCH CÁC LỚP CON -->
                             <div class="course-classes-body">
-                                <?php foreach ($mon['ds_lop'] as $lop): 
+                                <?php foreach ($mon['ds_lop'] as $lop):
                                     // 1. Lịch học cụ thể của lớp học phần (lhp.lich_hoc, lhp.phong_hoc)
                                     $lichHoc = !empty($lop['lich_hoc']) ? trim($lop['lich_hoc']) : 'Chưa xếp lịch';
                                     $phongHoc = !empty($lop['phong_hoc']) ? trim($lop['phong_hoc']) : '';
