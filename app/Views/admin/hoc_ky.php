@@ -9,27 +9,35 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
     <title>Quản lý học kỳ | StudentHub</title>
     <link rel="stylesheet" href="/studenthub/assets/css/quantrivien.css">
     <style>
-        /* Giữ nguyên toàn bộ CSS bạn đã có */
         .banner-highlight { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 16px; padding: 30px; color: white; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); }
         .banner-highlight h2 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; color: #fff; }
         .banner-highlight p { margin: 0; font-size: 15px; color: #e0e7ff; }
+        
         .section-card { background: #fff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); margin-bottom: 30px; border: 1px solid #e2e8f0; }
         .section-card h3 { margin-top: 0; font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* CSS CHO FORM 2 CỘT */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .form-column .form-field { margin-bottom: 20px; }
+        .form-column .form-field:last-child { margin-bottom: 0; }
+        
         .form-field label { display: block; font-weight: 600; margin-bottom: 8px; color: #475569; font-size: 14px; }
         .form-field input, .form-field select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; transition: 0.2s; }
         .form-field input:focus, .form-field select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
         .table-modern { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
         .table-modern th { padding: 15px; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; text-align: left; border-bottom: 2px solid #e2e8f0; }
         .table-modern td { padding: 15px; background: #fff; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         .table-modern tr td:first-child { border-left: 1px solid #e2e8f0; border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
         .table-modern tr td:last-child { border-right: 1px solid #e2e8f0; border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
         .table-modern tbody tr:hover td { background: #f8fafc; }
+        
         .btn-view-class { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
         .btn-view-class:hover { background: #dbeafe; transform: translateY(-1px); }
         .btn-toggle-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
         .btn-toggle-on { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .btn-toggle-off { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
         .detail-row { background: #f8fafc; }
         .detail-row td { padding: 0; border: none; }
         .detail-container { padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px; margin: 10px 0; background: #fff; }
@@ -65,24 +73,39 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             <!-- FORM THÊM / SỬA -->
             <div class="section-card">
                 <h3><?= !empty($duLieuSua['id']) ? '✏️ Cập nhật học kỳ' : '➕ Thêm học kỳ mới' ?></h3>
-                <!-- LƯU Ý ĐỔI ACTION VỀ admin_hoc_ky.php -->
                 <form method="POST" action="admin_hoc_ky.php">
                     <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                     <input type="hidden" name="hanh_dong" value="<?= !empty($duLieuSua['id']) ? 'sua' : 'them' ?>">
                     <input type="hidden" name="id" value="<?= e($duLieuSua['id']) ?>">
                     
                     <div class="form-grid">
-                        <div class="form-field"><label>Tên học kỳ *</label><input type="text" name="ten_hoc_ky" required placeholder="VD: Học kỳ 1 năm 2026-2027" value="<?= e($duLieuSua['ten_hoc_ky']) ?>"></div>
-                        <div class="form-field"><label>Trạng thái Đăng ký *</label>
-                            <select name="trang_thai_dang_ky">
-                                <option value="1" <?= $duLieuSua['trang_thai_dang_ky'] == 1 ? 'selected' : '' ?>>🟢 Mở cổng đăng ký (Sinh viên được ĐK)</option>
-                                <option value="0" <?= $duLieuSua['trang_thai_dang_ky'] == 0 ? 'selected' : '' ?>>🔴 Đóng cổng đăng ký (Chặn Sinh viên)</option>
-                            </select>
+                        <!-- CỘT BÊN TRÁI: THÔNG TIN HỌC KỲ -->
+                        <div class="form-column">
+                            <div class="form-field">
+                                <label>Tên học kỳ *</label>
+                                <input type="text" name="ten_hoc_ky" required placeholder="VD: Học kỳ 1 năm 2026-2027" value="<?= e($duLieuSua['ten_hoc_ky']) ?>">
+                            </div>
+                            <div class="form-field">
+                                <label>Ngày bắt đầu *</label>
+                                <input type="date" name="ngay_bat_dau" required value="<?= e($duLieuSua['ngay_bat_dau']) ?>">
+                            </div>
+                            <div class="form-field">
+                                <label>Ngày kết thúc *</label>
+                                <input type="date" name="ngay_ket_thuc" required value="<?= e($duLieuSua['ngay_ket_thuc']) ?>">
+                            </div>
                         </div>
-                        <div class="form-field"><label>Ngày bắt đầu *</label><input type="date" name="ngay_bat_dau" required value="<?= e($duLieuSua['ngay_bat_dau']) ?>"></div>
-                        <div class="form-field"><label>Ngày kết thúc *</label><input type="date" name="ngay_ket_thuc" required value="<?= e($duLieuSua['ngay_ket_thuc']) ?>"></div>
-                        <div class="form-field"><label>Thời gian mở ĐK</label><input type="datetime-local" name="thoi_gian_mo_dk" value="<?= e($duLieuSua['thoi_gian_mo_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_mo_dk'])) : '') ?>"></div>
-                        <div class="form-field"><label>Thời gian đóng ĐK</label><input type="datetime-local" name="thoi_gian_dong_dk" value="<?= e($duLieuSua['thoi_gian_dong_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_dong_dk'])) : '') ?>"></div>
+
+                        <!-- CỘT BÊN PHẢI: THỜI GIAN ĐĂNG KÝ -->
+                        <div class="form-column">
+                            <div class="form-field">
+                                <label>Thời gian mở ĐK</label>
+                                <input type="datetime-local" name="thoi_gian_mo_dk" value="<?= e($duLieuSua['thoi_gian_mo_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_mo_dk'])) : '') ?>">
+                            </div>
+                            <div class="form-field">
+                                <label>Thời gian đóng ĐK</label>
+                                <input type="datetime-local" name="thoi_gian_dong_dk" value="<?= e($duLieuSua['thoi_gian_dong_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_dong_dk'])) : '') ?>">
+                            </div>
+                        </div>
                     </div>
                     
                     <div style="margin-top: 25px; display: flex; gap: 15px;">
@@ -139,6 +162,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         </div>
                                     </td>
                                     <td>
+                                        <!-- NÚT CÔNG TẮC KẨN CẤP (CHỈ ĐỔI TRẠNG THÁI) -->
                                         <form method="POST" action="admin_hoc_ky.php" style="margin:0;">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                             <input type="hidden" name="hanh_dong" value="toggle_status">
@@ -162,10 +186,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                 <tr id="detail-<?= $hk['id'] ?>" class="detail-row" style="display: none;">
                                     <td colspan="6">
                                         <div class="detail-container">
-                                            <?php 
-                                            // LẤY DỮ LIỆU TỪ MẢNG ĐÃ ĐƯỢC CONTROLLER TRUYỀN SANG
-                                            $dsLop = $dsLopTheoHocKy[$hk['id']] ?? []; 
-                                            ?>
+                                            <?php $dsLop = $dsLopTheoHocKy[$hk['id']] ?? []; ?>
                                             <?php if (empty($dsLop)): ?>
                                                 <p style="color: #64748b; font-style: italic; text-align: center; margin: 0;">Học kỳ này chưa có lớp học phần nào được mở.</p>
                                             <?php else: ?>

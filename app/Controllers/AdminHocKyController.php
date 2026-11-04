@@ -9,7 +9,6 @@ class AdminHocKyController {
         $this->model = new HocKyModel($conn);
         if (session_status() === PHP_SESSION_NONE) session_start();
         
-        // Kiểm tra quyền
         if (empty($_SESSION['username']) || !in_array(strtolower($_SESSION['role'] ?? ''), ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'])) {
             header('Location: /studenthub/public/index.php');
             exit;
@@ -23,9 +22,8 @@ class AdminHocKyController {
     public function index() {
         $thongBao = ''; $loaiThongBao = 'success';
         $tuKhoa = trim($_GET['q'] ?? '');
-        $duLieuSua = ['id' => '', 'ten_hoc_ky' => '', 'ngay_bat_dau' => '', 'ngay_ket_thuc' => '', 'thoi_gian_mo_dk' => '', 'thoi_gian_dong_dk' => '', 'trang_thai_dang_ky' => 1];
+        $duLieuSua = ['id' => '', 'ten_hoc_ky' => '', 'ngay_bat_dau' => '', 'ngay_ket_thuc' => '', 'thoi_gian_mo_dk' => '', 'thoi_gian_dong_dk' => ''];
 
-        // Lấy dữ liệu Sửa
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
             $idSua = (int) $_GET['sua'];
             if ($idSua > 0) {
@@ -34,7 +32,6 @@ class AdminHocKyController {
             }
         }
 
-        // Xử lý POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $csrfNhan = $_POST['csrf_token'] ?? '';
             if (!hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
@@ -58,18 +55,39 @@ class AdminHocKyController {
                         $ngayKetThuc = trim($_POST['ngay_ket_thuc'] ?? '');
                         $thoiGianMo = trim($_POST['thoi_gian_mo_dk'] ?? '');
                         $thoiGianDong = trim($_POST['thoi_gian_dong_dk'] ?? '');
-                        $trangThai = (int) ($_POST['trang_thai_dang_ky'] ?? 1);
 
                         $duLieuSua = [
                             'id' => $id, 'ten_hoc_ky' => $tenHocKy, 'ngay_bat_dau' => $ngayBatDau,
                             'ngay_ket_thuc' => $ngayKetThuc, 'thoi_gian_mo_dk' => $thoiGianMo,
-                            'thoi_gian_dong_dk' => $thoiGianDong, 'trang_thai_dang_ky' => $trangThai
+                            'thoi_gian_dong_dk' => $thoiGianDong
                         ];
 
                         if ($tenHocKy === '') throw new RuntimeException('Vui lòng nhập tên học kỳ.');
                         if ($ngayBatDau === '' || $ngayKetThuc === '') throw new RuntimeException('Vui lòng nhập ngày bắt đầu và kết thúc.');
+                        
+                        // 1. Validate ngày tháng (chặn tháng 13, 14, ngày 31/02...)
+                        $d1 = DateTime::createFromFormat('Y-m-d', $ngayBatDau);
+                        if (!$d1 || $d1->format('Y-m-d') !== $ngayBatDau) throw new RuntimeException('Ngày bắt đầu không hợp lệ (Sai định dạng hoặc tháng/ngày không tồn tại).');
+                        
+                        $d2 = DateTime::createFromFormat('Y-m-d', $ngayKetThuc);
+                        if (!$d2 || $d2->format('Y-m-d') !== $ngayKetThuc) throw new RuntimeException('Ngày kết thúc không hợp lệ.');
+
+                        if ($thoiGianMo !== '') {
+                            $d3 = DateTime::createFromFormat('Y-m-d\TH:i', $thoiGianMo);
+                            if (!$d3) throw new RuntimeException('Thời gian mở đăng ký không hợp lệ.');
+                        }
+                        if ($thoiGianDong !== '') {
+                            $d4 = DateTime::createFromFormat('Y-m-d\TH:i', $thoiGianDong);
+                            if (!$d4) throw new RuntimeException('Thời gian đóng đăng ký không hợp lệ.');
+                        }
+
                         if (strtotime($ngayBatDau) > strtotime($ngayKetThuc)) throw new RuntimeException('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.');
                         if ($thoiGianMo !== '' && $thoiGianDong !== '' && strtotime($thoiGianMo) > strtotime($thoiGianDong)) throw new RuntimeException('Thời gian mở đăng ký phải trước thời gian đóng.');
+
+                        // 4. Chặn tạo học kỳ trong quá khứ (Ngày kết thúc nhỏ hơn hôm nay)
+                        if ($ngayKetThuc < date('Y-m-d')) {
+                            throw new RuntimeException('Không thể tạo/cập nhật học kỳ đã kết thúc trong quá khứ.');
+                        }
 
                         $excludeId = ($hanhDong === 'sua') ? $id : 0;
                         if ($this->model->checkOverlap($ngayBatDau, $ngayKetThuc, $excludeId)) {
@@ -77,11 +95,11 @@ class AdminHocKyController {
                         }
 
                         if ($hanhDong === 'them') {
-                            $this->model->insert($tenHocKy, $ngayBatDau, $ngayKetThuc, $thoiGianMo, $thoiGianDong, $trangThai);
+                            $this->model->insert($tenHocKy, $ngayBatDau, $ngayKetThuc, $thoiGianMo, $thoiGianDong);
                             $_SESSION['semester_notice'] = 'Thêm học kỳ thành công.';
                         } else {
                             if ($id <= 0) throw new RuntimeException('Học kỳ cần sửa không hợp lệ.');
-                            $this->model->update($id, $tenHocKy, $ngayBatDau, $ngayKetThuc, $thoiGianMo, $thoiGianDong, $trangThai);
+                            $this->model->update($id, $tenHocKy, $ngayBatDau, $ngayKetThuc, $thoiGianMo, $thoiGianDong);
                             $_SESSION['semester_notice'] = 'Cập nhật học kỳ thành công.';
                         }
                         $_SESSION['semester_notice_type'] = 'success'; header('Location: admin_hoc_ky.php'); exit;
@@ -107,13 +125,11 @@ class AdminHocKyController {
         $danhSach = $this->model->getAll($tuKhoa);
         $tongHocKy = count($danhSach);
 
-        // Lấy danh sách lớp cho từng học kỳ
         $dsLopTheoHocKy = [];
         foreach ($danhSach as $hk) {
             $dsLopTheoHocKy[$hk['id']] = $this->model->getClassesBySemester($hk['id']);
         }
 
-        // Gọi View
         require_once __DIR__ . '/../Views/admin/hoc_ky.php';
     }
 }

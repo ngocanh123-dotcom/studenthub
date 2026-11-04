@@ -44,14 +44,26 @@ class AdminLopHocPhanController {
      * Kiểm tra phân quyền truy cập: Chỉ cho phép Quản trị viên (Admin)
      */
     private function checkAuth(): void {
-        if (empty($_SESSION['username'])) {
-            header('Location: /studenthub/public/index.php');
+        $isLoggedIn = !empty($_SESSION['user'])
+            || !empty($_SESSION['nguoi_dung'])
+            || !empty($_SESSION['user_id'])
+            || !empty($_SESSION['username']);
+
+        if (!$isLoggedIn) {
+            header("Location: /studenthub/public/index.php?error=login_required");
             exit;
         }
 
-        $vaiTro = strtolower(trim((string)($_SESSION['vai_tro'] ?? $_SESSION['role'] ?? '')));
-        if (!in_array($vaiTro, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
-            header('Location: /studenthub/public/index.php');
+        $vaiTro = strtolower(trim((string)(
+            $_SESSION['user']['vai_tro']
+            ?? $_SESSION['nguoi_dung']['vai_tro']
+            ?? $_SESSION['vai_tro']
+            ?? $_SESSION['role']
+            ?? ''
+        )));
+
+        if (!in_array($vaiTro, ['quantrivien', 'admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
+            header("Location: /studenthub/public/index.php?error=forbidden");
             exit;
         }
     }
@@ -110,9 +122,11 @@ class AdminLopHocPhanController {
         $hocPhanList = $this->model->getAllHocPhan();
         $giangVienList = $this->model->getAllGiangVien();
 
-        $notice = $_SESSION['admin_notice'] ?? '';
-        $noticeType = $_SESSION['admin_notice_type'] ?? 'success';
-        unset($_SESSION['admin_notice'], $_SESSION['admin_notice_type']);
+        $notice = $_SESSION['flash_error'] ?? ($_SESSION['flash_success'] ?? ($_SESSION['admin_notice'] ?? ''));
+        $noticeType = isset($_SESSION['flash_error'])
+            ? 'error'
+            : (isset($_SESSION['flash_success']) ? 'success' : ($_SESSION['admin_notice_type'] ?? 'success'));
+        unset($_SESSION['flash_error'], $_SESSION['flash_success'], $_SESSION['admin_notice'], $_SESSION['admin_notice_type']);
 
         $csrfToken = $_SESSION['csrf_token'];
         $tenAdmin = $_SESSION['ho_ten'] ?? ($_SESSION['tenVaiTro'] ?? $_SESSION['username']);
@@ -200,7 +214,11 @@ class AdminLopHocPhanController {
             }
         }
 
-        if ($siSoToiDa <= 0 || $siSoToiDa > 500) {
+        if ($siSoToiDa <= 0) {
+            $this->redirectBackWithError('Sĩ số tối đa phải là số nguyên dương.', $_POST);
+        }
+
+        if ($siSoToiDa > 500) {
             $this->redirectBackWithError('Sĩ số tối đa phải là số nguyên dương từ 1 đến 500 sinh viên.', $_POST);
         }
 
@@ -343,12 +361,20 @@ class AdminLopHocPhanController {
             }
         }
 
+        if ($siSoToiDa <= 0) {
+            $this->redirectEditWithError($id, 'Sĩ số tối đa phải là số nguyên dương.');
+        }
+
+        if ($siSoToiDa > 500) {
+            $this->redirectEditWithError($id, 'Sĩ số tối đa không được vượt quá 500 sinh viên.');
+        }
+
         // Ràng buộc an toàn sĩ số: Không được giảm sĩ số tối đa xuống thấp hơn số sinh viên hiện tại
-        $siSoHienTai = (int)$currentClass['si_so_hien_tai'];
-        if ($siSoToiDa < $siSoHienTai) {
+        $daDangKy = (int)($currentClass['da_dang_ky'] ?? $currentClass['si_so_hien_tai'] ?? 0);
+        if ($siSoToiDa < $daDangKy) {
             $this->redirectEditWithError(
                 $id, 
-                "Sĩ số tối đa ({$siSoToiDa}) không được nhỏ hơn số sinh viên hiện đang đăng ký ({$siSoHienTai} sinh viên)."
+                "Sĩ số tối đa ({$siSoToiDa}) không được nhỏ hơn số sinh viên hiện đang đăng ký ({$daDangKy} sinh viên)."
             );
         }
 
@@ -386,40 +412,47 @@ class AdminLopHocPhanController {
      * Cầu dao Mở / Khóa trạng thái lớp học phần (Bắt buộc cho Demo Kịch bản Mục H)
      */
     public function toggleStatus(): void {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if (!in_array($method, ['POST', 'GET'], true)) {
             header('Location: lop_hoc_phan.php');
             exit;
         }
 
-        // [TC 8] Kiểm tra mã CSRF token trên mọi form gửi phương thức POST
-        if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
-            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
+        // Kiểm tra CSRF token trên POST (hoặc trên GET nếu có gửi kèm)
+        $csrf = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? null);
+        if ($method === 'POST' || $csrf !== null) {
+            if (!$csrf || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$csrf)) {
+                die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
+            }
         }
 
-        $id = (int)($_POST['id'] ?? 0);
+        $id = (int)($_POST['id'] ?? ($_GET['id'] ?? 0));
         $class = $this->model->getClassById($id);
+        $redirectUrl = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'lop_hoc_phan.php';
 
         if (!$class) {
-            $_SESSION['admin_notice'] = 'Lớp học phần không tồn tại.';
+            $_SESSION['flash_error'] = 'Lớp học phần không tồn tại.';
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
+            header("Location: " . $redirectUrl);
             exit;
         }
 
         $newStatus = $this->model->toggleStatus($id);
 
-        if ($newStatus === 'khoa') {
-            $_SESSION['admin_notice'] = "Đã KHÓA lớp học phần '{$class['ma_lop']}'. Sinh viên ở cổng đăng ký sẽ lập tức bị chặn theo đúng kịch bản Mục H!";
-            $_SESSION['admin_notice_type'] = 'success';
-        } elseif ($newStatus === 'mo') {
-            $_SESSION['admin_notice'] = "Đã MỞ lại đăng ký cho lớp học phần '{$class['ma_lop']}' thành công!";
+        if ($newStatus === 'khoa' || $newStatus === 'mo') {
+            $_SESSION['flash_success'] = "Đã cập nhật trạng thái lớp học phần thành công!";
+            $_SESSION['admin_notice'] = ($newStatus === 'khoa')
+                ? "Đã KHÓA lớp học phần '{$class['ma_lop']}'. Sinh viên ở cổng đăng ký sẽ lập tức bị chặn theo đúng kịch bản Mục H!"
+                : "Đã MỞ lại đăng ký cho lớp học phần '{$class['ma_lop']}' thành công!";
             $_SESSION['admin_notice_type'] = 'success';
         } else {
-            $_SESSION['admin_notice'] = "Không thể chuyển trạng thái cho lớp học phần '{$class['ma_lop']}'.";
+            $_SESSION['flash_error'] = "Không thể chuyển trạng thái cho lớp học phần '{$class['ma_lop']}'.";
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
         }
 
-        header('Location: lop_hoc_phan.php');
+        header("Location: " . $redirectUrl);
         exit;
     }
 
@@ -441,26 +474,27 @@ class AdminLopHocPhanController {
         $class = $this->model->getClassById($id);
 
         if (!$class) {
-            $_SESSION['admin_notice'] = 'Lớp học phần không tồn tại.';
+            $_SESSION['flash_error'] = 'Lớp học phần không tồn tại.';
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
             header('Location: lop_hoc_phan.php');
             exit;
         }
 
-        // [BẢO VỆ 2 LỚP - CHỐNG RACE CONDITION]
-        // LỚP 1: Kiểm tra trạng thái cầu dao. Lớp phải được KHÓA ('khoa') trước khi xóa
-        if (($class['trang_thai'] ?? '') === 'mo') {
-            $_SESSION['admin_notice'] = "Vui lòng ngắt cầu dao (Khóa lớp) trước khi thực hiện thao tác xóa để đảm bảo an toàn hệ thống.";
-            $_SESSION['admin_notice_type'] = 'error';
-            header('Location: lop_hoc_phan.php');
-            exit;
-        }
-
-        // LỚP 2: Kiểm tra sĩ số đăng ký hiện tại (sĩ số phải == 0). Tuyệt đối chặn xóa nếu đã có sinh viên
+        // Kiểm tra xem lớp này đã có sinh viên đăng ký hay chưa trước khi DELETE
         $check = $this->model->checkCanDelete($id);
-        $siSoHienTai = max((int)($class['si_so_hien_tai'] ?? 0), (int)($check['enrollment_count'] ?? 0));
-        if ($siSoHienTai > 0 || !$check['can_delete']) {
-            $_SESSION['admin_notice'] = "KHÔNG THỂ XÓA lớp '{$class['ma_lop']}' vì hiện đã có {$siSoHienTai} sinh viên đăng ký trên hệ thống. Để ngừng tiếp nhận, vui lòng dùng nút 'Khóa' đăng ký.";
+        $daDangKy = max((int)($class['si_so_hien_tai'] ?? 0), (int)($check['enrollment_count'] ?? 0));
+        if ($daDangKy > 0) {
+            $_SESSION['flash_error'] = "Không thể xóa lớp đã có sinh viên đăng ký! Vui lòng sử dụng tính năng Khóa lớp.";
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
+            $_SESSION['admin_notice_type'] = 'error';
+            header('Location: lop_hoc_phan.php');
+            exit;
+        }
+
+        if (($class['trang_thai'] ?? '') === 'mo') {
+            $_SESSION['flash_error'] = "Vui lòng ngắt cầu dao (Khóa lớp) trước khi thực hiện thao tác xóa để đảm bảo an toàn hệ thống.";
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
             header('Location: lop_hoc_phan.php');
             exit;
@@ -468,10 +502,12 @@ class AdminLopHocPhanController {
 
         $deleted = $this->model->deleteClass($id);
         if ($deleted) {
-            $_SESSION['admin_notice'] = "Đã xóa vĩnh viễn lớp học phần '{$class['ma_lop']}' khỏi hệ thống.";
+            $_SESSION['flash_success'] = "Đã xóa vĩnh viễn lớp học phần '{$class['ma_lop']}' khỏi hệ thống.";
+            $_SESSION['admin_notice'] = $_SESSION['flash_success'];
             $_SESSION['admin_notice_type'] = 'success';
         } else {
-            $_SESSION['admin_notice'] = "Không thể xóa lớp học phần do vi phạm điều kiện an toàn (Lớp phải ở trạng thái Khóa và chưa có sinh viên đăng ký).";
+            $_SESSION['flash_error'] = "Không thể xóa lớp đã có sinh viên đăng ký! Vui lòng sử dụng tính năng Khóa lớp.";
+            $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
         }
 
