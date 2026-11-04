@@ -5,10 +5,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $sinhVienId = (int)($_SESSION['nguoi_dung_id'] ?? $_SESSION['user_id'] ?? 0);
-if ($sinhVienId <= 0) {
-    header('Location: /studenthub/public/index.php?error=login_required');
-    exit;
-}
 // Tạo mã bảo mật cho thao tác hủy đăng ký
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -54,41 +50,8 @@ if (!function_exists('hienThi')) {
 
 $danhSachLop = [];
 $cacLopDaDangKy = [];
+$cacHocPhanDaDangKy = [];
 $loi = '';
-$thongBaoKetQua = '';
-$loaiThongBaoKetQua = 'success';
-
-// Hiển thị kết quả đăng ký/hủy đăng ký sau khi quay về trang này.
-if (isset($_GET['huy'])) {
-    $ketQuaHuy = (string)$_GET['huy'];
-    $thongBaoKetQua = match ($ketQuaHuy) {
-        'thanh_cong' => 'Hủy đăng ký học phần thành công.',
-        'khong_tim_thay_dang_ky' => 'Hủy đăng ký thất bại: không tìm thấy đăng ký đang hoạt động.',
-        'chua_dang_nhap' => 'Vui lòng đăng nhập để thực hiện thao tác này.',
-        'khong_co_quyen' => 'Bạn không có quyền hủy đăng ký học phần.',
-        'yeu_cau_khong_hop_le' => 'Yêu cầu hủy đăng ký không hợp lệ.',
-        'lop_khong_hop_le' => 'Mã lớp học phần không hợp lệ.',
-        'loi_he_thong' => 'Hủy đăng ký thất bại do lỗi hệ thống. Vui lòng thử lại.',
-        default => ''
-    };
-    $loaiThongBaoKetQua = $ketQuaHuy === 'thanh_cong' ? 'success' : 'error';
-} elseif (isset($_GET['dangky'])) {
-    $ketQuaDangKy = (string)$_GET['dangky'];
-    $thongBaoKetQua = $ketQuaDangKy === 'thanh_cong'
-        ? 'Đăng ký học phần thành công.'
-        : 'Đăng ký học phần chưa thành công. Vui lòng kiểm tra điều kiện đăng ký.';
-    $loaiThongBaoKetQua = $ketQuaDangKy === 'thanh_cong' ? 'success' : 'error';
-}
-
-if (!function_exists('thoiHanDangKy')) {
-    function thoiHanDangKy(array $lop): string {
-        $mo = !empty($lop['thoi_gian_mo_rieng']) ? $lop['thoi_gian_mo_rieng'] : ($lop['thoi_gian_mo_dk'] ?? null);
-        $dong = !empty($lop['thoi_gian_dong_rieng']) ? $lop['thoi_gian_dong_rieng'] : ($lop['thoi_gian_dong_dk'] ?? null);
-        if (!$mo && !$dong) return 'Chưa thiết lập';
-        $fmt = static function ($value) { return $value ? date('d/m/Y H:i', strtotime($value)) : ''; };
-        return ($mo ? $fmt($mo) : 'Không giới hạn') . ' - ' . ($dong ? $fmt($dong) : 'Không giới hạn');
-    }
-}
 
 try {
     $sql = "
@@ -119,7 +82,7 @@ try {
         FROM lop_hoc_phan lhp
         INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
         INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
-        INNER JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
+        LEFT JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
         ORDER BY hp.ten_hoc_phan ASC, lhp.ma_lop ASC
     ";
 
@@ -127,16 +90,17 @@ try {
 
     if ($sinhVienId > 0) {
         $stmt = $pdo->prepare("
-            SELECT lop_hoc_phan_id
-            FROM dang_ky_hoc
-            WHERE sinh_vien_id = :id
-              AND trang_thai = 'dang_ky'
+            SELECT dkh.lop_hoc_phan_id, lhp.hoc_phan_id
+            FROM dang_ky_hoc dkh
+            INNER JOIN lop_hoc_phan lhp ON lhp.id = dkh.lop_hoc_phan_id
+            WHERE dkh.sinh_vien_id = :id
+              AND dkh.trang_thai = 'dang_ky'
         ");
         $stmt->execute(['id' => $sinhVienId]);
-        $cacLopDaDangKy = array_map(
-            'intval',
-            $stmt->fetchAll(PDO::FETCH_COLUMN)
-        );
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $registration) {
+            $cacLopDaDangKy[] = (int) $registration['lop_hoc_phan_id'];
+            $cacHocPhanDaDangKy[] = (int) $registration['hoc_phan_id'];
+        }
     }
 } catch (PDOException $e) {
     error_log('StudentHub: ' . $e->getMessage());
@@ -150,11 +114,38 @@ foreach ($danhSachLop as $lop) {
     $id = (int)$lop['id'];
     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
+    $coHanRieng = !empty($lop['thoi_gian_mo_rieng'])
+        || !empty($lop['thoi_gian_dong_rieng']);
+
+    if ($coHanRieng) {
+        $moDangKy = !empty($lop['thoi_gian_mo_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_mo_rieng'])
+            : null;
+        $dongDangKy = !empty($lop['thoi_gian_dong_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_dong_rieng'])
+            : null;
+        $now = new DateTimeImmutable();
+        $trongHanDangKy = (!$moDangKy || $now >= $moDangKy)
+            && (!$dongDangKy || $now <= $dongDangKy);
+    } else {
+        $moDangKy = !empty($lop['thoi_gian_mo_dk'])
+            ? new DateTimeImmutable($lop['thoi_gian_mo_dk'])
+            : null;
+        $dongDangKy = !empty($lop['thoi_gian_dong_dk'])
+            ? new DateTimeImmutable($lop['thoi_gian_dong_dk'])
+            : null;
+        $now = new DateTimeImmutable();
+        $trongHanDangKy = (int) ($lop['trang_thai_dang_ky'] ?? 0) === 1
+            && (!$moDangKy || $now >= $moDangKy)
+            && (!$dongDangKy || $now <= $dongDangKy);
+    }
 
     if (
         ($lop['trang_thai'] ?? '') === 'mo'
         && $toiDa > 0
         && $siSo < $toiDa
+        && $trongHanDangKy
+        && !in_array((int) $lop['hoc_phan_id'], $cacHocPhanDaDangKy, true)
     ) {
         $soLopMo++;
     }
@@ -519,8 +510,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
     font-size: 14px;
 }
 
-.registration-alert-success { color: #087443; background: #eafaf1; border-color: #a7f3d0; }
-
 .registration-alert {
     padding: 13px 16px;
     margin-bottom: 18px;
@@ -580,11 +569,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 </style>
 
 <div class="registration-page">
-    <?php if ($thongBaoKetQua !== ''): ?>
-        <div class="registration-alert <?= $loaiThongBaoKetQua === 'success' ? 'registration-alert-success' : '' ?>" role="status">
-            <?= hienThi($thongBaoKetQua) ?>
-        </div>
-    <?php endif; ?>
 
     <?php if ($loi !== ''): ?>
         <div class="registration-alert"><?= hienThi($loi) ?></div>
@@ -658,7 +642,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <th>MÃ LỚP</th>
                         <th>GIẢNG VIÊN</th>
                         <th>HỌC KỲ</th>
-                        <th>THỜI HẠN ĐĂNG KÝ</th>
                         <th>SĨ SỐ</th>
                         <th>TRẠNG THÁI</th>
                         <th>THAO TÁC</th>
@@ -700,7 +683,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td><?= hienThi($lop['ma_lop']) ?></td>
                         <td><?= hienThi($lop['ten_giang_vien'] ?: 'Chưa phân công') ?></td>
                         <td><?= hienThi($lop['ten_hoc_ky']) ?></td>
-                        <td><?= hienThi(thoiHanDangKy($lop)) ?></td>
                         <td>
                             <div class="registration-capacity">
                                 <div class="registration-capacity-label">
@@ -716,7 +698,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                          <form
     method="POST"
-    action="huy_dang_ky_hoc.php"
+    action="/studenthub/public/index.php?route=huy_dang_ky_hoc.php"
     onsubmit="return xacNhanHuyDangKy(this, <?= json_encode($lop['ten_hoc_phan'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>)"
     style="margin:0;"
 >
@@ -745,7 +727,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 
                 <?php if (!$coLopDaDangKy): ?>
                     <tr id="registeredEmpty">
-                        <td colspan="8">
+                        <td colspan="7">
                             <div class="registration-empty-state">
                                 <strong>Bạn chưa đăng ký học phần nào</strong>
                                 Chọn một lớp trong danh sách bên dưới để bắt đầu đăng ký.
@@ -771,7 +753,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <th>MÃ LỚP</th>
                         <th>GIẢNG VIÊN</th>
                         <th>HỌC KỲ</th>
-                        <th>THỜI HẠN ĐĂNG KÝ</th>
                         <th>SĨ SỐ</th>
                         <th>TRẠNG THÁI</th>
                         <th>THAO TÁC</th>
@@ -788,25 +769,48 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     }
 
                     $coLopChuaDangKy = true;
+                    $daDangKyHocPhan = in_array(
+                        (int) $lop['hoc_phan_id'],
+                        $cacHocPhanDaDangKy,
+                        true
+                    );
                     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
                     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
                     $tiLe = $toiDa > 0 ? min(100, $siSo / $toiDa * 100) : 0;
-                    $nowTime = time();
-                    $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? strtotime($lop['thoi_gian_mo_rieng']) : null;
-                    $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? strtotime($lop['thoi_gian_dong_rieng']) : null;
-                    if ($moRieng && $nowTime < $moRieng) {
-                        $realtimeStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Chưa đến hạn)', 'is_dang_mo' => false];
-                    } elseif ($dongRieng && $nowTime > $dongRieng) {
-                        $realtimeStatus = ['code' => 'khoa', 'label' => 'Đã khóa (Hết hạn đăng ký)', 'is_dang_mo' => false];
+                    $dangMo = ($lop['trang_thai'] ?? '') === 'mo';
+                    $conCho = $toiDa > 0 && $siSo < $toiDa;
+                    $now = new DateTimeImmutable();
+                    $coHanRieng = !empty($lop['thoi_gian_mo_rieng'])
+                        || !empty($lop['thoi_gian_dong_rieng']);
+
+                    if ($coHanRieng) {
+                        $moDangKy = !empty($lop['thoi_gian_mo_rieng'])
+                            ? new DateTimeImmutable($lop['thoi_gian_mo_rieng'])
+                            : null;
+                        $dongDangKy = !empty($lop['thoi_gian_dong_rieng'])
+                            ? new DateTimeImmutable($lop['thoi_gian_dong_rieng'])
+                            : null;
+                        $trongHanDangKy = (!$moDangKy || $now >= $moDangKy)
+                            && (!$dongDangKy || $now <= $dongDangKy);
                     } else {
-                        $isManualOpen = (($lop['trang_thai'] ?? 'mo') === 'mo');
-                        $realtimeStatus = ['code' => $isManualOpen ? 'mo' : 'khoa', 'label' => $isManualOpen ? 'Đang mở' : 'Đã khóa', 'is_dang_mo' => $isManualOpen];
+                        $moDangKy = !empty($lop['thoi_gian_mo_dk'])
+                            ? new DateTimeImmutable($lop['thoi_gian_mo_dk'])
+                            : null;
+                        $dongDangKy = !empty($lop['thoi_gian_dong_dk'])
+                            ? new DateTimeImmutable($lop['thoi_gian_dong_dk'])
+                            : null;
+                        $trongHanDangKy = (int) $lop['trang_thai_dang_ky'] === 1
+                            && (!$moDangKy || $now >= $moDangKy)
+                            && (!$dongDangKy || $now <= $dongDangKy);
                     }
 
-                    $dangMo = $realtimeStatus['is_dang_mo'];
-                    $conCho = $toiDa > 0 && $siSo < $toiDa;
-                    $coTheDangKy = $dangMo && $conCho;
-                    $trangThaiLoc = $coTheDangKy ? 'open' : (!$dangMo ? 'closed' : 'full');
+                    $coTheDangKy = $dangMo
+                        && $conCho
+                        && $trongHanDangKy
+                        && !$daDangKyHocPhan;
+                    $trangThaiLoc = $daDangKyHocPhan
+                        ? 'registered'
+                        : ($coTheDangKy ? 'open' : (!$dangMo || !$trongHanDangKy ? 'closed' : 'full'));
 
                     $tuKhoa = mb_strtolower(
                         ($lop['ten_hoc_phan'] ?? '') . ' ' .
@@ -830,7 +834,6 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td><?= hienThi($lop['ma_lop']) ?></td>
                         <td><?= hienThi($lop['ten_giang_vien'] ?: 'Chưa phân công') ?></td>
                         <td><?= hienThi($lop['ten_hoc_ky']) ?></td>
-                        <td><?= hienThi(thoiHanDangKy($lop)) ?></td>
                         <td>
                             <div class="registration-capacity">
                                 <div class="registration-capacity-label">
@@ -845,8 +848,12 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                             <?php if ($coTheDangKy): ?>
                                 <span class="registration-status registration-status-open">Đang mở</span>
+                            <?php elseif ($daDangKyHocPhan): ?>
+                                <span class="registration-status registration-status-registered">Đã đăng ký học phần</span>
                             <?php elseif (!$dangMo): ?>
-                                <span class="registration-status registration-status-closed"><?= htmlspecialchars($realtimeStatus['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                <span class="registration-status registration-status-closed">Đã khóa</span>
+                            <?php elseif (!$trongHanDangKy): ?>
+                                <span class="registration-status registration-status-closed">Ngoài hạn đăng ký</span>
                             <?php else: ?>
                                 <span class="registration-status registration-status-full">Đủ sĩ số</span>
                             <?php endif; ?>
@@ -856,10 +863,17 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                                 <a class="registration-button registration-button-primary"
                                    href="/studenthub/public/index.php">Đăng nhập</a>
                             <?php elseif ($coTheDangKy): ?>
-                                <a class="registration-button registration-button-primary"
-                                   href="dang_ky_hoc.php?lop_hoc_phan_id=<?= $idLop ?>">
-                                    + Đăng ký
-                                </a>
+                                <form
+                                    method="POST"
+                                    action="/studenthub/public/index.php?route=dang_ky_hoc.php"
+                                    style="margin:0;"
+                                >
+                                    <input type="hidden" name="lop_hoc_phan_id" value="<?= $idLop ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= hienThi($csrfToken) ?>">
+                                    <button type="submit" class="registration-button registration-button-primary">
+                                        + Đăng ký
+                                    </button>
+                                </form>
                             <?php else: ?>
                                 <button type="button" class="registration-button registration-button-disabled" disabled>
                                     Không khả dụng
@@ -871,7 +885,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 
                 <?php if (!$coLopChuaDangKy): ?>
                     <tr id="availableEmpty">
-                        <td colspan="8">
+                        <td colspan="7">
                             <div class="registration-empty-state">
                                 <strong>Bạn đã đăng ký tất cả lớp hiện có</strong>
                                 Hiện không còn lớp nào trong danh sách để đăng ký thêm.
@@ -932,7 +946,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     tr.className = 'registration-filter-empty';
 
                     tr.innerHTML =
-                        '<td colspan="8">' +
+                        '<td colspan="7">' +
                         '<div class="registration-empty-state">' +
                         '<strong>Không tìm thấy học phần phù hợp</strong>' +
                         'Thử thay đổi từ khóa tìm kiếm hoặc trạng thái lọc.' +

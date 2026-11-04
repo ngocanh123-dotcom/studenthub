@@ -8,7 +8,7 @@ class HocKyModel {
 
     // 3. Sắp xếp theo thời gian gần nhất với hiện tại
     public function getAll($keyword = '') {
-        $sql = "SELECT hk.*, (SELECT COUNT(*) FROM lop_hoc_phan lhp WHERE lhp.hoc_ky_id = hk.id) AS so_lop 
+        $sql = "SELECT hk.*, (SELECT COUNT(*) FROM lop_hoc_phan lhp WHERE lhp.hoc_ky_id = hk.id) AS so_lop
                 FROM hoc_ky hk WHERE 1=1";
         $params = [];
         if ($keyword !== '') {
@@ -16,7 +16,7 @@ class HocKyModel {
             $params[':q'] = '%' . $keyword . '%';
         }
         $sql .= " ORDER BY ABS(DATEDIFF(hk.ngay_bat_dau, CURDATE())) ASC, hk.id DESC";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -30,7 +30,7 @@ class HocKyModel {
 
     // 2. Bỏ tham số $trang_thai khi insert, mặc định là 1
     public function insert($ten, $bat_dau, $ket_thuc, $mo_dk, $dong_dk) {
-        $sql = "INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky) 
+        $sql = "INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky)
                 VALUES (:ten, :bat_dau, :ket_thuc, :mo_dk, :dong_dk, 1)";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
@@ -41,8 +41,8 @@ class HocKyModel {
 
     // 2. Bỏ cập nhật $trang_thai khi update (chỉ đổi qua nút bật/tắt)
     public function update($id, $ten, $bat_dau, $ket_thuc, $mo_dk, $dong_dk) {
-        $sql = "UPDATE hoc_ky SET ten_hoc_ky = :ten, ngay_bat_dau = :bat_dau, ngay_ket_thuc = :ket_thuc, 
-                thoi_gian_mo_dk = :mo_dk, thoi_gian_dong_dk = :dong_dk 
+        $sql = "UPDATE hoc_ky SET ten_hoc_ky = :ten, ngay_bat_dau = :bat_dau, ngay_ket_thuc = :ket_thuc,
+                thoi_gian_mo_dk = :mo_dk, thoi_gian_dong_dk = :dong_dk
                 WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
@@ -81,10 +81,10 @@ class HocKyModel {
 
     public function getClassesBySemester($hoc_ky_id) {
         $stmt = $this->conn->prepare("
-            SELECT lhp.ma_lop, hp.ten_hoc_phan, hp.so_tin_chi, nd.ho_ten AS gv, lhp.si_so_toi_da 
-            FROM lop_hoc_phan lhp 
-            JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id 
-            JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id 
+            SELECT lhp.ma_lop, hp.ten_hoc_phan, hp.so_tin_chi, nd.ho_ten AS gv, lhp.si_so_toi_da
+            FROM lop_hoc_phan lhp
+            JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
+            JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
             WHERE lhp.hoc_ky_id = :id
         ");
         $stmt->execute([':id' => $hoc_ky_id]);

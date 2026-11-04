@@ -137,7 +137,7 @@ class AdminLopHocPhanController {
      */
     public function store(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -225,7 +225,7 @@ class AdminLopHocPhanController {
         if ($success) {
             $_SESSION['admin_notice'] = "Tạo mới lớp học phần '{$maLop}' thành công!";
             $_SESSION['admin_notice_type'] = 'success';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         } else {
             $this->redirectBackWithError('Đã xảy ra lỗi khi tạo lớp học phần trong CSDL. Vui lòng thử lại.', $_POST);
@@ -240,7 +240,7 @@ class AdminLopHocPhanController {
         if ($id <= 0) {
             $_SESSION['admin_notice'] = 'ID lớp học phần không hợp lệ.';
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -248,7 +248,7 @@ class AdminLopHocPhanController {
         if (!$class) {
             $_SESSION['admin_notice'] = 'Không tìm thấy lớp học phần cần chỉnh sửa.';
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -270,7 +270,7 @@ class AdminLopHocPhanController {
      */
     public function update(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -281,7 +281,7 @@ class AdminLopHocPhanController {
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -289,7 +289,7 @@ class AdminLopHocPhanController {
         if (!$currentClass) {
             $_SESSION['admin_notice'] = 'Lớp học phần không tồn tại.';
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -353,7 +353,7 @@ class AdminLopHocPhanController {
         $daDangKy = (int)($currentClass['da_dang_ky'] ?? $currentClass['si_so_hien_tai'] ?? 0);
         if ($siSoToiDa < $daDangKy) {
             $this->redirectEditWithError(
-                $id, 
+                $id,
                 "Sĩ số tối đa ({$siSoToiDa}) không được nhỏ hơn số sinh viên hiện đang đăng ký ({$daDangKy} sinh viên)."
             );
         }
@@ -381,7 +381,7 @@ class AdminLopHocPhanController {
         if ($success) {
             $_SESSION['admin_notice'] = "Cập nhật lớp học phần '{$maLop}' thành công!";
             $_SESSION['admin_notice_type'] = 'success';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         } else {
             $this->redirectEditWithError($id, 'Không thể cập nhật lớp học phần trong CSDL.');
@@ -394,7 +394,7 @@ class AdminLopHocPhanController {
     public function toggleStatus(): void {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         if (!in_array($method, ['POST', 'GET'], true)) {
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -408,7 +408,7 @@ class AdminLopHocPhanController {
 
         $id = (int)($_POST['id'] ?? ($_GET['id'] ?? 0));
         $class = $this->model->getClassById($id);
-        $redirectUrl = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/studenthub/app/Views/admin/lop_hoc_phan.php';
+        $redirectUrl = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/studenthub/public/index.php?route=admin_lop_hoc_phan.php';
 
         if (!$class) {
             $_SESSION['flash_error'] = 'Lớp học phần không tồn tại.';
@@ -441,7 +441,7 @@ class AdminLopHocPhanController {
      */
     public function delete(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -457,7 +457,7 @@ class AdminLopHocPhanController {
             $_SESSION['flash_error'] = 'Lớp học phần không tồn tại.';
             $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -468,7 +468,7 @@ class AdminLopHocPhanController {
             $_SESSION['flash_error'] = "Không thể xóa lớp đã có sinh viên đăng ký! Vui lòng sử dụng tính năng Khóa lớp.";
             $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -476,7 +476,7 @@ class AdminLopHocPhanController {
             $_SESSION['flash_error'] = "Vui lòng ngắt cầu dao (Khóa lớp) trước khi thực hiện thao tác xóa để đảm bảo an toàn hệ thống.";
             $_SESSION['admin_notice'] = $_SESSION['flash_error'];
             $_SESSION['admin_notice_type'] = 'error';
-            header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
         }
 
@@ -491,7 +491,7 @@ class AdminLopHocPhanController {
             $_SESSION['admin_notice_type'] = 'error';
         }
 
-        header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php');
+        header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
         exit;
     }
 
@@ -573,13 +573,13 @@ class AdminLopHocPhanController {
     private function redirectBackWithError(string $message, array $oldData): void {
         $_SESSION['form_error'] = $message;
         $_SESSION['form_old_data'] = $oldData;
-        header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php?action=create');
+        header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php&action=create');
         exit;
     }
 
     private function redirectEditWithError(int $id, string $message): void {
         $_SESSION['form_error'] = $message;
-        header('Location: /studenthub/app/Views/admin/lop_hoc_phan.php?action=edit&id=' . $id);
+        header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php&action=edit&id=' . $id);
         exit;
     }
 }

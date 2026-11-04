@@ -387,7 +387,7 @@ if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
         <div class="alert alert-success">✓ <?= htmlspecialchars($successMsg) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="doi_mat_khau.php">
+    <form method="POST" action="/studenthub/public/index.php?route=doi_mat_khau.php">
         <input type="hidden" name="csrf_token" id="modal_csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="field">

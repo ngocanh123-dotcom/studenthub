@@ -50,6 +50,12 @@
 .lecturer-page .sidebar {
     width: 260px;
     min-width: 260px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    overflow-y: auto;
+    flex-shrink: 0;
     padding: 28px 18px;
     display: flex;
     flex-direction: column;
@@ -787,6 +793,9 @@
     .lecturer-page .sidebar {
         width: 100%;
         min-width: 0;
+        height: auto;
+        position: static;
+        overflow-y: hidden;
         padding: 12px;
 
         flex-direction: row;
