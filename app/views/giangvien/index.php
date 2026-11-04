@@ -18,7 +18,7 @@ $tenGiangVien = $_SESSION['tenVaiTro'] ?? 'Giảng viên';
 $host = 'localhost';
 $dbname = 'studenthub';
 $dbUser = 'root';
-$dbPass = '123456';
+$dbPass = '';
 
 try {
     $pdo = new PDO(

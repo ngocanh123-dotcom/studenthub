@@ -31,7 +31,7 @@ $duLieuSua = [
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
     $idSua = (int) $_GET['sua'];
     if ($idSua > 0) {
-        $stmt = $conn->prepare("SELECT * FROM hoc_ky WHERE id = :id LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM hoc_ky WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $idSua]);
         $hocKySua = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($hocKySua) $duLieuSua = $hocKySua;
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($hanhDong === 'toggle_status') {
                 $idToggle = (int) ($_POST['id'] ?? 0);
                 if ($idToggle > 0) {
-                    $stmt = $conn->prepare("UPDATE hoc_ky SET trang_thai_dang_ky = 1 - trang_thai_dang_ky WHERE id = :id");
+                    $stmt = $pdo->prepare("UPDATE hoc_ky SET trang_thai_dang_ky = 1 - trang_thai_dang_ky WHERE id = :id");
                     $stmt->execute([':id' => $idToggle]);
                     $_SESSION['semester_notice'] = 'Đã thay đổi trạng thái đăng ký.';
                 }
@@ -81,15 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($hanhDong === 'sua' && $id > 0) {
                     $sqlCheckTrung .= " AND id != :id"; $paramsCheck[':id'] = $id;
                 }
-                $stmtCheck = $conn->prepare($sqlCheckTrung); $stmtCheck->execute($paramsCheck);
+                $stmtCheck = $pdo->prepare($sqlCheckTrung); $stmtCheck->execute($paramsCheck);
                 if ((int)$stmtCheck->fetchColumn() > 0) throw new RuntimeException('Khoảng thời gian này bị trùng lặp với một học kỳ khác!');
 
                 if ($hanhDong === 'them') {
-                    $stmt = $conn->prepare("INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky) VALUES (:ten, :bat_dau, :ket_thuc, :mo_dk, :dong_dk, :trang_thai)");
+                    $stmt = $pdo->prepare("INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky) VALUES (:ten, :bat_dau, :ket_thuc, :mo_dk, :dong_dk, :trang_thai)");
                     $stmt->execute([':ten' => $tenHocKy, ':bat_dau' => $ngayBatDau, ':ket_thuc' => $ngayKetThuc, ':mo_dk' => $thoiGianMo ?: null, ':dong_dk' => $thoiGianDong ?: null, ':trang_thai' => $trangThai]);
                     $_SESSION['semester_notice'] = 'Thêm học kỳ thành công.';
                 } else {
-                    $stmt = $conn->prepare("UPDATE hoc_ky SET ten_hoc_ky = :ten, ngay_bat_dau = :bat_dau, ngay_ket_thuc = :ket_thuc, thoi_gian_mo_dk = :mo_dk, thoi_gian_dong_dk = :dong_dk, trang_thai_dang_ky = :trang_thai WHERE id = :id");
+                    $stmt = $pdo->prepare("UPDATE hoc_ky SET ten_hoc_ky = :ten, ngay_bat_dau = :bat_dau, ngay_ket_thuc = :ket_thuc, thoi_gian_mo_dk = :mo_dk, thoi_gian_dong_dk = :dong_dk, trang_thai_dang_ky = :trang_thai WHERE id = :id");
                     $stmt->execute([':ten' => $tenHocKy, ':bat_dau' => $ngayBatDau, ':ket_thuc' => $ngayKetThuc, ':mo_dk' => $thoiGianMo ?: null, ':dong_dk' => $thoiGianDong ?: null, ':trang_thai' => $trangThai, ':id' => $id]);
                     $_SESSION['semester_notice'] = 'Cập nhật học kỳ thành công.';
                 }
@@ -98,10 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($hanhDong === 'xoa') {
                 $idXoa = (int) ($_POST['id'] ?? 0);
-                $stmt = $conn->prepare("SELECT COUNT(*) FROM lop_hoc_phan WHERE hoc_ky_id = :id");
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM lop_hoc_phan WHERE hoc_ky_id = :id");
                 $stmt->execute([':id' => $idXoa]);
                 if ((int) $stmt->fetchColumn() > 0) throw new RuntimeException('Không thể xóa! Đã có lớp học phần thuộc học kỳ này.');
-                $stmt = $conn->prepare("DELETE FROM hoc_ky WHERE id = :id");
+                $stmt = $pdo->prepare("DELETE FROM hoc_ky WHERE id = :id");
                 $stmt->execute([':id' => $idXoa]);
                 $_SESSION['semester_notice'] = 'Xóa học kỳ thành công.'; $_SESSION['semester_notice_type'] = 'success'; header('Location: hoc_ky.php'); exit;
             }
@@ -118,7 +118,7 @@ $sql = "SELECT hk.*, (SELECT COUNT(*) FROM lop_hoc_phan lhp WHERE lhp.hoc_ky_id 
 $thamSo = [];
 if ($tuKhoa !== '') { $sql .= " AND hk.ten_hoc_ky LIKE :q"; $thamSo[':q'] = '%' . $tuKhoa . '%'; }
 $sql .= " ORDER BY hk.id DESC";
-$stmt = $conn->prepare($sql); $stmt->execute($thamSo);
+$stmt = $pdo->prepare($sql); $stmt->execute($thamSo);
 $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $tongHocKy = count($danhSach);
 
@@ -312,7 +312,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                     <td colspan="6">
                                         <div class="detail-container">
                                             <?php
-                                            $stmtLop = $conn->prepare("
+                                            $stmtLop = $pdo->prepare("
                                                 SELECT lhp.ma_lop, hp.ten_hoc_phan, hp.so_tin_chi, nd.ho_ten AS gv, lhp.si_so_toi_da 
                                                 FROM lop_hoc_phan lhp 
                                                 JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id 

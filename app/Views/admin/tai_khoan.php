@@ -69,17 +69,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Tên đăng nhập phải gồm 3–30 ký tự chữ, số hoặc dấu gạch dưới.');
                 }
 
-                if ($hoTen === '') {
-                    throw new RuntimeException('Vui lòng nhập họ và tên.');
-                }
+                // Kiểm tra họ và tên: phải có ít nhất 2 từ.
+$hoTen = preg_replace('/\s+/u', ' ', trim($hoTen));
 
+if ($hoTen === '') {
+    throw new RuntimeException('Vui lòng nhập đầy đủ họ và tên.');
+}
+
+if (count(preg_split('/\s+/u', $hoTen)) < 2) {
+    throw new RuntimeException(
+        'Họ và tên phải có ít nhất 2 từ. Ví dụ: Nguyễn Khánh Ly.'
+    );
+}
                 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     throw new RuntimeException('Địa chỉ email không hợp lệ.');
                 }
 
-                if ($soDienThoai !== '' && !preg_match('/^[0-9+\s().-]{8,20}$/', $soDienThoai)) {
-                    throw new RuntimeException('Số điện thoại không hợp lệ.');
-                }
+                // Kiểm tra số điện thoại Việt Nam: đúng 10 số và bắt đầu bằng 0.
+if ($soDienThoai !== '' && !preg_match('/^0[0-9]{9}$/', $soDienThoai)) {
+    throw new RuntimeException(
+        'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.'
+    );
+}
 
                 if (!in_array($vaiTro, ['sinh_vien', 'giang_vien', 'admin'], true)) {
                     throw new RuntimeException('Vui lòng chọn vai trò hợp lệ.');
@@ -112,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $thamSoTrung[':id'] = $id;
                 }
 
-                $stmtTrung = $conn->prepare($sqlTrung);
+                $stmtTrung = $pdo->prepare($sqlTrung);
                 $stmtTrung->execute($thamSoTrung);
 
                 if ((int) $stmtTrung->fetchColumn() > 0) {
@@ -127,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             (:username, :password, :fullname, :email,
                              :phone, :role)";
 
-                    $stmt = $conn->prepare($sql);
+                    $stmt = $pdo->prepare($sql);
                     $stmt->execute([
                         ':username' => $tenDangNhap,
                         ':password' => password_hash($matKhau, PASSWORD_DEFAULT),
@@ -167,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $sql .= " WHERE id = :id";
 
-                    $stmt = $conn->prepare($sql);
+                    $stmt = $pdo->prepare($sql);
                     $stmt->execute($thamSo);
 
                     // Cập nhật session nếu sửa tài khoản đang đăng nhập.
@@ -197,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 // Không cho tự xóa tài khoản đang đăng nhập.
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "SELECT id, ten_dang_nhap, vai_tro
                      FROM nguoi_dung WHERE id = :id LIMIT 1"
                 );
@@ -213,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if (($taiKhoanXoa['vai_tro'] ?? '') === 'admin') {
-                    $stmtDem = $conn->query(
+                    $stmtDem = $pdo->query(
                         "SELECT COUNT(*) FROM nguoi_dung WHERE vai_tro = 'admin'"
                     );
 
@@ -222,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "DELETE FROM nguoi_dung WHERE id = :id"
                 );
                 $stmt->execute([':id' => $idXoa]);
@@ -260,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
 
     if ($idSua > 0) {
         try {
-            $stmt = $conn->prepare(
+            $stmt = $pdo->prepare(
                 "SELECT id, ten_dang_nhap, ho_ten, email,
                         so_dien_thoai, vai_tro
                  FROM nguoi_dung WHERE id = :id LIMIT 1"
@@ -307,11 +318,11 @@ try {
 
     $sql .= " ORDER BY id DESC";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($thamSoTim);
     $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtTong = $conn->query("SELECT COUNT(*) FROM nguoi_dung");
+    $stmtTong = $pdo->query("SELECT COUNT(*) FROM nguoi_dung");
     $tongTaiKhoan = (int) $stmtTong->fetchColumn();
 
 } catch (PDOException $e) {
@@ -413,11 +424,21 @@ function tenVaiTro($role)
                         </div>
 
                         <div class="form-field">
-                            <label for="ho_ten">Họ và tên <span>*</span></label>
-                            <input id="ho_ten" name="ho_ten" required maxlength="150"
-                                   value="<?= e($duLieuSua['ho_ten']) ?>"
-                                   placeholder="Nhập họ và tên">
-                        </div>
+    <label for="ho_ten">Họ và tên <span>*</span></label>
+
+    <input
+        id="ho_ten"
+        name="ho_ten"
+        type="text"
+        required
+        maxlength="150"
+        value="<?= e($duLieuSua['ho_ten']) ?>"
+        placeholder="Ví dụ: Lê Khánh Ly"
+        title="Vui lòng nhập đầy đủ họ và tên, tối thiểu 2 từ."
+    >
+
+    <small>Vui lòng nhập đầy đủ họ và tên.</small>
+</div>
 
                         <div class="form-field">
                             <label for="email">Email</label>
@@ -426,12 +447,24 @@ function tenVaiTro($role)
                                    placeholder="example@email.com">
                         </div>
 
-                        <div class="form-field">
-                            <label for="so_dien_thoai">Số điện thoại</label>
-                            <input id="so_dien_thoai" name="so_dien_thoai" maxlength="20"
-                                   value="<?= e($duLieuSua['so_dien_thoai'] ?? '') ?>"
-                                   placeholder="Nhập số điện thoại">
-                        </div>
+                       <div class="form-field">
+    <label for="so_dien_thoai">Số điện thoại</label>
+
+    <input
+        id="so_dien_thoai"
+        name="so_dien_thoai"
+        type="tel"
+        maxlength="10"
+        minlength="10"
+        pattern="0[0-9]{9}"
+        inputmode="numeric"
+        value="<?= e($duLieuSua['so_dien_thoai'] ?? '') ?>"
+        placeholder="Ví dụ: 0912345678"
+        title="Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0."
+    >
+
+    <small>Nhập đúng 10 chữ số, bắt đầu bằng số 0.</small>
+</div>
 
                         <div class="form-field">
                             <label for="vai_tro">Vai trò <span>*</span></label>
