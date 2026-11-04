@@ -193,7 +193,7 @@ try {
 
                 <div class="quick-links">
 
-                    <a class="quick-link" href="tai_khoan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/tai_khoan.php">
                         <div class="quick-icon blue-bg">♙</div>
                         <div class="quick-content">
                             <h3>Quản lý tài khoản</h3>
@@ -205,7 +205,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/hoc_phan.php">
                         <div class="quick-icon purple-bg">▤</div>
                         <div class="quick-content">
                             <h3>Quản lý học phần</h3>
@@ -217,7 +217,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="hoc_ky.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/hoc_ky.php">
                         <div class="quick-icon green-bg">▦</div>
                         <div class="quick-content">
                             <h3>Quản lý học kỳ</h3>
@@ -229,7 +229,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="lop_hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/lop_hoc_phan.php">
                         <div class="quick-icon orange-bg">▣</div>
                         <div class="quick-content">
                             <h3>Quản lý lớp học phần</h3>
