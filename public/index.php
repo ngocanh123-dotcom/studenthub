@@ -31,6 +31,29 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
+// Route legacy public URLs through this single web entry point.
+$route = strtolower(trim((string) ($_GET['route'] ?? ''), '/'));
+$publicRoutes = [
+    'api_huy_dang_ky.php' => __DIR__ . '/../routes/api_huy_dang_ky.php',
+    'dangky.php' => __DIR__ . '/../routes/dangky.php',
+    'dang_ky_hoc.php' => __DIR__ . '/../routes/dang_ky_hoc.php',
+    'danh_sach_lop_hoc_phan.php' => __DIR__ . '/../routes/danh_sach_lop_hoc_phan.php',
+    'huy_dang_ky_hoc.php' => __DIR__ . '/../routes/huy_dang_ky_hoc.php',
+    'lich_su_dang_ky.php' => __DIR__ . '/../routes/lich_su_dang_ky.php',
+    'logout.php' => __DIR__ . '/../routes/logout.php',
+    'trang_dang_ky_hoc.php' => __DIR__ . '/../routes/trang_dang_ky_hoc.php',
+];
+
+if ($route !== '') {
+    if (!isset($publicRoutes[$route])) {
+        http_response_code(404);
+        exit('Không tìm thấy trang yêu cầu.');
+    }
+
+    require $publicRoutes[$route];
+    exit;
+}
+
 // 2. KẾT NỐI DATABASE
 $pdo = null;
 $dbError = false;

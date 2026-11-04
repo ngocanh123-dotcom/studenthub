@@ -788,7 +788,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                             <?php if ($sinhVienId <= 0): ?>
                                 <a class="registration-button registration-button-primary"
-                                   href="/studenthub/public/dang_nhap.php">Đăng nhập</a>
+                                   href="/studenthub/public/index.php">Đăng nhập</a>
                             <?php elseif ($coTheDangKy): ?>
                                 <a class="registration-button registration-button-primary"
                                    href="dang_ky_hoc.php?lop_hoc_phan_id=<?= $idLop ?>">

@@ -22,6 +22,13 @@
 
 - Dự án hướng đến giao diện hiện đại, dễ sử dụng, có khả năng thích ứng với nhiều kích thước màn hình và bảo đảm các chức năng phù hợp với từng vai trò.
 
+## Điểm vào ứng dụng web
+
+- `public/index.php` là điểm vào PHP duy nhất trong thư mục `public/`.
+- `public/.htaccess` chuyển các URL PHP cũ qua `public/index.php`; bộ định tuyến chỉ cho phép các handler đã liệt kê trong front controller.
+- Handler được lưu trong `routes/`. Các công cụ phát triển như `seed_users.php` và `test_db.php` được lưu ngoài `public/` trong `scripts/` và chỉ chạy bằng PHP CLI.
+- CSS, JavaScript và ảnh vẫn được phục vụ từ `assets/`.
+
 ## 3. Mục tiêu và chức năng chính
 
 ### 3.1. Đăng nhập và phân quyền
