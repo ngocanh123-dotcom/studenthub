@@ -44,28 +44,8 @@ class AdminLopHocPhanController {
      * Kiểm tra phân quyền truy cập: Chỉ cho phép Quản trị viên (Admin)
      */
     private function checkAuth(): void {
-        $isLoggedIn = !empty($_SESSION['user'])
-            || !empty($_SESSION['nguoi_dung'])
-            || !empty($_SESSION['user_id'])
-            || !empty($_SESSION['username']);
-
-        if (!$isLoggedIn) {
-            header("Location: /studenthub/public/index.php?error=login_required");
-            exit;
-        }
-
-        $vaiTro = strtolower(trim((string)(
-            $_SESSION['user']['vai_tro']
-            ?? $_SESSION['nguoi_dung']['vai_tro']
-            ?? $_SESSION['vai_tro']
-            ?? $_SESSION['role']
-            ?? ''
-        )));
-
-        if (!in_array($vaiTro, ['quantrivien', 'admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
-            header("Location: /studenthub/public/index.php?error=forbidden");
-            exit;
-        }
+        require_once __DIR__ . '/../Core/Auth.php';
+        Auth::requireRole('admin');
     }
 
     /**
