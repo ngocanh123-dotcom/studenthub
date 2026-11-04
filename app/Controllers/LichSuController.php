@@ -75,7 +75,7 @@ class LichSuController {
         }
 
         // 6. Tiến hành hủy
-        if ($this->model->huyDangKy($dangKyId)) {
+        if ($this->model->huyDangKy($dangKyId, $sinhVienId)) {
             echo json_encode(['status' => 'success', 'message' => 'Hủy đăng ký thành công!']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống, vui lòng thử lại sau.']);
