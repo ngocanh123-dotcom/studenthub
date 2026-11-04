@@ -194,6 +194,11 @@ class AdminLopHocPhanModel {
      * Tạo lớp học phần mới
      */
     public function createClass(array $data): bool {
+        $siSoToiDa = (int)($data['si_so_toi_da'] ?? 0);
+        if ($siSoToiDa <= 0) {
+            return false;
+        }
+
         $sql = "INSERT INTO lop_hoc_phan (
                     ma_lop, 
                     hoc_phan_id, 
@@ -242,6 +247,18 @@ class AdminLopHocPhanModel {
      * Cập nhật thông tin lớp học phần
      */
     public function updateClass(int $id, array $data): bool {
+        $siSoToiDa = (int)($data['si_so_toi_da'] ?? 0);
+        if ($siSoToiDa <= 0) {
+            return false;
+        }
+
+        $stmtCount = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
+        $stmtCount->execute([':id' => $id]);
+        $daDangKy = (int)$stmtCount->fetchColumn();
+        if ($siSoToiDa < $daDangKy) {
+            return false;
+        }
+
         $sql = "UPDATE lop_hoc_phan SET
                     ma_lop = :ma_lop,
                     hoc_phan_id = :hoc_phan_id,
@@ -310,38 +327,62 @@ class AdminLopHocPhanModel {
      * @return array ['can_delete' => bool, 'enrollment_count' => int]
      */
     public function checkCanDelete(int $id): array {
-        $sql = "SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id";
         try {
-            $stmt = $this->conn->prepare($sql);
+            $class = $this->getClassById($id);
+            if (!$class) {
+                return ['can_delete' => false, 'enrollment_count' => 0, 'trang_thai' => ''];
+            }
+
+            $stmt = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
             $stmt->execute([':id' => $id]);
             $count = (int)$stmt->fetchColumn();
 
+            $isKhoa = (($class['trang_thai'] ?? '') === 'khoa');
+            $canDelete = ($count === 0 && $isKhoa);
+
             return [
-                'can_delete'       => ($count === 0),
-                'enrollment_count' => $count
+                'can_delete'       => $canDelete,
+                'enrollment_count' => $count,
+                'trang_thai'       => $class['trang_thai'] ?? '',
+                'is_khoa'          => $isKhoa
             ];
         } catch (PDOException $e) {
             error_log("Lỗi AdminLopHocPhanModel::checkCanDelete: " . $e->getMessage());
             return [
                 'can_delete'       => false,
-                'enrollment_count' => 999
+                'enrollment_count' => 999,
+                'trang_thai'       => 'mo',
+                'is_khoa'          => false
             ];
         }
     }
 
     /**
-     * Xóa lớp học phần (Chỉ khi chưa có sinh viên đăng ký)
+     * Xóa lớp học phần (Chặn xóa nếu đã có sinh viên đăng ký trang_thai = 'dang_ky')
      */
     public function deleteClass(int $id): bool {
+        try {
+            $stmtCheck = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
+            $stmtCheck->execute([':id' => $id]);
+            if ((int)$stmtCheck->fetchColumn() > 0) {
+                return false;
+            }
+        } catch (PDOException $e) {
+            error_log("Lỗi kiểm tra sĩ số trước khi xóa lớp: " . $e->getMessage());
+            return false;
+        }
+
         $check = $this->checkCanDelete($id);
         if (!$check['can_delete']) {
             return false;
         }
 
-        $sql = "DELETE FROM lop_hoc_phan WHERE id = :id";
+        // Chặn Race Condition tại tầng cơ sở dữ liệu: chỉ xóa khi lớp đang khóa
+        $sql = "DELETE FROM lop_hoc_phan WHERE id = :id AND trang_thai = 'khoa'";
         try {
             $stmt = $this->conn->prepare($sql);
-            return $stmt->execute([':id' => $id]);
+            $success = $stmt->execute([':id' => $id]);
+            return $success && ($stmt->rowCount() > 0);
         } catch (PDOException $e) {
             error_log("Lỗi AdminLopHocPhanModel::deleteClass: " . $e->getMessage());
             return false;
@@ -397,6 +438,51 @@ class AdminLopHocPhanModel {
     /**
      * Thống kê tổng quan cho trang quản trị
      */
+    /**
+     * Tính toán trạng thái thời gian thực của lớp học phần
+     * Dựa trên thoi_gian_mo_rieng, thoi_gian_dong_rieng và trang_thai thủ công
+     * 
+     * @param array $class Dữ liệu lớp học phần có các key: trang_thai, thoi_gian_mo_rieng, thoi_gian_dong_rieng
+     * @return array ['code' => 'mo'|'khoa', 'label' => string, 'is_dang_mo' => bool, 'can_register' => bool]
+     */
+    public static function getRealtimeClassStatus(array $class): array {
+        $now = time();
+        $moRieng = !empty($class['thoi_gian_mo_rieng']) ? strtotime($class['thoi_gian_mo_rieng']) : null;
+        $dongRieng = !empty($class['thoi_gian_dong_rieng']) ? strtotime($class['thoi_gian_dong_rieng']) : null;
+
+        // 1. Kiểm tra nếu có cấu hình thời gian riêng - Chưa đến hạn mở
+        if ($moRieng && $now < $moRieng) {
+            return [
+                'code' => 'khoa',
+                'label' => 'Đã khóa (Chưa đến hạn)',
+                'is_dang_mo' => false,
+                'can_register' => false
+            ];
+        }
+
+        // 3. Quá hạn đóng riêng
+        if ($dongRieng && $now > $dongRieng) {
+            return [
+                'code' => 'khoa',
+                'label' => 'Đã khóa (Hết hạn đăng ký)',
+                'is_dang_mo' => false,
+                'can_register' => false
+            ];
+        }
+
+        // 2. Nếu không vướng thời gian riêng, tuân theo trạng thái thủ công của Admin
+        $isManualOpen = (($class['trang_thai'] ?? 'mo') === 'mo');
+        return [
+            'code' => $isManualOpen ? 'mo' : 'khoa',
+            'label' => $isManualOpen ? 'Đang mở' : 'Đã khóa',
+            'is_dang_mo' => $isManualOpen,
+            'can_register' => $isManualOpen
+        ];
+    }
+
+    /**
+     * Thống kê tổng quan cho trang quản trị (áp dụng Real-time Validation)
+     */
     public function getStatistics(): array {
         $stats = [
             'tong_lop'         => 0,
@@ -406,17 +492,19 @@ class AdminLopHocPhanModel {
         ];
 
         try {
-            // Tổng lớp
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan");
-            $stats['tong_lop'] = (int)$stmt->fetchColumn();
+            // Lấy tất cả lớp học phần để tính toán trạng thái thời gian thực chuẩn xác
+            $stmt = $this->conn->query("SELECT id, trang_thai, thoi_gian_mo_rieng, thoi_gian_dong_rieng FROM lop_hoc_phan");
+            $allClasses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $stats['tong_lop'] = count($allClasses);
 
-            // Lớp đang mở
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan WHERE trang_thai = 'mo'");
-            $stats['lop_dang_mo'] = (int)$stmt->fetchColumn();
-
-            // Lớp đang khóa
-            $stmt = $this->conn->query("SELECT COUNT(*) FROM lop_hoc_phan WHERE trang_thai = 'khoa'");
-            $stats['lop_dang_khoa'] = (int)$stmt->fetchColumn();
+            foreach ($allClasses as $c) {
+                $status = self::getRealtimeClassStatus($c);
+                if ($status['is_dang_mo']) {
+                    $stats['lop_dang_mo']++;
+                } else {
+                    $stats['lop_dang_khoa']++;
+                }
+            }
 
             // Tổng lượt sinh viên ghi danh hợp lệ
             $stmt = $this->conn->query("SELECT COUNT(*) FROM dang_ky_hoc WHERE trang_thai = 'dang_ky'");
@@ -426,5 +514,14 @@ class AdminLopHocPhanModel {
         }
 
         return $stats;
+    }
+}
+
+if (!function_exists('getRealtimeClassStatus')) {
+    /**
+     * Helper toàn cục tính trạng thái thời gian thực cho lớp học phần
+     */
+    function getRealtimeClassStatus(array $class): array {
+        return AdminLopHocPhanModel::getRealtimeClassStatus($class);
     }
 }

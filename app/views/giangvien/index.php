@@ -18,26 +18,8 @@ $username = $_SESSION['username'];
 // ==========================================
 // 2. KẾT NỐI CƠ SỞ DỮ LIỆU
 // ==========================================
-$host = 'localhost';
-$dbname = 'studenthub';
-$dbUser = 'root';
-$dbPass = '03112006';
-
-try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $dbUser,
-        $dbPass,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]
-    );
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
-}
+require_once __DIR__ . '/../../../config/database.php';
+$username = (string) $_SESSION['username'];
 
 // ==========================================
 // 3. LẤY THÔNG TIN GIẢNG VIÊN ĐANG ĐĂNG NHẬP
@@ -233,18 +215,16 @@ function e($value): string
 
         <!-- Đăng xuất -->
         <div class="sidebar-bottom">
-
-            <a href="../../../public/index.php"
-               class="menu-item logout">
-
-                <span>⇥</span>
-                Quay lại đăng nhập
-
+            <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-item change-pass-link" style="color: #38bdf8;">
+                <span>🔑</span> Đổi mật khẩu
             </a>
-
+            <a href="../../../public/index.php?action=logout" class="menu-item logout">
+                <span>⇥</span> Đăng xuất
+            </a>
         </div>
 
     </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
 
 
     <!-- ==================================

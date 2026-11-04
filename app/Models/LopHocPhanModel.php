@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * LopHocPhanModel.php
  * Model xử lý truy vấn dữ liệu Lớp học phần cho StudentHub
@@ -60,7 +60,7 @@ class LopHocPhanModel {
                      LIMIT 1) AS ngay_dang_ky_cua_ban
                 FROM lop_hoc_phan lhp
                 INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
-                INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
+                LEFT JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
                 LEFT JOIN nguoi_dung gv ON lhp.giang_vien_id = gv.id
                 WHERE (lhp.id = :class_id_numeric OR lhp.ma_lop = :class_code)
                 LIMIT 1";

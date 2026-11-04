@@ -15,6 +15,7 @@ if (!in_array($vaiTro, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true))
     exit;
 }
 
+
 // Kết nối cơ sở dữ liệu.
 require_once __DIR__ . '/../../../config/database.php';
 
@@ -29,32 +30,34 @@ $tongLopHocPhan = 0;
 $loi = '';
 
 try {
-    $stmt = $conn->query(
+    // File database.php của dự án khởi tạo kết nối PDO bằng biến $pdo.
+    if (!isset($pdo) || !$pdo instanceof PDO) {
+        throw new RuntimeException('Không tìm thấy kết nối cơ sở dữ liệu PDO.');
+    }
+
+    $stmt = $pdo->query(
         "SELECT COUNT(*) FROM nguoi_dung
          WHERE vai_tro = 'sinh_vien'"
     );
     $tongSinhVien = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
+    $stmt = $pdo->query(
         "SELECT COUNT(*) FROM nguoi_dung
          WHERE vai_tro = 'giang_vien'"
     );
     $tongGiangVien = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
-        "SELECT COUNT(*) FROM hoc_phan"
-    );
+    $stmt = $pdo->query("SELECT COUNT(*) FROM hoc_phan");
     $tongHocPhan = (int) $stmt->fetchColumn();
 
-    $stmt = $conn->query(
-        "SELECT COUNT(*) FROM lop_hoc_phan"
-    );
+    $stmt = $pdo->query("SELECT COUNT(*) FROM lop_hoc_phan");
     $tongLopHocPhan = (int) $stmt->fetchColumn();
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log('StudentHub Admin: ' . $e->getMessage());
     $loi = 'Không thể tải số liệu. Vui lòng kiểm tra cấu trúc cơ sở dữ liệu.';
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -190,7 +193,7 @@ try {
 
                 <div class="quick-links">
 
-                    <a class="quick-link" href="tai_khoan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/tai_khoan.php">
                         <div class="quick-icon blue-bg">♙</div>
                         <div class="quick-content">
                             <h3>Quản lý tài khoản</h3>
@@ -202,7 +205,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/hoc_phan.php">
                         <div class="quick-icon purple-bg">▤</div>
                         <div class="quick-content">
                             <h3>Quản lý học phần</h3>
@@ -214,7 +217,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="hoc_ky.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/hoc_ky.php">
                         <div class="quick-icon green-bg">▦</div>
                         <div class="quick-content">
                             <h3>Quản lý học kỳ</h3>
@@ -226,7 +229,7 @@ try {
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="lop_hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/app/Views/admin/lop_hoc_phan.php">
                         <div class="quick-icon orange-bg">▣</div>
                         <div class="quick-content">
                             <h3>Quản lý lớp học phần</h3>

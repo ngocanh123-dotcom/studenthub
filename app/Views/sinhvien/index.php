@@ -79,19 +79,6 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <span>Đăng ký học phần</span>
                 </a>
 
-                <a href="/studenthub/app/Views/classes/detail.php?id=1"
-                   class="sh-nav-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                    <span>Chi tiết lớp học phần</span>
-                </a>
-
                 <a href="/studenthub/app/Views/lichsu/index.php"
                    class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24"
@@ -100,6 +87,12 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         <polyline points="12 6 12 12 14 14"/>
                     </svg>
                     <span>Lịch sử đăng ký</span>
+                </a>
+
+                <a href="javascript:void(0)" onclick="openChangePasswordModal()"
+                   class="sh-nav-item change-pass-link" style="color: #38bdf8;">
+                    <span style="font-size: 16px; width: 18px; text-align: center;">🔑</span>
+                    <span>Đổi mật khẩu</span>
                 </a>
 
                 <a href="/studenthub/public/index.php?action=logout"
@@ -123,6 +116,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
             <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
         </div>
     </aside>
+<script src="/studenthub/assets/js/change_password.js"></script>
 
     <!-- 2. NỘI DUNG CHÍNH BÊN PHẢI -->
     <main class="sh-main-content">
