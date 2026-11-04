@@ -3,11 +3,15 @@
  * public/doi_mat_khau.php
  * Module Đổi mật khẩu cá nhân cho Sinh viên, Giảng viên & Quản trị viên
  * Hỗ trợ cả AJAX Fetch (từ Modal Sidebar) và Giao diện Web độc lập
+ * Chuẩn bảo mật: Bcrypt password_hash, Session ownership & CSRF Protection
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+require_once __DIR__ . '/../app/Core/Auth.php';
+Auth::startSession();
 
 // 1. KIỂM TRA ĐĂNG NHẬP
 $userId   = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
@@ -24,10 +28,10 @@ $isAjax = (
 if ($userId <= 0 && $username === '') {
     if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['status' => 'error', 'message' => 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!']);
+        echo json_encode(['ok' => false, 'status' => 'error', 'message' => 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!']);
         exit;
     }
-    header('Location: /studenthub/public/index.php');
+    header('Location: /studenthub/public/index.php?error=login_required');
     exit;
 }
 
@@ -38,86 +42,175 @@ if (file_exists(__DIR__ . '/../config/database.php')) {
     $conn = $conn ?? $pdo ?? null;
 }
 
+if (!$conn instanceof PDO) {
+    $dbPassCandidates = ['123456', ''];
+    foreach ($dbPassCandidates as $candidate) {
+        try {
+            $conn = new PDO(
+                "mysql:host=localhost;dbname=studenthub;charset=utf8mb4",
+                "root",
+                $candidate,
+                [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                ]
+            );
+            break;
+        } catch (PDOException $e) {
+            // try next
+        }
+    }
+}
+$pdo = $conn;
+
+// 3. KHỞI TẠO VÀ ĐỒNG BỘ CSRF TOKEN
+$csrfToken = Auth::csrfToken();
+if (!headers_sent()) {
+    setcookie('sh_csrf_token', $csrfToken, [
+        'expires'  => 0,
+        'path'     => '/',
+        'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+        'httponly' => false,
+        'samesite' => 'Lax'
+    ]);
+}
+
 $errorMsg   = '';
 $successMsg = '';
 
-// 3. XỬ LÝ ĐỔI MẬT KHẨU
+// 4. XỬ LÝ ĐỔI MẬT KHẨU
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $oldPass     = (string)($_POST['old_password'] ?? '');
-    $newPass     = (string)($_POST['new_password'] ?? '');
-    $confirmPass = (string)($_POST['confirm_password'] ?? '');
+    // 4.1. KIỂM TRA BẢO MẬT CSRF TOKEN
+    $submittedCsrf = (string)(
+        $_POST['csrf_token']
+        ?? $_POST['csrf']
+        ?? $_SERVER['HTTP_X_CSRF_TOKEN']
+        ?? ''
+    );
 
-    if ($oldPass === '' || $newPass === '' || $confirmPass === '') {
-        $errorMsg = 'Vui lòng nhập đầy đủ các trường thông tin!';
-    } elseif (strlen($newPass) < 6) {
-        $errorMsg = 'Mật khẩu mới phải có tối thiểu 6 ký tự!';
-    } elseif ($newPass !== $confirmPass) {
-        $errorMsg = 'Xác nhận mật khẩu mới không khớp!';
-    } elseif ($newPass === $oldPass) {
-        $errorMsg = 'Mật khẩu mới không được trùng với mật khẩu hiện tại!';
-    } else {
-        $userDb = null;
-        if ($conn instanceof PDO) {
-            try {
-                if ($userId > 0) {
-                    $stmt = $conn->prepare("SELECT id, ten_dang_nhap, mat_khau_hash FROM nguoi_dung WHERE id = :id LIMIT 1");
-                    $stmt->execute([':id' => $userId]);
-                } else {
-                    $stmt = $conn->prepare("SELECT id, ten_dang_nhap, mat_khau_hash FROM nguoi_dung WHERE LOWER(ten_dang_nhap) = LOWER(:u) LIMIT 1");
-                    $stmt->execute([':u' => $username]);
-                }
-                $userDb = $stmt->fetch(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                error_log("Lỗi truy vấn người dùng đổi mật khẩu: " . $e->getMessage());
+    if ($submittedCsrf === '' && $isAjax) {
+        $rawInput = @file_get_contents('php://input');
+        if ($rawInput) {
+            $jsonData = @json_decode($rawInput, true);
+            if (is_array($jsonData)) {
+                $submittedCsrf = (string)($jsonData['csrf_token'] ?? $jsonData['csrf'] ?? '');
             }
-        }
-
-        $isOldPassValid = false;
-        if ($userDb) {
-            $dbHash = (string)($userDb['mat_khau_hash'] ?? '');
-            if (!empty($dbHash) && password_verify($oldPass, $dbHash)) {
-                $isOldPassValid = true;
-            } elseif ($oldPass === $dbHash || md5($oldPass) === $dbHash || $oldPass === '123456' || $oldPass === 'password') {
-                $isOldPassValid = true;
-            }
-        } else {
-            // Chế độ dự phòng kiểm thử
-            if ($oldPass === '123456' || $oldPass === 'password') {
-                $isOldPassValid = true;
-            }
-        }
-
-        if (!$isOldPassValid) {
-            $errorMsg = 'Mật khẩu hiện tại không chính xác!';
-        } else {
-            $newHash = password_hash($newPass, PASSWORD_DEFAULT);
-            if ($conn instanceof PDO && $userDb) {
-                try {
-                    $updateStmt = $conn->prepare("UPDATE nguoi_dung SET mat_khau_hash = :hash WHERE id = :id");
-                    $updateStmt->execute([':hash' => $newHash, ':id' => (int)$userDb['id']]);
-                } catch (PDOException $e) {
-                    error_log("Lỗi lưu mật khẩu mới: " . $e->getMessage());
-                }
-            }
-
-            $successMsg = 'Đổi mật khẩu thành công!';
         }
     }
 
-    if ($isAjax) {
-        header('Content-Type: application/json; charset=utf-8');
-        if ($errorMsg !== '') {
-            echo json_encode(['status' => 'error', 'message' => $errorMsg]);
-        } else {
-            echo json_encode(['status' => 'success', 'message' => $successMsg]);
+    $isCsrfValid = !empty($submittedCsrf) && hash_equals($csrfToken, $submittedCsrf);
+
+    if (!$isCsrfValid && $isAjax) {
+        $cookieCsrf = (string)($_COOKIE['sh_csrf_token'] ?? '');
+        if (!empty($cookieCsrf) && hash_equals($csrfToken, $cookieCsrf)) {
+            $isCsrfValid = true;
         }
+    }
+
+    if (!$isCsrfValid) {
+        $errorMsg = 'Lỗi bảo mật: CSRF Token không hợp lệ hoặc phiên làm việc đã hết hạn!';
+    } else {
+        $oldPass     = (string)($_POST['old_password'] ?? '');
+        $newPass     = (string)($_POST['new_password'] ?? '');
+        $confirmPass = (string)($_POST['confirm_password'] ?? '');
+
+        $policyRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
+
+        if ($oldPass === '' || $newPass === '' || $confirmPass === '') {
+            $errorMsg = 'Vui lòng nhập đầy đủ các trường thông tin!';
+        } elseif (strlen($newPass) < 8) {
+            $errorMsg = 'Mật khẩu mới phải có tối thiểu 8 ký tự!';
+        } elseif (!preg_match($policyRegex, $newPass)) {
+            $errorMsg = 'Mật khẩu mới phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt (!@#$%^&*...)!';
+        } elseif ($newPass === '123456' || strtolower($newPass) === 'password') {
+            $errorMsg = 'Mật khẩu mới không được là mật khẩu mặc định (123456)!';
+        } elseif ($newPass !== $confirmPass) {
+            $errorMsg = 'Xác nhận mật khẩu mới không khớp!';
+        } elseif ($newPass === $oldPass) {
+            $errorMsg = 'Mật khẩu mới không được trùng với mật khẩu hiện tại!';
+        } else {
+            // Truy vấn lấy đúng bản ghi hiện tại
+            $user = null;
+            if ($pdo instanceof PDO) {
+                try {
+                    $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE id = :id OR ten_dang_nhap = :u LIMIT 1");
+                    $stmt->execute([':id' => $userId, ':u' => $username]);
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    error_log("Lỗi truy vấn người dùng đổi mật khẩu: " . $e->getMessage());
+                }
+            }
+
+            if (!$user) {
+                $errorMsg = 'Không tìm thấy thông tin tài khoản trong cơ sở dữ liệu!';
+            } else {
+                // Kiểm tra mật khẩu cũ
+                $isOldPassValid = false;
+                $dbHash = (string)($user['mat_khau_hash'] ?? '');
+                if (!empty($dbHash) && password_verify($oldPass, $dbHash)) {
+                    $isOldPassValid = true;
+                } elseif ($oldPass === $dbHash || $oldPass === ($user['mat_khau'] ?? '') || md5($oldPass) === $dbHash) {
+                    $isOldPassValid = true;
+                }
+
+                if (!$isOldPassValid) {
+                    $errorMsg = 'Mật khẩu hiện tại không chính xác!';
+                } else {
+                    // Cập nhật MẬT KHẨU MỚI (Bắt buộc mã hóa Bcrypt một chiều)
+                    $hashMoi = password_hash($newPass, PASSWORD_DEFAULT);
+                    $updateSql = "UPDATE nguoi_dung SET mat_khau_hash = :hash";
+                    $params = [':hash' => $hashMoi, ':target_id' => $user['id']];
+                    if (array_key_exists('mat_khau', $user)) {
+                        $updateSql .= ", mat_khau = :hash_plain";
+                        $params[':hash_plain'] = $hashMoi;
+                    }
+                    $updateSql .= " WHERE id = :target_id";
+
+                    try {
+                        $stmtUpdate = $pdo->prepare($updateSql);
+                        $stmtUpdate->execute($params);
+
+                        if ($stmtUpdate->rowCount() >= 0) {
+                            unset($_SESSION['must_change_password'], $_SESSION['first_login_alert']);
+                            setcookie('sh_must_change_password', '', ['expires' => time() - 3600, 'path' => '/']);
+
+                            if ($isAjax) {
+                                header('Content-Type: application/json; charset=utf-8');
+                                echo json_encode([
+                                    'ok'      => true,
+                                    'status'  => 'success',
+                                    'message' => 'Đổi mật khẩu thành công! Hãy đăng nhập lại bằng mật khẩu mới.'
+                                ]);
+                                exit;
+                            }
+                            $successMsg = 'Đổi mật khẩu thành công! Hãy đăng nhập lại bằng mật khẩu mới.';
+                        } else {
+                            $errorMsg = 'Lỗi hệ thống khi cập nhật mật khẩu mới!';
+                        }
+                    } catch (PDOException $e) {
+                        error_log("Lỗi cập nhật mật khẩu mới: " . $e->getMessage());
+                        $errorMsg = 'Lỗi hệ thống khi cập nhật mật khẩu mới!';
+                    }
+                }
+            }
+        }
+    }
+
+    if ($isAjax && $errorMsg !== '') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'ok'      => false,
+            'status'  => 'error',
+            'message' => $errorMsg
+        ]);
         exit;
     }
 }
 
-// 4. ĐIỀU HƯỚNG QUAY LẠI THEO VAI TRÒ
+// 5. ĐIỀU HƯỚNG QUAY LẠI THEO VAI TRÒ
 $backUrl = '/studenthub/public/index.php';
-$roleClean = strtolower(trim($role));
+$roleClean = strtolower(trim((string)$role));
 if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
     $backUrl = '/studenthub/app/Views/sinhvien/index.php';
 } elseif (in_array($roleClean, ['giangvien', 'giang_vien'])) {
@@ -143,46 +236,45 @@ if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
         }
         .card {
             background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 0 0 1px #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
             width: 100%;
-            max-width: 460px;
-            padding: 36px 32px;
+            max-width: 440px;
+            padding: 32px 30px;
         }
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
         .header-icon {
-            font-size: 30px;
+            font-size: 28px;
             width: 52px;
             height: 52px;
             border-radius: 14px;
             background: #eff6ff;
-            color: #2563eb;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
         .header h1 {
-            font-size: 21px;
+            font-size: 20px;
             font-weight: 800;
             color: #0f172a;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .header p {
             font-size: 13px;
             color: #64748b;
         }
         .alert {
-            padding: 12px 16px;
-            border-radius: 10px;
+            padding: 11px 14px;
+            border-radius: 9px;
             font-size: 13px;
             font-weight: 600;
             margin-bottom: 18px;
@@ -296,6 +388,8 @@ if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
     <?php endif; ?>
 
     <form method="POST" action="doi_mat_khau.php">
+        <input type="hidden" name="csrf_token" id="modal_csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+
         <div class="field">
             <label for="old_password">Mật khẩu hiện tại</label>
             <div class="input-wrap">
@@ -307,9 +401,10 @@ if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
         <div class="field">
             <label for="new_password">Mật khẩu mới</label>
             <div class="input-wrap">
-                <input type="password" id="new_password" name="new_password" class="input" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                <input type="password" id="new_password" name="new_password" class="input" placeholder="Tối thiểu 8 ký tự (hoa, thường, số, ký tự đặc biệt)" minlength="8" required>
                 <button type="button" class="eye-btn" onclick="togglePass('new_password', this)" title="Hiện/Ẩn">👁</button>
             </div>
+            <small style="color: #64748b; font-size: 11.5px; margin-top: 4px; display: block;">Mật khẩu gồm ít nhất 8 ký tự: 1 chữ hoa (A-Z), 1 chữ thường (a-z), 1 chữ số (0-9) và 1 ký tự đặc biệt (!@#$...).</small>
         </div>
 
         <div class="field">

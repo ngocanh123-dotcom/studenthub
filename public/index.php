@@ -43,32 +43,43 @@ if (file_exists($dbFile)) {
     }
 }
 
-// Kết nối dự phòng an toàn
-if (!$pdo) {
-    $dbHost = 'localhost';
-    $dbName = 'studenthub';
-    $dbUser = 'root';
-    $dbPass = '';
-
-    try {
-        $pdo = new PDO(
-            "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4",
-            $dbUser,
-            $dbPass,
-            [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
-        );
-    } catch (PDOException $e) {
-        error_log("Lỗi kết nối CSDL trong index.php: " . $e->getMessage());
-        $dbError = true;
+// Kết nối dự phòng an toàn hỗ trợ cả pass '123456' và ''
+if (!$pdo instanceof PDO) {
+    $dbPassCandidates = ['123456', ''];
+    foreach ($dbPassCandidates as $candidate) {
+        try {
+            $pdo = new PDO(
+                "mysql:host=localhost;dbname=studenthub;charset=utf8mb4",
+                "root",
+                $candidate,
+                [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                ]
+            );
+            $conn = $pdo;
+            break;
+        } catch (PDOException $e) {
+            // Thử mật khẩu tiếp theo
+        }
     }
+}
+if (!$pdo instanceof PDO) {
+    $dbError = true;
 }
 
 if (!isset($conn) || !($conn instanceof PDO)) {
     $conn = $pdo;
+}
+
+// 2.5. FRONT CONTROLLER DISPATCHER CHO CÁC MODULE MVC
+$currentRoute = $_GET['route'] ?? $_GET['action'] ?? '';
+if ($currentRoute === 'danh_sach_lop_hoc_phan') {
+    require_once __DIR__ . '/../app/Controllers/DanhSachLopHocPhanController.php';
+    $controller = new DanhSachLopHocPhanController($pdo);
+    $controller->index();
+    exit;
 }
 
 // Ánh xạ vai trò hiển thị và vai trò CSDL
@@ -106,67 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $loiGet !== '') {
 $username = '';
 $role = 'sinhvien';
 
-// 3. TÀI KHOẢN DEMO DỰ PHÒNG (Đảm bảo kiểm thử thông suốt khi không có CSDL)
-$demoAccounts = [
-    // 3.1. Quản trị viên
-    'admin' => ['password' => '123456', 'role' => 'quantri', 'ho_ten' => 'Quản trị viên Hệ thống', 'id' => 1],
-
-    // 3.2. Giảng viên
-    'gv001' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng', 'id' => 2],
-    'GV001' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'ThS Trần Bình Trọng', 'id' => 2],
-    'gv002' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'TS Lê Phương Hoa', 'id' => 3],
-    'GV002' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'TS Lê Phương Hoa', 'id' => 3],
-    'gv003' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'PGS.TS Nguyễn Văn An', 'id' => 4],
-    'GV003' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'PGS.TS Nguyễn Văn An', 'id' => 4],
-    'gv004' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'ThS Hoàng Bích Ngọc', 'id' => 5],
-    'GV004' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'ThS Hoàng Bích Ngọc', 'id' => 5],
-    'gv005' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'TS Vũ Đình Đạt', 'id' => 6],
-    'GV005' => ['password' => '123456', 'role' => 'giangvien', 'ho_ten' => 'TS Vũ Đình Đạt', 'id' => 6],
-
-    // 3.3. Sinh viên
-    'sv001' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Thu Trang', 'id' => 7],
-    'SV001' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Thu Trang', 'id' => 7],
-    'sv002' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Vũ Quốc Bảo', 'id' => 8],
-    'SV002' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Vũ Quốc Bảo', 'id' => 8],
-    'sv003' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Hoàng Nam', 'id' => 9],
-    'SV003' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Hoàng Nam', 'id' => 9],
-    'sv004' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phạm Mai Phương', 'id' => 10],
-    'SV004' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phạm Mai Phương', 'id' => 10],
-    'sv005' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đỗ Minh Quân', 'id' => 11],
-    'SV005' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đỗ Minh Quân', 'id' => 11],
-    'sv006' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Thị Mai', 'id' => 12],
-    'SV006' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Thị Mai', 'id' => 12],
-    'sv007' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hoàng Đức Anh', 'id' => 13],
-    'SV007' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hoàng Đức Anh', 'id' => 13],
-    'sv008' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Bùi Khánh Linh', 'id' => 14],
-    'SV008' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Bùi Khánh Linh', 'id' => 14],
-    'sv009' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Dương Tuấn Kiệt', 'id' => 15],
-    'SV009' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Dương Tuấn Kiệt', 'id' => 15],
-    'sv010' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Ngô Phương Thảo', 'id' => 16],
-    'SV010' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Ngô Phương Thảo', 'id' => 16],
-    'sv011' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đinh Trọng Hiếu', 'id' => 17],
-    'SV011' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đinh Trọng Hiếu', 'id' => 17],
-    'sv012' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Thanh Hằng', 'id' => 18],
-    'SV012' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lê Thanh Hằng', 'id' => 18],
-    'sv013' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Võ Minh Khang', 'id' => 19],
-    'SV013' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Võ Minh Khang', 'id' => 19],
-    'sv014' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Bảo Ngọc', 'id' => 20],
-    'SV014' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Nguyễn Bảo Ngọc', 'id' => 20],
-    'sv015' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Gia Huy', 'id' => 21],
-    'SV015' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Trần Gia Huy', 'id' => 21],
-    'sv016' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phan Thảo Vy', 'id' => 22],
-    'SV016' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Phan Thảo Vy', 'id' => 22],
-    'sv017' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đặng Quốc Khánh', 'id' => 23],
-    'SV017' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Đặng Quốc Khánh', 'id' => 23],
-    'sv018' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lý Mỹ Linh', 'id' => 24],
-    'SV018' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Lý Mỹ Linh', 'id' => 24],
-    'sv019' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hồ Nhật Nam', 'id' => 25],
-    'SV019' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Hồ Nhật Nam', 'id' => 25],
-    'sv020' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Cao Hoài An', 'id' => 26],
-    'SV020' => ['password' => '123456', 'role' => 'sinhvien', 'ho_ten' => 'Cao Hoài An', 'id' => 26]
-];
-
-// 3.5. XỬ LÝ QUÊN MẬT KHẨU 3 BƯỚC (FORGOT PASSWORD CONTROLLER)
+// 3. XỬ LÝ QUÊN MẬT KHẨU 3 BƯỚC (FORGOT PASSWORD CONTROLLER)
 $fp_step = 0;
 $fp_error = '';
 $fp_success = '';
@@ -193,19 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 } catch (PDOException $e) {
                     error_log("Lỗi kiểm tra quên mật khẩu: " . $e->getMessage());
-                }
-            }
-
-            // Hỗ trợ kiểm thử dự phòng nếu CSDL chưa kết nối
-            if (!$user && (isset($demoAccounts[$fp_username]) || isset($demoAccounts[strtolower($fp_username)]))) {
-                $accKey = isset($demoAccounts[$fp_username]) ? $fp_username : strtolower($fp_username);
-                $expectedEmail = strtolower($accKey) . '@studenthub.edu.vn';
-                if (strtolower($fp_email) === $expectedEmail || strtolower($fp_email) === 'admin@studenthub.edu.vn' || strpos($fp_email, '@') !== false) {
-                    $user = [
-                        'id' => $demoAccounts[$accKey]['id'] ?? 1,
-                        'ten_dang_nhap' => $accKey,
-                        'email' => $fp_email
-                    ];
                 }
             }
 
@@ -259,12 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
                     }
                 }
 
-                // Cập nhật mảng tài khoản demo để kiểm thử thông suốt
-                $uName = $_SESSION['fp_username'] ?? '';
-                if ($uName !== '' && isset($demoAccounts[$uName])) {
-                    $demoAccounts[$uName]['password'] = $new_pass;
-                }
-
                 unset($_SESSION['fp_user_id'], $_SESSION['fp_username'], $_SESSION['fp_email'], $_SESSION['fp_otp'], $_SESSION['fp_verified']);
                 $fp_step = 0;
                 $thongBao = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.";
@@ -282,121 +214,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = (string)($_POST['password'] ?? '');
-    $role = trim($_POST['role'] ?? 'sinhvien');
 
     $authenticated = false;
     $taiKhoan = null;
-    $userDb = null;
+    $role = 'sinhvien';
 
-    if (!isset($vaiTroDatabase[$role])) {
-        $thongBao = 'Vui lòng chọn vai trò đăng nhập hợp lệ.';
-        $loaiThongBao = 'error';
-    } elseif ($username === '' || $password === '') {
+    if ($username === '' || $password === '') {
         $thongBao = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
         $loaiThongBao = 'error';
     } else {
-        // 4.1. ƯU TIÊN XÁC THỰC BẰNG DATABASE QUA PDO PREPARED STATEMENTS
-        if ($pdo instanceof PDO) {
+        if (!$pdo instanceof PDO) {
+            $thongBao = 'Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra dịch vụ MySQL.';
+            $loaiThongBao = 'error';
+        } else {
             try {
-                $sql = "SELECT id, ten_dang_nhap, mat_khau_hash, ho_ten, email, vai_tro
-                        FROM nguoi_dung
-                        WHERE LOWER(ten_dang_nhap) = LOWER(:u)
-                        LIMIT 1";
+                // 4.1. Truy vấn trực tiếp vào bảng nguoi_dung bằng PDO
+                $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE (LOWER(ten_dang_nhap) = LOWER(:u) OR LOWER(email) = LOWER(:e)) LIMIT 1");
+                $stmt->execute([':u' => $username, ':e' => $username]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([':u' => $username]);
-                $userDb = $stmt->fetch(PDO::FETCH_ASSOC);
+                $loginSuccess = false;
+                if ($user) {
+                    $storedHash = (string)($user['mat_khau_hash'] ?? '');
+
+                    // Ưu tiên kiểm tra bằng hash chuẩn Bcrypt
+                    if (!empty($storedHash) && password_verify($password, $storedHash)) {
+                        $loginSuccess = true;
+                    }
+                    // Chỉ chấp nhận nếu mật khẩu trong DB chưa băm (dữ liệu ban đầu) và khớp đúng
+                    elseif (!str_starts_with($storedHash, '$2y$') && ($password === $storedHash || md5($password) === $storedHash)) {
+                        $loginSuccess = true;
+                        // Tự động nâng cấp băm luôn vào CSDL
+                        $newH = password_hash($password, PASSWORD_DEFAULT);
+                        $pdo->prepare("UPDATE nguoi_dung SET mat_khau_hash = :h WHERE id = :id")->execute([':h' => $newH, ':id' => $user['id']]);
+                        $user['mat_khau_hash'] = $newH;
+                    }
+                }
+
+                if ($loginSuccess) {
+                    $authenticated = true;
+                    $taiKhoan = $user;
+                } else {
+                    $thongBao = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
+                    $loaiThongBao = 'error';
+                }
             } catch (PDOException $e) {
                 error_log('Lỗi truy vấn đăng nhập: ' . $e->getMessage());
-                $dbError = true;
+                $thongBao = 'Có lỗi xảy ra khi xử lý đăng nhập. Vui lòng thử lại sau.';
+                $loaiThongBao = 'error';
             }
         }
+    }
 
-        // 4.2. XÁC THỰC MẬT KHẨU VÀ TÀI KHOẢN TRONG DATABASE
-        if ($userDb) {
-            $dbRole = strtolower(trim((string)($userDb['vai_tro'] ?? '')));
-            $roleDbNormalized = $roleAliases[$dbRole] ?? '';
+    // 4.2. ĐĂNG NHẬP THÀNH CÔNG: CHUẨN HÓA VÀ ĐỒNG BỘ SESSION
+    if ($authenticated && $taiKhoan) {
+        session_regenerate_id(true);
 
-            $isPasswordValid = false;
-            $dbHash = (string)($userDb['mat_khau_hash'] ?? '');
+        // Kiểm tra tài khoản sử dụng mật khẩu mặc định (123456) để bật cờ đổi mật khẩu bắt buộc
+        $isDefaultPass = ($password === '123456');
+        if (!$isDefaultPass && !empty($taiKhoan['mat_khau_hash'])) {
+            $isDefaultPass = password_verify('123456', $taiKhoan['mat_khau_hash']);
+        }
 
-            // Chuẩn 1: Xác thực bằng password_verify
-            if (!empty($dbHash) && password_verify($password, $dbHash)) {
-                $isPasswordValid = true;
-            }
-
-            if ($isPasswordValid) {
-                // Kiểm tra vai trò đăng nhập
-                if ($roleDbNormalized === $role) {
-                    $authenticated = true;
-                    $taiKhoan = $userDb;
-                } else {
-                    $tenVaiTroDung = $tenVaiTroMap[$roleDbNormalized] ?? 'khác';
-                    $thongBao = "Tài khoản thuộc vai trò {$tenVaiTroDung}. Vui lòng chọn đúng vai trò trên giao diện.";
-                    $loaiThongBao = 'error';
-                }
-            } else {
-                $thongBao = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
-                $loaiThongBao = 'error';
-            }
-
-        // 4.3. NẾU DATABASE CHƯA KẾT NỐI ĐƯỢC HOẶC KHÔNG TÌM THẤY -> DÙNG TÀI KHOẢN DEMO DỰ PHÒNG
-        } elseif (isset($demoAccounts[$username]) || isset($demoAccounts[strtolower($username)])) {
-            $key = isset($demoAccounts[$username]) ? $username : strtolower($username);
-            $acc = $demoAccounts[$key];
-
-            // Chấp nhận mật khẩu chính, '123456', 'password' hoặc mật khẩu cũ
-            if ($password === $acc['password'] || $password === '123456' || $password === 'password' || in_array($password, ['Admin@123', 'Gv@123', 'Sv@123'], true)) {
-                if ($role === $acc['role']) {
-                    $authenticated = true;
-                    $taiKhoan = [
-                        'id'            => $acc['id'],
-                        'ten_dang_nhap' => $username,
-                        'ho_ten'        => $acc['ho_ten'],
-                        'vai_tro'       => $vaiTroDatabase[$acc['role']]
-                    ];
-                } else {
-                    $tenVaiTroDung = $tenVaiTroMap[$acc['role']] ?? 'khác';
-                    $thongBao = "Tài khoản thuộc vai trò {$tenVaiTroDung}. Vui lòng chọn đúng vai trò trên giao diện.";
-                    $loaiThongBao = 'error';
-                }
-            } else {
-                $thongBao = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
-                $loaiThongBao = 'error';
-            }
+        if ($isDefaultPass) {
+            $_SESSION['must_change_password'] = true;
+            $_SESSION['first_login_alert'] = 'Cảnh báo bảo mật quan trọng: Mật khẩu của bạn là mật khẩu mặc định (123456). Vui lòng đổi mật khẩu để bảo vệ thông tin cá nhân và đảm bảo không ai (kể cả Admin) biết mật khẩu của bạn!';
+            setcookie('sh_must_change_password', '1', [
+                'expires'  => 0,
+                'path'     => '/',
+                'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
         } else {
-            $thongBao = $dbError
-                ? 'Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra dịch vụ MySQL.'
-                : 'Tên đăng nhập hoặc mật khẩu không chính xác.';
-            $loaiThongBao = 'error';
+            unset($_SESSION['must_change_password'], $_SESSION['first_login_alert']);
+            setcookie('sh_must_change_password', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
         }
 
-        // 4.4. ĐĂNG NHẬP THÀNH CÔNG: CHUẨN HÓA VÀ ĐỒNG BỘ TOÀN DIỆN SESSION
-        if ($authenticated && $taiKhoan) {
-            session_regenerate_id(true);
+        $dbRole = strtolower(trim((string)($taiKhoan['vai_tro'] ?? 'sinh_vien')));
+        $roleMap = [
+            'sinh_vien'  => 'sinhvien',
+            'sinhvien'   => 'sinhvien',
+            'giang_vien' => 'giangvien',
+            'giangvien'  => 'giangvien',
+            'admin'      => 'quantri',
+            'quantri'    => 'quantri'
+        ];
+        $role = $roleMap[$dbRole] ?? 'sinhvien';
+        $vaiTroDatabaseVal = [
+            'sinhvien'  => 'sinh_vien',
+            'giangvien' => 'giang_vien',
+            'quantri'   => 'admin'
+        ];
+        $vaiTroChuan = $vaiTroDatabaseVal[$role] ?? 'sinh_vien';
 
-            $vaiTroChuan = $taiKhoan['vai_tro'] ?? ($vaiTroDatabase[$role] ?? 'sinh_vien');
-
-            // 1. Chuẩn hóa 4 khóa Session bắt buộc theo yêu cầu kỹ thuật:
-            $_SESSION['user_id']       = (int)$taiKhoan['id'];
-            $_SESSION['ten_dang_nhap'] = (string)$taiKhoan['ten_dang_nhap'];
-            $_SESSION['ho_ten']        = (string)$taiKhoan['ho_ten'];
-            $_SESSION['vai_tro']       = (string)$vaiTroChuan; // 'sinh_vien', 'giang_vien', 'admin'
-
-            // 2. Đồng bộ các khóa Session tương thích cho tất cả các module khác:
-            $_SESSION['nguoi_dung_id'] = (int)$taiKhoan['id'];
-            $_SESSION['username']      = (string)$taiKhoan['ten_dang_nhap'];
-            $_SESSION['role']          = (string)$role; // 'sinhvien', 'giangvien', 'quantri'
-            $_SESSION['tenVaiTro']     = $tenVaiTroMap[$role] ?? 'Thành viên';
-            $_SESSION['nguoi_dung']    = [
-                'id'            => (int)$taiKhoan['id'],
-                'ten_dang_nhap' => (string)$taiKhoan['ten_dang_nhap'],
-                'ho_ten'        => (string)$taiKhoan['ho_ten'],
-                'vai_tro'       => (string)$vaiTroChuan
-            ];
-
-            // Đường dẫn điều hướng chính xác theo vai trò
-            $trangDich = [
+        // Chuẩn hóa Session
+        $_SESSION['user_id']       = (int)$taiKhoan['id'];
+        $_SESSION['ten_dang_nhap'] = (string)$taiKhoan['ten_dang_nhap'];
+        $_SESSION['ho_ten']        = (string)$taiKhoan['ho_ten'];
+        $_SESSION['vai_tro']       = (string)$vaiTroChuan; // 'sinh_vien', 'giang_vien', 'admin'
+        $_SESSION['nguoi_dung_id'] = (int)$taiKhoan['id'];
+        $_SESSION['username']      = (string)$taiKhoan['ten_dang_nhap'];
+        $_SESSION['role']          = (string)$role; // 'sinhvien', 'giangvien', 'quantri'
+        $_SESSION['tenVaiTro']     = $tenVaiTroMap[$role] ?? 'Thành viên';
+        $_SESSION['csrf_token']    = bin2hex(random_bytes(32));
+        $_SESSION['nguoi_dung']    = [
+            'id'            => (int)$taiKhoan['id'],
+            'ten_dang_nhap' => (string)$taiKhoan['ten_dang_nhap'],
+            'ho_ten'        => (string)$taiKhoan['ho_ten'],
+            'vai_tro'       => (string)$vaiTroChuan,
+            'email'         => (string)($taiKhoan['email'] ?? '')
+        ];
+        $trangDich = [
                 'sinhvien'  => '../app/Views/sinhvien/index.php',
                 'giangvien' => '../app/Views/giangvien/index.php',
                 'quantri'   => '../app/Views/admin/index.php'
@@ -406,14 +341,13 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
-}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cổng Đăng Ký Học Phần & Quản Trị Học Vụ - EDUPORTAL</title>
+    <title>Cổng Đăng Ký Học Phần & Quản Trị Học Vụ - StudentHub</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/login.css?v=<?= time() ?>">
@@ -759,7 +693,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="brand-text-wrap">
-                <h2>EDUPORTAL</h2>
+                <h2>StudentHub</h2>
                 <span>HỆ THỐNG ĐÀO TẠO TÍN CHỈ</span>
             </div>
         </div>
@@ -826,6 +760,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <form method="POST" action="index.php" id="authLoginForm" novalidate>
+                <!-- Ẩn khối Chọn vai trò truy cập (Backend tự động nhận diện từ CSDL) -->
+                <div style="display: none;" aria-hidden="true">
                 <span class="bento-group-label">CHỌN VAI TRÒ TRUY CẬP</span>
 
                 <div class="bento-tiles-grid" role="radiogroup">
@@ -885,6 +821,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <span class="tile-title">Quản trị</span>
                         </label>
                     </div>
+                </div>
                 </div>
 
                 <!-- TÊN ĐĂNG NHẬP -->

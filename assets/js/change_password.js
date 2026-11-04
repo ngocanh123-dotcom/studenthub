@@ -202,6 +202,7 @@ function openChangePasswordModal() {
                 <div id="cpAlert" class="cp-alert" style="display: none;"></div>
 
                 <form id="cpForm" onsubmit="submitChangePassword(event)">
+                    <input type="hidden" name="csrf_token" id="modal_csrf_token" value="">
                     <div class="cp-field">
                         <label for="cp_old_password">Mật khẩu hiện tại</label>
                         <div class="cp-input-wrap">
@@ -213,9 +214,10 @@ function openChangePasswordModal() {
                     <div class="cp-field">
                         <label for="cp_new_password">Mật khẩu mới</label>
                         <div class="cp-input-wrap">
-                            <input type="password" id="cp_new_password" name="new_password" class="cp-input" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                            <input type="password" id="cp_new_password" name="new_password" class="cp-input" placeholder="Tối thiểu 8 ký tự" minlength="8" required>
                             <button type="button" class="cp-eye-btn" onclick="toggleCpPass('cp_new_password', this)" title="Hiện mật khẩu">👁</button>
                         </div>
+                        <p style="font-size: 11.5px; color: #64748b; margin-top: 4px; margin-bottom: 0; line-height: 1.35;">Yêu cầu: Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (!@#$...).</p>
                     </div>
 
                     <div class="cp-field">
@@ -255,6 +257,19 @@ function openChangePasswordModal() {
 
     const form = document.getElementById('cpForm');
     if (form) form.reset();
+
+    // Đồng bộ mã CSRF Token vào ô #modal_csrf_token từ trang chính hoặc cookie
+    const cpCsrfInput = document.getElementById('modal_csrf_token');
+    if (cpCsrfInput) {
+        let token = '';
+        const pageCsrf = document.querySelector('input[name="csrf_token"]:not(#cpForm #modal_csrf_token)');
+        if (pageCsrf && pageCsrf.value) token = pageCsrf.value.trim();
+        if (!token) {
+            const cookieMatch = document.cookie.match(/(?:^|;)\s*sh_csrf_token=([^;]+)/);
+            if (cookieMatch) token = decodeURIComponent(cookieMatch[1]);
+        }
+        if (token) cpCsrfInput.value = token;
+    }
     const alertBox = document.getElementById('cpAlert');
     if (alertBox) alertBox.style.display = 'none';
     const submitBtn = document.getElementById('cpSubmitBtn');
@@ -300,9 +315,25 @@ function submitChangePassword(event) {
         return;
     }
 
-    if (newPass.length < 6) {
+    const policyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    if (newPass.length < 8) {
         alertBox.className = 'cp-alert cp-alert-error';
-        alertBox.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự!';
+        alertBox.textContent = 'Mật khẩu mới phải có tối thiểu 8 ký tự!';
+        alertBox.style.display = 'block';
+        return;
+    }
+
+    if (!policyRegex.test(newPass)) {
+        alertBox.className = 'cp-alert cp-alert-error';
+        alertBox.textContent = 'Mật khẩu mới phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt (!@#$%...)!';
+        alertBox.style.display = 'block';
+        return;
+    }
+
+    if (newPass === '123456' || newPass.toLowerCase() === 'password') {
+        alertBox.className = 'cp-alert cp-alert-error';
+        alertBox.textContent = 'Mật khẩu mới không được là mật khẩu mặc định (123456)!';
         alertBox.style.display = 'block';
         return;
     }
@@ -321,28 +352,50 @@ function submitChangePassword(event) {
         return;
     }
 
+    // Lấy chính xác giá trị CSRF token từ ô input #modal_csrf_token
+    const modalCsrfEl = document.getElementById('modal_csrf_token');
+    let csrfToken = modalCsrfEl ? modalCsrfEl.value.trim() : '';
+
+    if (!csrfToken) {
+        const pageToken = document.querySelector('input[name="csrf_token"]:not(#modal_csrf_token)');
+        if (pageToken && pageToken.value) csrfToken = pageToken.value.trim();
+    }
+    if (!csrfToken) {
+        const cookieMatch = document.cookie.match(/(?:^|;)\s*sh_csrf_token=([^;]+)/);
+        if (cookieMatch) csrfToken = decodeURIComponent(cookieMatch[1]);
+    }
+
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>Đang cập nhật...</span>';
+
+    // Tạo payload FormData / URLSearchParams truyền kèm cả csrf_token và csrf
+    const payload = new URLSearchParams();
+    payload.append('ajax', '1');
+    payload.append('csrf_token', csrfToken);
+    payload.append('csrf', csrfToken);
+    payload.append('old_password', oldPass);
+    payload.append('new_password', newPass);
+    payload.append('confirm_password', confirmPass);
 
     fetch('/studenthub/public/doi_mat_khau.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': csrfToken
         },
-        body: new URLSearchParams({
-            ajax: '1',
-            old_password: oldPass,
-            new_password: newPass,
-            confirm_password: confirmPass
-        })
+        body: payload
     })
     .then(res => res.json())
     .then(data => {
-        if (data.status === 'success') {
+        if (data.ok === true || data.status === 'success') {
             alertBox.className = 'cp-alert cp-alert-success';
             alertBox.textContent = '✓ ' + (data.message || 'Đổi mật khẩu thành công!');
             alertBox.style.display = 'block';
+            // Xóa cookie cảnh báo đổi mật khẩu mặc định
+            document.cookie = 'sh_must_change_password=; Max-Age=0; path=/;';
+            const banner = document.getElementById('shDefaultPasswordBanner');
+            if (banner) banner.style.display = 'none';
             document.getElementById('cpForm').reset();
             setTimeout(() => {
                 closeChangePasswordModal();
@@ -363,3 +416,32 @@ function submitChangePassword(event) {
         submitBtn.innerHTML = '<span>Xác nhận đổi mật khẩu</span>';
     });
 }
+
+// Tự động kiểm tra cờ phải đổi mật khẩu (sh_must_change_password) để mở modal ở lần đăng nhập đầu tiên
+(function checkAutoOpenChangePassword() {
+    function initCheck() {
+        const isMustChange = document.cookie.split(';').some(item => item.trim().startsWith('sh_must_change_password=1'));
+        if (isMustChange) {
+            setTimeout(function() {
+                if (typeof openChangePasswordModal === 'function') {
+                    openChangePasswordModal();
+                    const alertBox = document.getElementById('cpAlert');
+                    if (alertBox) {
+                        alertBox.className = 'cp-alert';
+                        alertBox.style.background = '#fffbeb';
+                        alertBox.style.color = '#b45309';
+                        alertBox.style.border = '1px solid #fde68a';
+                        alertBox.style.display = 'block';
+                        alertBox.innerHTML = '<strong>⚠️ Cảnh báo bảo mật:</strong> Mật khẩu của bạn là mật khẩu mặc định (123456). Vui lòng đặt mật khẩu mới mạnh hơn để bảo vệ tài khoản!';
+                    }
+                }
+            }, 350);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCheck);
+    } else {
+        initCheck();
+    }
+})();

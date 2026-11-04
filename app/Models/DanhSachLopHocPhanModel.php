@@ -14,6 +14,7 @@ class DanhSachLopHocPhanModel {
 
     /**
      * Lấy danh sách lớp học phần kèm bộ lọc tra cứu động
+     * Đồng bộ đầy đủ lịch học (lhp.lich_hoc, lhp.phong_hoc) và thời gian học kỳ (hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk)
      * 
      * @param int $sinhVienId ID sinh viên đang đăng nhập để kiểm tra sv_da_dang_ky
      * @param array $filters Mảng tham số lọc: tu_khoa, hoc_ky_id, giang_vien_id
@@ -55,6 +56,8 @@ class DanhSachLopHocPhanModel {
                 lhp.si_so_toi_da,
                 lhp.thoi_gian_mo_rieng,
                 lhp.thoi_gian_dong_rieng,
+                lhp.lich_hoc,
+                lhp.phong_hoc,
 
                 hp.ma_hoc_phan,
                 hp.ten_hoc_phan,
@@ -65,6 +68,7 @@ class DanhSachLopHocPhanModel {
                 hk.ngay_ket_thuc,
                 hk.thoi_gian_mo_dk,
                 hk.thoi_gian_dong_dk,
+                hk.trang_thai_dang_ky,
 
                 nd.ten_dang_nhap AS ma_giang_vien,
                 nd.ho_ten AS ho_ten_giang_vien,
@@ -88,7 +92,7 @@ class DanhSachLopHocPhanModel {
             FROM lop_hoc_phan lhp
             INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
             INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
-            INNER JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
+            LEFT JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
             WHERE $whereSql
             ORDER BY lhp.hoc_ky_id ASC, hp.ma_hoc_phan ASC, lhp.ma_lop ASC
         ";
@@ -110,7 +114,7 @@ class DanhSachLopHocPhanModel {
      */
     public function getAllHocKy(): array {
         try {
-            $stmt = $this->conn->query("SELECT id, ten_hoc_ky FROM hoc_ky ORDER BY id ASC");
+            $stmt = $this->conn->query("SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky FROM hoc_ky ORDER BY id ASC");
             return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (PDOException $e) {
             error_log("Lỗi DanhSachLopHocPhanModel::getAllHocKy: " . $e->getMessage());
@@ -130,6 +134,41 @@ class DanhSachLopHocPhanModel {
         } catch (PDOException $e) {
             error_log("Lỗi DanhSachLopHocPhanModel::getAllGiangVien: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Lấy thông tin học kỳ đang mở cổng đăng ký (trang_thai_dang_ky = 1)
+     * Phục vụ hiển thị sidebar-semester-pill đồng bộ với Admin
+     * 
+     * @return array|null
+     */
+    public function getActiveHocKy(): ?array {
+        try {
+            // Ưu tiên học kỳ có cổng đăng ký đang mở
+            $stmt = $this->conn->query("
+                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky 
+                FROM hoc_ky 
+                WHERE trang_thai_dang_ky = 1 
+                ORDER BY id DESC 
+                LIMIT 1
+            ");
+            $active = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($active) {
+                return $active;
+            }
+
+            // Fallback lấy học kỳ mới nhất nếu không có học kỳ nào đang mở
+            $stmt = $this->conn->query("
+                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky 
+                FROM hoc_ky 
+                ORDER BY id DESC 
+                LIMIT 1
+            ");
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (PDOException $e) {
+            error_log("Lỗi DanhSachLopHocPhanModel::getActiveHocKy: " . $e->getMessage());
+            return null;
         }
     }
 }
