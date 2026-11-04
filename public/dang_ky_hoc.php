@@ -29,7 +29,8 @@ if (!in_array($vaiTro, ['sinhvien', 'sinh_vien'], true)) {
     );
 }
 
-$lopId = filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
+$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT)
+    ?: filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
 $thongBao = '';
 $loaiThongBao = 'error';
 
@@ -199,22 +200,6 @@ if (!$lopId || $lopId <= 0) {
 
                 $thongBao = 'Đăng ký học phần thành công!';
                 $loaiThongBao = 'success';
-
-
-                // Tạo bản ghi đăng ký mới
-                $stmt = $pdo->prepare("
-                    INSERT INTO dang_ky_hoc
-                        (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
-                    VALUES
-                        (:lop_id, :sv_id, 'dang_ky', NOW())
-                ");
-
-                $stmt->execute([
-                    'lop_id' => $lopId,
-                    'sv_id'  => $sinhVienId
-                ]);
-
-
             }
         }
 

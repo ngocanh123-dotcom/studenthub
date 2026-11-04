@@ -45,13 +45,13 @@ class AdminLopHocPhanController {
      */
     private function checkAuth(): void {
         if (empty($_SESSION['username'])) {
-            header('Location: /studenthub/public/index.php');
+            header('Location: /studenthub/public/index.php?error=login_required');
             exit;
         }
 
         $vaiTro = strtolower(trim((string)($_SESSION['vai_tro'] ?? $_SESSION['role'] ?? '')));
         if (!in_array($vaiTro, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
-            header('Location: /studenthub/public/index.php');
+            header('Location: /studenthub/public/index.php?error=forbidden');
             exit;
         }
     }
