@@ -396,7 +396,7 @@
                     <span>Tổng quan</span>
                 </a>
 
-                <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="sh-nav-item active">
+                <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan" class="sh-nav-item active">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
@@ -468,6 +468,8 @@
             <?php endif; ?>
         </div>
     </aside>
+    <!-- Ô input ẩn chứa CSRF Token cho Modal Đổi mật khẩu theo yêu cầu -->
+    <input type="hidden" name="csrf_token" id="modal_csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
     <script src="/studenthub/assets/js/change_password.js"></script>
 
     <!-- 2. NỘI DUNG CHÍNH -->
@@ -532,7 +534,8 @@
             </div>
 
             <!-- THANH TÌM KIẾM & BỘ LỌC -->
-            <form method="GET" action="/studenthub/public/danh_sach_lop_hoc_phan.php" class="filter-bar">
+            <form method="GET" action="/studenthub/public/index.php" class="filter-bar">
+                <input type="hidden" name="route" value="danh_sach_lop_hoc_phan">
                 <input type="text" name="tu_khoa" class="input-control"
                        placeholder="Tìm mã HP, tên môn học (có thể để trống để lọc theo học kỳ)..."
                        value="<?= htmlspecialchars($tu_khoa) ?>">
@@ -559,7 +562,7 @@
                     <button type="submit" class="btn-filter-custom">
                         <i class="fa-solid fa-magnifying-glass"></i> Lọc
                     </button>
-                    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="btn-outline-custom" title="Đặt lại bộ lọc">
+                    <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan" class="btn-outline-custom" title="Đặt lại bộ lọc">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 </div>
@@ -579,7 +582,7 @@
                         <?php endif; ?>
                         (Tìm thấy <strong><?= $tong_so_mon ?></strong> môn học phần / <strong><?= $tong_so_lop ?></strong> lớp)
                     </div>
-                    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" style="color:#1e40af; font-weight:600; text-decoration:none;">
+                    <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan" style="color:#1e40af; font-weight:600; text-decoration:none;">
                         <i class="fa-solid fa-xmark"></i> Xem tất cả
                     </a>
                 </div>

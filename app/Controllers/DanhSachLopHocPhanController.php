@@ -64,12 +64,18 @@ class DanhSachLopHocPhanController {
      * Hiển thị danh sách lớp học phần theo môn cho sinh viên
      */
     public function index(): void {
-        // Thông tin người dùng: chỉ tin vào session thật, không tự gán đăng nhập giả
-        $isStudent = (($_SESSION['role'] ?? '') === 'sinhvien') && (int)($_SESSION['user_id'] ?? 0) > 0;
-        $isGuest   = !$isStudent;
-        $sinh_vien_id_hien_tai = $isStudent ? (int)$_SESSION['user_id'] : 0;
-        $hoTen                 = $isStudent ? ($_SESSION['ho_ten'] ?? 'Sinh viên') : 'Khách';
-        $maSinhVien            = $isStudent ? ($_SESSION['username'] ?? '') : 'Chưa đăng nhập';
+        require_once __DIR__ . '/../Core/Auth.php';
+        Auth::requireRole('sinh_vien');
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        $sinh_vien_id_hien_tai = Auth::id() ?? 0;
+        $hoTen                 = Auth::name();
+        $maSinhVien            = Auth::username();
+        $isStudent             = true;
+        $isGuest               = false;
 
         // Nhận tham số tìm kiếm & bộ lọc từ $_GET
         $tu_khoa       = trim($_GET['tu_khoa'] ?? '');
