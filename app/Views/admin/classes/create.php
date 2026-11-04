@@ -105,9 +105,9 @@
 <div class="layout">
 
     <!-- THANH MENU BÊN TRÁI -->
-    <?php 
+    <?php
     $activeMenu = 'lop_hoc_phan';
-    require __DIR__ . '/../../layouts/admin_sidebar.php'; 
+    require __DIR__ . '/../../layouts/admin_sidebar.php';
     ?>
 
     <!-- KHU VỰC CHÍNH -->
@@ -137,7 +137,7 @@
             <?php endif; ?>
 
             <div class="form-card-container">
-                <form method="POST" action="lop_hoc_phan.php?action=store" novalidate>
+                <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=store" novalidate>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <!-- 1. THÔNG TIN CHUNG VÀ HỌC THUẬT -->
@@ -178,8 +178,8 @@
                         <!-- Mã lớp -->
                         <div class="form-group-item">
                             <label for="ma_lop">Mã lớp học phần <span class="required">*</span></label>
-                            <input type="text" name="ma_lop" id="ma_lop" 
-                                   value="<?= htmlspecialchars($oldData['ma_lop'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                            <input type="text" name="ma_lop" id="ma_lop"
+                                   value="<?= htmlspecialchars($oldData['ma_lop'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                    placeholder="Ví dụ: LHP06, LHP-WEB-01..." required>
                             <span class="form-hint">Mã định danh duy nhất (không trùng lặp)</span>
                         </div>
@@ -205,8 +205,8 @@
                         <!-- Sĩ số tối đa -->
                         <div class="form-group-item">
                             <label for="si_so_toi_da">Sĩ số tối đa (Chỗ ngồi) <span class="required">*</span></label>
-                            <input type="number" name="si_so_toi_da" id="si_so_toi_da" 
-                                   value="<?= htmlspecialchars((string)($oldData['si_so_toi_da'] ?? 40), ENT_QUOTES, 'UTF-8') ?>" 
+                            <input type="number" name="si_so_toi_da" id="si_so_toi_da"
+                                   value="<?= htmlspecialchars((string)($oldData['si_so_toi_da'] ?? 40), ENT_QUOTES, 'UTF-8') ?>"
                                    min="1" max="500" required>
                             <span class="form-hint">Số lượng sinh viên tối đa được phép ghi danh</span>
                         </div>
@@ -224,8 +224,8 @@
                         <!-- Thời khóa biểu -->
                         <div class="form-group-item">
                             <label for="lich_hoc">Thời khóa biểu / Lịch học</label>
-                            <input type="text" name="lich_hoc" id="lich_hoc" 
-                                   value="<?= htmlspecialchars($oldData['lich_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                            <input type="text" name="lich_hoc" id="lich_hoc"
+                                   value="<?= htmlspecialchars($oldData['lich_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                    placeholder="Ví dụ: Thứ 2 (Tiết 1 - 3)">
                             <span class="form-hint">Lịch học cố định hàng tuần; lịch và phòng không được trùng với lớp khác trong cùng học kỳ</span>
                         </div>
@@ -233,8 +233,8 @@
                         <!-- Phòng học -->
                         <div class="form-group-item">
                             <label for="phong_hoc">Địa điểm / Phòng học</label>
-                            <input type="text" name="phong_hoc" id="phong_hoc" 
-                                   value="<?= htmlspecialchars($oldData['phong_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                            <input type="text" name="phong_hoc" id="phong_hoc"
+                                   value="<?= htmlspecialchars($oldData['phong_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                    placeholder="Ví dụ: P.302 - Nhà Giảng đường A1">
                             <span class="form-hint">Phòng học lý thuyết hoặc phòng máy thực hành</span>
                         </div>
@@ -245,14 +245,14 @@
                     <div class="form-grid-2col">
                         <div class="form-group-item">
                             <label for="thoi_gian_mo_rieng">Thời gian mở riêng</label>
-                            <input type="datetime-local" name="thoi_gian_mo_rieng" id="thoi_gian_mo_rieng" 
+                            <input type="datetime-local" name="thoi_gian_mo_rieng" id="thoi_gian_mo_rieng"
                                    value="<?= htmlspecialchars($oldData['thoi_gian_mo_rieng'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <span class="form-hint">Để trống nếu muốn áp dụng khung giờ chung của Học kỳ</span>
                         </div>
 
                         <div class="form-group-item">
                             <label for="thoi_gian_dong_rieng">Thời gian đóng riêng</label>
-                            <input type="datetime-local" name="thoi_gian_dong_rieng" id="thoi_gian_dong_rieng" 
+                            <input type="datetime-local" name="thoi_gian_dong_rieng" id="thoi_gian_dong_rieng"
                                    value="<?= htmlspecialchars($oldData['thoi_gian_dong_rieng'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <span class="form-hint">Hạn chót đóng cổng đăng ký riêng cho lớp này</span>
                         </div>
@@ -263,7 +263,7 @@
                         <button type="submit" class="btn-submit-save">
                             ✓ Lưu lớp học phần
                         </button>
-                        <a href="lop_hoc_phan.php" class="btn-cancel-back">
+                        <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php" class="btn-cancel-back">
                             &larr; Hủy bỏ &amp; Quay lại
                         </a>
                     </div>

@@ -255,9 +255,9 @@
 <div class="layout">
 
     <!-- THANH MENU BÊN TRÁI -->
-    <?php 
+    <?php
     $activeMenu = 'lop_hoc_phan';
-    require __DIR__ . '/../../layouts/admin_sidebar.php'; 
+    require __DIR__ . '/../../layouts/admin_sidebar.php';
     ?>
 
     <!-- KHU VỰC NỘI DUNG CHÍNH -->
@@ -334,7 +334,7 @@
                     <h2>Danh sách lớp học phần đào tạo</h2>
                 </div>
                 <div class="btn-toolbar-group">
-                    <a href="lop_hoc_phan.php?action=create" class="btn-create-class">
+                    <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=create" class="btn-create-class">
                         <span>+ Thêm lớp học phần mới</span>
                     </a>
                     <button type="button" onclick="exportPDF()" class="btn-export-pdf" title="Xuất danh sách dạng PDF / In ấn trực tiếp">
@@ -351,13 +351,13 @@
             </div>
 
             <!-- 3. BỘ LỌC TÌM KIẾM ĐA TIÊU CHÍ (SEARCH & FILTERS) -->
-            <form method="GET" action="lop_hoc_phan.php" class="filter-grid-classes">
+            <form method="GET" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php" class="filter-grid-classes">
                 <input type="hidden" name="action" value="index">
-                
+
                 <div>
-                    <input type="text" name="tu_khoa" 
-                           value="<?= htmlspecialchars($filters['tu_khoa'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
-                           placeholder="Tìm theo mã lớp, mã môn, tên môn..." 
+                    <input type="text" name="tu_khoa"
+                           value="<?= htmlspecialchars($filters['tu_khoa'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                           placeholder="Tìm theo mã lớp, mã môn, tên môn..."
                            style="width: 100%; min-height: 40px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px;">
                 </div>
 
@@ -407,7 +407,7 @@
                         Lọc
                     </button>
                     <?php if (!empty($filters['tu_khoa']) || !empty($filters['hoc_ky_id']) || !empty($filters['hoc_phan_id']) || !empty($filters['giang_vien_id']) || !empty($filters['trang_thai'])): ?>
-                        <a href="lop_hoc_phan.php" class="btn-secondary" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; text-decoration: none; color: #64748b; background: #e2e8f0; font-size: 13px; font-weight: 600;">
+                        <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php" class="btn-secondary" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; text-decoration: none; color: #64748b; background: #e2e8f0; font-size: 13px; font-weight: 600;">
                             Xóa lọc
                         </a>
                     <?php endif; ?>
@@ -459,7 +459,7 @@
                             </tr>
                         <?php else: ?>
                             <?php foreach ($classes as $c): ?>
-                                <?php 
+                                <?php
                                     $siSoHienTai = (int)$c['si_so_hien_tai'];
                                     $siSoToiDa = (int)$c['si_so_toi_da'];
                                     $conLai = max(0, $siSoToiDa - $siSoHienTai);
@@ -477,7 +477,7 @@
                                     <td>
                                         <strong><?= htmlspecialchars($c['ten_hoc_phan'], ENT_QUOTES, 'UTF-8') ?></strong>
                                         <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
-                                            Mã: <code><?= htmlspecialchars($c['ma_hoc_phan'], ENT_QUOTES, 'UTF-8') ?></code> • 
+                                            Mã: <code><?= htmlspecialchars($c['ma_hoc_phan'], ENT_QUOTES, 'UTF-8') ?></code> •
                                             <strong><?= (int)$c['so_tin_chi'] ?> Tín chỉ</strong>
                                         </div>
                                     </td>
@@ -523,7 +523,7 @@
                                             <?php endif; ?>
                                         </div>
                                         <div class="capacity-bar-wrap">
-                                            <div class="capacity-bar-fill <?= $isFull ? 'danger' : ($percent >= 80 ? 'full' : '') ?>" 
+                                            <div class="capacity-bar-fill <?= $isFull ? 'danger' : ($percent >= 80 ? 'full' : '') ?>"
                                                  style="width: <?= $percent ?>%;"></div>
                                         </div>
                                     </td>
@@ -539,18 +539,18 @@
 
                                     <!-- CẦU DAO MỞ / KHÓA ĐĂNG KÝ (MỤC H DEMO) -->
                                     <td style="text-align: center;">
-                                        <form method="POST" action="lop_hoc_phan.php?action=toggle" style="display: inline;">
+                                        <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=toggle" style="display: inline;">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
-                                            
+
                                             <?php if (!$isLocked): ?>
-                                                <button type="submit" class="btn-toggle-switch to-lock" 
+                                                <button type="submit" class="btn-toggle-switch to-lock"
                                                         title="Bấm để khóa lớp: sinh viên sẽ bị chặn ngay lập tức!"
                                                         onclick="return confirm('Bạn có chắc chắn muốn KHÓA đăng ký lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>? Sinh viên sẽ không thể đăng ký hoặc xem mở lớp này.');">
                                                     🔒 Khóa lớp
                                                 </button>
                                             <?php else: ?>
-                                                <button type="submit" class="btn-toggle-switch to-open" 
+                                                <button type="submit" class="btn-toggle-switch to-open"
                                                         title="Bấm để mở cổng đăng ký cho sinh viên"
                                                         onclick="return confirm('Bạn có chắc chắn muốn MỞ lại đăng ký cho lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>?');">
                                                     🔓 Mở lại
@@ -561,12 +561,12 @@
 
                                     <!-- Hành động (Sửa, Xóa) -->
                                     <td style="text-align: center;">
-                                        <a href="lop_hoc_phan.php?action=edit&id=<?= (int)$c['id'] ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
+                                        <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=edit&id=<?= (int)$c['id'] ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
                                             Sửa
                                         </a>
 
                                         <!-- Xóa có kiểm tra an toàn -->
-                                        <form method="POST" action="lop_hoc_phan.php?action=delete" style="display: inline;" 
+                                        <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=delete" style="display: inline;"
                                               onsubmit="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>? Hệ thống sẽ chặn xóa nếu đã có sinh viên ghi danh.');">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
