@@ -32,14 +32,16 @@ $duLieuSua = [
     'id' => '',
     'ma_hoc_phan' => '',
     'ten_hoc_phan' => '',
-    'so_tin_chi' => ''
+    'so_tin_chi' => '',
+    'dieu_kien_tien_quyet' => '',
+    'mo_ta' => ''
 ];
 
 // XỬ LÝ THÊM, SỬA, XÓA
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrfNhan = $_POST['csrf_token'] ?? '';
 
-    if (!hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
+    if (!is_string($csrfNhan) || !hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
         $thongBao = 'Phiên làm việc không hợp lệ. Vui lòng tải lại trang.';
         $loaiThongBao = 'error';
     } else {
@@ -52,11 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tenHocPhan = trim($_POST['ten_hoc_phan'] ?? '');
                 $soTinChiNhap = trim((string) ($_POST['so_tin_chi'] ?? ''));
 
+                // Lấy thêm điều kiện tiên quyết và mô tả
+                $dieuKienTienQuyet = trim($_POST['dieu_kien_tien_quyet'] ?? '');
+                $moTa = trim($_POST['mo_ta'] ?? '');
+
                 $duLieuSua = [
                     'id' => $id,
                     'ma_hoc_phan' => $maHocPhan,
                     'ten_hoc_phan' => $tenHocPhan,
-                    'so_tin_chi' => $soTinChiNhap
+                    'so_tin_chi' => $soTinChiNhap,
+                    'dieu_kien_tien_quyet' => $dieuKienTienQuyet,
+                    'mo_ta' => $moTa
                 ];
 
                 if (!preg_match('/^[A-Z0-9_-]{2,30}$/', $maHocPhan)) {
@@ -71,6 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (mb_strlen($tenHocPhan, 'UTF-8') > 150) {
                     throw new RuntimeException('Tên học phần không được vượt quá 150 ký tự.');
+                }
+
+                // Kiểm tra điều kiện tiên quyết
+                if (mb_strlen($dieuKienTienQuyet, 'UTF-8') > 255) {
+                    throw new RuntimeException(
+                        'Điều kiện tiên quyết không được vượt quá 255 ký tự.'
+                    );
                 }
 
                 if (
@@ -101,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $thamSoTrung[':id'] = $id;
                 }
 
-                $stmt = $conn->prepare($sqlTrung);
+                $stmt = $pdo->prepare($sqlTrung);
                 $stmt->execute($thamSoTrung);
 
                 if ((int) $stmt->fetchColumn() > 0) {
@@ -109,28 +124,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if ($hanhDong === 'them') {
-                    // Đã bổ sung cột so_tin_chi
-                    $stmt = $conn->prepare(
+                    // Thêm học phần cùng điều kiện tiên quyết và mô tả
+                    $stmt = $pdo->prepare(
                         "INSERT INTO hoc_phan
-                            (ma_hoc_phan, ten_hoc_phan, so_tin_chi)
+                            (
+                                ma_hoc_phan,
+                                ten_hoc_phan,
+                                so_tin_chi,
+                                dieu_kien_tien_quyet,
+                                mo_ta
+                            )
                          VALUES
-                            (:ma, :ten, :so_tin_chi)"
+                            (
+                                :ma,
+                                :ten,
+                                :so_tin_chi,
+                                :dieu_kien_tien_quyet,
+                                :mo_ta
+                            )"
                     );
 
                     $stmt->execute([
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
-                        ':so_tin_chi' => $soTinChi
+                        ':so_tin_chi' => $soTinChi,
+                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
+                            ? $dieuKienTienQuyet : null,
+                        ':mo_ta' => $moTa !== ''
+                            ? $moTa : null
                     ]);
 
                     $thongBao = 'Thêm học phần thành công.';
                 } else {
-                    // Cập nhật cả số tín chỉ
-                    $stmt = $conn->prepare(
+                    // Cập nhật cả số tín chỉ, điều kiện tiên quyết và mô tả
+                    $stmt = $pdo->prepare(
                         "UPDATE hoc_phan
                          SET ma_hoc_phan = :ma,
                              ten_hoc_phan = :ten,
-                             so_tin_chi = :so_tin_chi
+                             so_tin_chi = :so_tin_chi,
+                             dieu_kien_tien_quyet = :dieu_kien_tien_quyet,
+                             mo_ta = :mo_ta
                          WHERE id = :id"
                     );
 
@@ -138,6 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
+                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
+                            ? $dieuKienTienQuyet : null,
+                        ':mo_ta' => $moTa !== ''
+                            ? $moTa : null,
                         ':id' => $id
                     ]);
 
@@ -158,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Mã học phần không hợp lệ.');
                 }
 
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "SELECT id FROM hoc_phan
                      WHERE id = :id
                      LIMIT 1"
@@ -170,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 // Không xóa nếu lớp học phần đang sử dụng học phần này
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "SELECT COUNT(*) FROM lop_hoc_phan
                      WHERE hoc_phan_id = :id"
                 );
@@ -182,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
 
-                $stmt = $conn->prepare(
+                $stmt = $pdo->prepare(
                     "DELETE FROM hoc_phan WHERE id = :id"
                 );
                 $stmt->execute([':id' => $idXoa]);
@@ -219,8 +256,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
 
     if ($idSua > 0) {
         try {
-            $stmt = $conn->prepare(
-                "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi
+            $stmt = $pdo->prepare(
+                "SELECT
+                    id,
+                    ma_hoc_phan,
+                    ten_hoc_phan,
+                    so_tin_chi,
+                    dieu_kien_tien_quyet,
+                    mo_ta
                  FROM hoc_phan
                  WHERE id = :id
                  LIMIT 1"
@@ -268,11 +311,11 @@ try {
 
     $sql .= " ORDER BY id DESC";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($thamSo);
     $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtTong = $conn->query("SELECT COUNT(*) FROM hoc_phan");
+    $stmtTong = $pdo->query("SELECT COUNT(*) FROM hoc_phan");
     $tongHocPhan = (int) $stmtTong->fetchColumn();
 
 } catch (PDOException $e) {
@@ -298,9 +341,9 @@ function e($value)
 <div class="layout">
 
     <!-- THANH MENU BÊN TRÁI -->
-    <?php 
+    <?php
     $activeMenu = 'hoc_phan';
-    require __DIR__ . '/../layouts/admin_sidebar.php'; 
+    require __DIR__ . '/../layouts/admin_sidebar.php';
     ?>
 
     <main class="main">
@@ -393,6 +436,46 @@ function e($value)
                                 value="<?= e($duLieuSua['so_tin_chi']) ?>"
                                 placeholder="Ví dụ: 3"
                             >
+                        </div>
+
+                        <!-- BỔ SUNG: ĐIỀU KIỆN TIÊN QUYẾT -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <label for="dieu_kien_tien_quyet">Điều kiện tiên quyết</label>
+                            <input
+                                type="text"
+                                id="dieu_kien_tien_quyet"
+                                name="dieu_kien_tien_quyet"
+                                maxlength="255"
+                                value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>"
+                                placeholder="Ví dụ: WEB102 - Lập trình Web cơ bản"
+                            >
+                            <small class="text-slate-400">
+                                Để trống nếu học phần không có môn tiên quyết bắt buộc.
+                            </small>
+                        </div>
+
+                        <!-- BỔ SUNG: MÔ TẢ HỌC PHẦN -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <label for="mo_ta">Mô tả và mục tiêu học phần</label>
+                            <textarea
+    id="mo_ta"
+    name="mo_ta"
+    rows="4"
+    placeholder="Nhập mô tả, nội dung và mục tiêu của học phần..."
+    style="
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: vertical;
+        outline: none;
+    "
+><?= e($duLieuSua['mo_ta'] ?? '') ?></textarea>
                         </div>
                     </div>
 
