@@ -239,8 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
 }
 // 4. XỬ LÝ ĐĂNG NHẬP (AUTHENTICATION CONTROLLER)
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = (string)($_POST['password'] ?? '');
+    $username = trim($_POST['username'] ?? $_POST['ten_dang_nhap'] ?? '');
+    $password = trim($_POST['password'] ?? $_POST['mat_khau'] ?? '');
 
     $authenticated = false;
     $taiKhoan = null;
@@ -256,20 +256,20 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 // 4.1. Truy vấn trực tiếp vào bảng nguoi_dung bằng PDO
-                $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE (LOWER(ten_dang_nhap) = LOWER(:u) OR LOWER(email) = LOWER(:e)) LIMIT 1");
+                $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE (LOWER(TRIM(ten_dang_nhap)) = LOWER(TRIM(:u)) OR LOWER(TRIM(email)) = LOWER(TRIM(:e))) LIMIT 1");
                 $stmt->execute([':u' => $username, ':e' => $username]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 $loginSuccess = false;
                 if ($user) {
-                    $storedHash = (string)($user['mat_khau_hash'] ?? '');
+                    $storedHash = (string)($user['mat_khau_hash'] ?? $user['mat_khau'] ?? '');
 
                     // Ưu tiên kiểm tra bằng hash chuẩn Bcrypt
                     if (!empty($storedHash) && password_verify($password, $storedHash)) {
                         $loginSuccess = true;
                     }
                     // Chỉ chấp nhận nếu mật khẩu trong DB chưa băm (dữ liệu ban đầu) và khớp đúng
-                    elseif (!str_starts_with($storedHash, '$2y$') && ($password === $storedHash || md5($password) === $storedHash)) {
+                    elseif (!empty($storedHash) && !str_starts_with($storedHash, '$2y$') && ($password === $storedHash || md5($password) === $storedHash)) {
                         $loginSuccess = true;
                         // Tự động nâng cấp băm luôn vào CSDL
                         $newH = password_hash($password, PASSWORD_DEFAULT);
@@ -907,7 +907,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>Ghi nhớ phiên đăng nhập</span>
                     </label>
 
-                    <a href="javascript:void(0)" onclick="openForgotModal()" class="forgot-link">
+                    <a href="/studenthub/public/quen_mat_khau.php" class="forgot-link">
                         Quên mật khẩu?
                     </a>
                 </div>
