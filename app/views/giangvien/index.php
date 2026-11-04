@@ -1,6 +1,8 @@
 
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // ==========================================
 // 1. KIỂM TRA QUYỀN GIẢNG VIÊN
@@ -9,7 +11,7 @@ if (
     empty($_SESSION['username']) ||
     ($_SESSION['role'] ?? '') !== 'giangvien'
 ) {
-    header('Location: ../../../public/index.php');
+    header('Location: /studenthub/public/index.php');
     exit;
 }
 
@@ -187,7 +189,7 @@ function e($value): string
 
     <title>Tổng quan giảng viên - StudentHub</title>
 
-    <link rel="stylesheet" href="../../../assets/css/giangvien.css">
+    <link rel="stylesheet" href="/studenthub/assets/css/giangvien.css">
 </head>
 
 <body class="lecturer-page">
@@ -216,17 +218,17 @@ function e($value): string
         <!-- Menu -->
         <p class="menu-title">CỔNG GIẢNG VIÊN</p>
 
-        <a href="index.php" class="menu-item active">
+        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item active">
             <span>⌂</span>
             Tổng quan
         </a>
 
-        <a href="lop_hoc_phan.php" class="menu-item">
+        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
             <span>▦</span>
             Lớp học phần
         </a>
 
-        <a href="sinh_vien.php" class="menu-item">
+        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
             <span>♙</span>
             Sinh viên theo lớp
         </a>
@@ -234,7 +236,7 @@ function e($value): string
         <!-- Đăng xuất -->
         <div class="sidebar-bottom">
 
-            <a href="../../../public/index.php"
+            <a href="/studenthub/public/index.php?action=logout"
                class="menu-item logout">
 
                 <span>⇥</span>
@@ -420,7 +422,7 @@ function e($value): string
         <!-- ==================================
              DANH SÁCH HỌC PHẦN
         =================================== -->
-        <section class="panel">
+        <section class="panel" id="course-list">
 
             <div class="panel-heading">
 
@@ -490,7 +492,7 @@ function e($value): string
                                     <td>
                                         <a
                                             class="btn"
-                                            href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$class['hoc_phan_id'] ?>"
+                                            href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$class['hoc_phan_id'] ?>"
                                         >
                                             Xem lớp học phần
                                         </a>

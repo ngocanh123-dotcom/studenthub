@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 function quayLaiDanhSach($ketQua)
 {
     header(
-        'Location: trang_dang_ky_hoc.php?huy=' . urlencode($ketQua)
+        'Location: /studenthub/public/index.php?route=trang_dang_ky_hoc.php&huy=' . urlencode($ketQua)
     );
     exit;
 }

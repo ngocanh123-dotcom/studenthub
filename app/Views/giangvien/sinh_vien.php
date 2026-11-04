@@ -1,13 +1,15 @@
 
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 1. Kiểm tra quyền giảng viên
 if (
     empty($_SESSION['username']) ||
     ($_SESSION['role'] ?? '') !== 'giangvien'
 ) {
-    header('Location: ../../../public/index.php');
+    header('Location: /studenthub/public/index.php');
     exit;
 }
 
@@ -39,7 +41,7 @@ try {
 $lopId = filter_input(INPUT_GET, 'lop_id', FILTER_VALIDATE_INT);
 
 if (!$lopId || $lopId < 1) {
-    header('Location: index.php');
+    header('Location: /studenthub/public/index.php?route=giang_vien.php');
     exit;
 }
 
@@ -154,7 +156,7 @@ function e($value): string
 
     <title>Sinh viên theo lớp - StudentHub</title>
 
-    <link rel="stylesheet" href="../../../assets/css/giangvien.css">
+    <link rel="stylesheet" href="/studenthub/assets/css/giangvien.css">
 </head>
 
 <body class="lecturer-page">
@@ -174,25 +176,25 @@ function e($value): string
 
         <p class="menu-title">MENU CHÍNH</p>
 
-        <a href="index.php" class="menu-item">
+        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item">
             <span>▦</span>
             Tổng quan
         </a>
 
-        <a href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
+        <a href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
            class="menu-item">
             <span>▤</span>
             Lớp học phần
         </a>
 
-        <a href="sinh_vien.php?lop_id=<?= (int)$lop['id'] ?>"
+        <a href="/studenthub/public/index.php?route=giang_vien_sinh_vien.php&lop_id=<?= (int)$lop['id'] ?>"
            class="menu-item active">
             <span>♙</span>
             Sinh viên theo lớp
         </a>
 
         <div class="sidebar-bottom">
-            <a href="../../../public/index.php" class="menu-item logout">
+            <a href="/studenthub/public/index.php?action=logout" class="menu-item logout">
                 <span>⇥</span>
                 Quay lại đăng nhập
             </a>
@@ -365,7 +367,7 @@ function e($value): string
             <div class="back-action">
 
                 <a
-                    href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
+                    href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
                     class="back-button"
                 >
                     ← Quay lại danh sách lớp học phần

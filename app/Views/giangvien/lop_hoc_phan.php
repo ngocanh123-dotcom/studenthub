@@ -1,6 +1,8 @@
 
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // ==========================================
 // 1. KIỂM TRA QUYỀN GIẢNG VIÊN
@@ -9,7 +11,7 @@ if (
     empty($_SESSION['username']) ||
     ($_SESSION['role'] ?? '') !== 'giangvien'
 ) {
-    header('Location: ../../../public/index.php');
+    header('Location: /studenthub/public/index.php');
     exit;
 }
 
@@ -107,7 +109,7 @@ $hocPhanId = filter_input(
 );
 
 if (!$hocPhanId || $hocPhanId < 1) {
-    header('Location: index.php');
+    header('Location: /studenthub/public/index.php?route=giang_vien.php');
     exit;
 }
 
@@ -218,7 +220,7 @@ function trangThaiLop($status): string
 
     <title>Lớp học phần - StudentHub</title>
 
-    <link rel="stylesheet" href="../../../assets/css/giangvien.css">
+    <link rel="stylesheet" href="/studenthub/assets/css/giangvien.css">
 </head>
 
 <body class="lecturer-page">
@@ -241,24 +243,24 @@ function trangThaiLop($status): string
 
         <p class="menu-title">CỔNG GIẢNG VIÊN</p>
 
-        <a href="index.php" class="menu-item">
+        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item">
             <span>⌂</span>
             Tổng quan
         </a>
 
-        <a href="lop_hoc_phan.php?hoc_phan_id=<?= (int)$hocPhan['id'] ?>"
+        <a href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$hocPhan['id'] ?>"
            class="menu-item active">
             <span>▦</span>
             Lớp học phần
         </a>
 
-        <a href="sinh_vien.php" class="menu-item">
+        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
             <span>♙</span>
             Sinh viên theo lớp
         </a>
 
         <div class="sidebar-bottom">
-            <a href="../../../public/index.php"
+            <a href="/studenthub/public/index.php?action=logout"
                class="menu-item logout">
                 <span>⇥</span>
                 Quay lại đăng nhập
@@ -399,7 +401,7 @@ function trangThaiLop($status): string
                                 <td>
                                     <a
                                         class="btn"
-                                        href="sinh_vien.php?lop_id=<?= (int)$class['id'] ?>"
+                                        href="/studenthub/public/index.php?route=giang_vien_sinh_vien.php&lop_id=<?= (int)$class['id'] ?>"
                                     >
                                         Xem sinh viên
                                     </a>
@@ -419,7 +421,7 @@ function trangThaiLop($status): string
 
             <!-- NÚT QUAY LẠI -->
             <div class="back-action">
-                <a href="index.php" class="back-button">
+                <a href="/studenthub/public/index.php?route=giang_vien.php" class="back-button">
                     <span>←</span>
                     Quay lại danh sách học phần
                 </a>

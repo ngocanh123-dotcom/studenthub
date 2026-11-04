@@ -27,19 +27,25 @@ if ($sinhVienId <= 0 || !in_array($vaiTro, ['sinh_vien', 'sinhvien'], true)) {
 /**
  * [TC 8] Bảo mật CSRF Token: Kiểm tra mã CSRF trên mọi form gửi phương thức POST.
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$_POST['csrf_token'])) {
-        die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
-    }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    exit('Phương thức không hợp lệ. Hãy gửi biểu mẫu đăng ký.');
+}
+
+if (
+    !isset($_POST['csrf_token'])
+    || !hash_equals((string) ($_SESSION['csrf_token'] ?? ''), (string) $_POST['csrf_token'])
+) {
+    http_response_code(403);
+    exit('Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.');
 }
 
 /**
  * [TC 5] Kiểm soát dữ liệu: Sĩ số tối đa (si_so_toi_da) và số chỗ còn lại BẮT BUỘC phải được tính toán
  * trực tiếp từ CSDL. Tuyệt đối KHÔNG nhận bất kỳ tham số sĩ số nào từ $_GET hoặc $_POST.
- * Chỉ nhận duy nhất tham số định danh lớp học phần (lop_hoc_phan_id).
+ * Chỉ nhận duy nhất mã lớp học phần từ biểu mẫu POST.
  */
-$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT)
-    ?: filter_input(INPUT_GET, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
+$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
 $thongBao = '';
 $loaiThongBao = 'error';
 
@@ -260,44 +266,7 @@ if (!$lopId || $lopId <= 0) {
                 ]);
 
             } else {
-
-                if ($dangKyCu) {
-
-                    $stmt = $pdo->prepare("
-                        UPDATE dang_ky_hoc
-                        SET trang_thai = 'dang_ky', 
-                            ngay_dang_ky = NOW(), 
-                            ngay_huy = NULL
-                        WHERE id = :id
-                          AND sinh_vien_id = :sv_id
-                          AND lop_hoc_phan_id = :lop_id
-                    ");
-
-                    $stmt->execute([
-                        'id' => $dangKyCu['id'],
-                        'sv_id' => $sinhVienId,
-                        'lop_id' => $lopId
-                    ]);
-
-                } else {
-                    // Tạo bản ghi đăng ký mới.
-                    $stmt = $pdo->prepare("
-                        INSERT INTO dang_ky_hoc
-                            (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
-                        VALUES
-                            (:lop_id, :sv_id, 'dang_ky', NOW())
-                    ");
-
-                    $stmt->execute([
-                        'lop_id' => $lopId,
-                        'sv_id' => $sinhVienId
-                    ]);
-                }
-
-                $thongBao = 'Đăng ký học phần thành công!';
-                $loaiThongBao = 'success';
-
-                // Tạo bản ghi đăng ký mới
+                // Tạo đúng một bản ghi mới; bảng có unique (sinh_vien_id, lop_hoc_phan_id).
                 $stmt = $pdo->prepare("
                     INSERT INTO dang_ky_hoc
                         (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
@@ -309,7 +278,6 @@ if (!$lopId || $lopId <= 0) {
                     'lop_id' => $lopId,
                     'sv_id'  => $sinhVienId
                 ]);
-
             }
 
             $thongBao = 'Đăng ký học phần thành công!';
@@ -444,7 +412,7 @@ if (!$lopId || $lopId <= 0) {
         <div class="actions">
             <a
                 class="primary"
-                href="/studenthub/public/trang_dang_ky_hoc.php"
+                href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
             >
                 Quay lại đăng ký học phần
             </a>
@@ -454,7 +422,7 @@ if (!$lopId || $lopId <= 0) {
 
             <a
                 class="secondary"
-                href="/studenthub/public/lich_su_dang_ky.php"
+                href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
             >
 
                 Xem lịch sử đăng ký

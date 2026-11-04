@@ -35,12 +35,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 $route = strtolower(trim((string) ($_GET['route'] ?? ''), '/'));
 $publicRoutes = [
     'api_huy_dang_ky.php' => __DIR__ . '/../routes/api_huy_dang_ky.php',
+    'admin_hoc_ky.php' => __DIR__ . '/../routes/admin_hoc_ky.php',
+    'chi_tiet_lop_hoc_phan.php' => __DIR__ . '/../routes/chi_tiet_lop_hoc_phan.php',
     'dangky.php' => __DIR__ . '/../routes/dangky.php',
     'dang_ky_hoc.php' => __DIR__ . '/../routes/dang_ky_hoc.php',
     'danh_sach_lop_hoc_phan.php' => __DIR__ . '/../routes/danh_sach_lop_hoc_phan.php',
+    'giang_vien.php' => __DIR__ . '/../routes/giang_vien.php',
+    'giang_vien_lop_hoc_phan.php' => __DIR__ . '/../routes/giang_vien_lop_hoc_phan.php',
+    'giang_vien_sinh_vien.php' => __DIR__ . '/../routes/giang_vien_sinh_vien.php',
     'huy_dang_ky_hoc.php' => __DIR__ . '/../routes/huy_dang_ky_hoc.php',
     'lich_su_dang_ky.php' => __DIR__ . '/../routes/lich_su_dang_ky.php',
     'logout.php' => __DIR__ . '/../routes/logout.php',
+    'sinh_vien.php' => __DIR__ . '/../routes/sinh_vien.php',
     'trang_dang_ky_hoc.php' => __DIR__ . '/../routes/trang_dang_ky_hoc.php',
 ];
 
@@ -308,8 +314,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Đường dẫn điều hướng chính xác theo vai trò
             $trangDich = [
-                'sinhvien'  => '../app/Views/sinhvien/index.php',
-                'giangvien' => '../app/Views/giangvien/index.php',
+                'sinhvien'  => 'index.php?route=sinh_vien.php',
+                'giangvien' => 'index.php?route=giang_vien.php',
                 'quantri'   => '../app/Views/admin/index.php'
             ];
 

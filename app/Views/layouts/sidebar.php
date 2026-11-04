@@ -21,8 +21,8 @@ $currentUri = $_SERVER['REQUEST_URI'];
         <div class="sidebar-category-title">CỔNG SINH VIÊN</div>
         <nav class="sidebar-menu-list">
             <!-- 1. Tổng quan -->
-            <a href="/studenthub/app/Views/sinhvien/index.php" 
-               class="sh-nav-item <?= (strpos($currentUri, '/sinhvien/index.php') !== false || (strpos($currentUri, 'sinhvien') !== false && strpos($currentUri, 'detail') === false)) ? 'active' : '' ?>">
+            <a href="/studenthub/public/index.php?route=sinh_vien.php"
+               class="sh-nav-item <?= (strpos($currentUri, 'route=sinh_vien.php') !== false || strpos($currentUri, '/sinhvien/index.php') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -31,7 +31,7 @@ $currentUri = $_SERVER['REQUEST_URI'];
             </a>
 
             <!-- 2. Danh sách lớp học phần -->
-            <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" 
+            <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php"
                class="sh-nav-item <?= (strpos($currentUri, 'danh_sach_lop_hoc_phan') !== false && strpos($currentUri, 'dang_ky') === false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7"></rect>
@@ -44,7 +44,7 @@ $currentUri = $_SERVER['REQUEST_URI'];
 
             
 <!-- 3. ĐĂNG KÝ HỌC PHẦN -->
-<a href="/studenthub/public/trang_dang_ky_hoc.php"
+<a href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
    class="sh-nav-item <?= (strpos($currentUri, 'trang_dang_ky_hoc.php') !== false) ? 'active' : '' ?>">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -55,8 +55,8 @@ $currentUri = $_SERVER['REQUEST_URI'];
 
 
             <!-- 4. Chi tiết lớp học phần -->
-            <a href="/studenthub/app/Views/classes/detail.php?id=1" 
-               class="sh-nav-item <?= (strpos($currentUri, '/classes/detail.php') !== false) ? 'active' : '' ?>">
+            <a href="/studenthub/public/index.php?route=chi_tiet_lop_hoc_phan.php&id=1"
+               class="sh-nav-item <?= (strpos($currentUri, 'route=chi_tiet_lop_hoc_phan.php') !== false || strpos($currentUri, '/classes/detail.php') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -70,7 +70,7 @@ $currentUri = $_SERVER['REQUEST_URI'];
 
 
             <!-- 5. Lịch sử đăng ký -->
-            <a href="/studenthub/public/lich_su_dang_ky.php" 
+            <a href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
                class="sh-nav-item <?= (strpos($currentUri, 'lich_su_dang_ky') !== false || strpos($currentUri, 'lichsu') !== false || (isset($activeSidebar) && $activeSidebar === 'lich_su')) ? 'active' : '' ?>">
 
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

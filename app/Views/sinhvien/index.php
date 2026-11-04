@@ -10,8 +10,14 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'sinhvien') {
     exit;
 }
 
-$hoTen = $_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang';
-$maSinhVien = $_SESSION['username'] ?? 'SV001';
+$hoTen = $_SESSION['ho_ten'] ?? $_SESSION['username'] ?? 'Sinh viên';
+$maSinhVien = $_SESSION['username'] ?? '';
+$hocKyHienTai = $dashboardData['semester'] ?? null;
+$cacLopMo = $dashboardData['open_classes'] ?? [];
+$soLopDangMo = count($cacLopMo);
+$soLopDaDangKy = $dashboardData['registered_classes'] ?? null;
+$soTinChiDaDangKy = $dashboardData['registered_credits'] ?? null;
+$hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -47,7 +53,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
 
             <div class="sidebar-category-title">CỔNG SINH VIÊN</div>
             <nav class="sidebar-menu-list">
-                <a href="/studenthub/app/Views/sinhvien/index.php"
+                <a href="/studenthub/public/index.php?route=sinh_vien.php"
                    class="sh-nav-item active">
                     <svg width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -57,7 +63,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <span>Tổng quan</span>
                 </a>
 
-                <a href="/studenthub/public/danh_sach_lop_hoc_phan.php"
+                <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php"
                    class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -69,7 +75,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <span>Danh sách lớp học phần</span>
                 </a>
 
-                <a href="/studenthub/public/trang_dang_ky_hoc.php"
+                <a href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
                    class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -79,7 +85,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <span>Đăng ký học phần</span>
                 </a>
 
-                <a href="/studenthub/app/Views/classes/detail.php?id=1"
+                <a href="/studenthub/public/index.php?route=chi_tiet_lop_hoc_phan.php&id=1"
                    class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -92,7 +98,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     <span>Chi tiết lớp học phần</span>
                 </a>
 
-                <a href="/studenthub/app/Views/lichsu/index.php"
+                <a href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
                    class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2">
@@ -156,7 +162,16 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
         <!-- KHỐI 4 THẺ SỐ LIỆU HỌC TẬP (KPI) -->
         <div class="section-meta-heading">
             <h3>Số liệu học tập</h3>
-            <p>Tổng hợp dữ liệu đăng ký học phần của bạn trong Học kỳ 1 (2026 - 2027).</p>
+            <p>
+                <?php if ($dashboardData === null): ?>
+                    Không thể tải dữ liệu học tập.
+                <?php elseif ($hocKyHienTai !== null): ?>
+                    Tổng hợp dữ liệu đăng ký học phần của bạn trong
+                    <?= htmlspecialchars($hocKyHienTai['ten_hoc_ky'], ENT_QUOTES, 'UTF-8') ?>.
+                <?php else: ?>
+                    Chưa có học kỳ nào được thiết lập trong hệ thống.
+                <?php endif; ?>
+            </p>
         </div>
 
         <div class="sh-metrics-grid">
@@ -171,7 +186,9 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         </svg>
                     </div>
                 </div>
-                <div class="metric-big-number">6</div>
+                <div class="metric-big-number">
+                    <?= $dashboardData !== null ? number_format($soLopDangMo) : '—' ?>
+                </div>
                 <div class="metric-bottom-desc">Lớp học phần có thể đăng ký</div>
             </div>
 
@@ -186,7 +203,9 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         </svg>
                     </div>
                 </div>
-                <div class="metric-big-number">2</div>
+                <div class="metric-big-number">
+                    <?= $soLopDaDangKy !== null ? number_format($soLopDaDangKy) : '—' ?>
+                </div>
                 <div class="metric-bottom-desc">Lớp học phần trong học kỳ</div>
             </div>
 
@@ -202,7 +221,9 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         </svg>
                     </div>
                 </div>
-                <div class="metric-big-number">6</div>
+                <div class="metric-big-number">
+                    <?= $soTinChiDaDangKy !== null ? number_format($soTinChiDaDangKy) : '—' ?>
+                </div>
                 <div class="metric-bottom-desc">Tín chỉ đã đăng ký kỳ này</div>
             </div>
 
@@ -219,10 +240,29 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         </svg>
                     </div>
                 </div>
-                <div class="metric-big-number green-text">Đang mở ĐK</div>
-                <div class="metric-bottom-desc">Hạn đăng ký: 15/09/2026</div>
+                <div class="metric-big-number <?= !empty($dashboardData['registration_open']) ? 'green-text' : '' ?>">
+                    <?php if ($dashboardData === null): ?>
+                        —
+                    <?php elseif ($hocKyHienTai === null): ?>
+                        Chưa có kỳ
+                    <?php else: ?>
+                        <?= $dashboardData['registration_open'] ? 'Đang mở ĐK' : 'Đã đóng ĐK' ?>
+                    <?php endif; ?>
+                </div>
+                <div class="metric-bottom-desc">
+                    Hạn đăng ký:
+                    <?= $hanDangKy
+                        ? htmlspecialchars(date('d/m/Y', strtotime($hanDangKy)), ENT_QUOTES, 'UTF-8')
+                        : 'Chưa thiết lập' ?>
+                </div>
             </div>
         </div>
+
+        <?php if ($dashboardError !== ''): ?>
+            <div class="error-message" role="alert">
+                <?= htmlspecialchars($dashboardError, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
 
         <!-- BẢNG LỚP HỌC PHẦN ĐANG MỞ & HƯỚNG DẪN -->
         <div class="sh-lower-split">
@@ -230,7 +270,14 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                 <div class="panel-header-flex">
                     <div>
                         <h3>Lớp học phần đang mở đăng ký</h3>
-                        <p>Các lớp học phần tiêu biểu trong học kỳ hiện tại</p>
+                        <p>
+                            <?php if ($hocKyHienTai !== null): ?>
+                                Các lớp còn chỗ và đang nhận đăng ký trong
+                                <?= htmlspecialchars($hocKyHienTai['ten_hoc_ky'], ENT_QUOTES, 'UTF-8') ?>
+                            <?php else: ?>
+                                Các lớp học phần đang nhận đăng ký
+                            <?php endif; ?>
+                        </p>
                     </div>
                 </div>
 
@@ -245,45 +292,57 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><span class="class-code-tag">MAT101-01</span></td>
-                            <td>
-                                <strong>Toán Cao Cấp A1</strong><br>
-                                <small style="color:#64748b;">Mã HP: MAT101 • 3 tín chỉ</small>
-                            </td>
-                            <td>ThS Trần Bình Trọng</td>
-                            <td>28/40 <span style="color:#059669; font-weight:700;">(còn 12)</span></td>
-                            <td>
-                                <a href="/studenthub/public/trang_dang_ky_hoc.php?ma_lop=MAT101-01" class="btn-enroll-action">+ Đăng ký</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><span class="class-code-tag">WEB102-01</span></td>
-                            <td>
-                                <strong>Lập Trình Web Cơ Bản</strong><br>
-                                <small style="color:#64748b;">Mã HP: WEB102 • 3 tín chỉ</small>
-                            </td>
-                            <td>TS Lê Hoàng Nam</td>
-                            <td>35/45 <span style="color:#059669; font-weight:700;">(còn 10)</span></td>
-                            <td>
-                                <span class="badge-enrolled-ok">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                    Đã ĐK
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><span class="class-code-tag">DBS201-02</span></td>
-                            <td>
-                                <strong>Cơ Sở Dữ Liệu Quan Hệ</strong><br>
-                                <small style="color:#64748b;">Mã HP: DBS201 • 3 tín chỉ</small>
-                            </td>
-                            <td>ThS Nguyễn Minh Châu</td>
-                            <td>22/40 <span style="color:#059669; font-weight:700;">(còn 18)</span></td>
-                            <td>
-                                <a href="/studenthub/public/trang_dang_ky_hoc.php?ma_lop=DBS201-02" class="btn-enroll-action">+ Đăng ký</a>
-                            </td>
-                        </tr>
+                        <?php if ($dashboardData === null): ?>
+                            <tr>
+                                <td colspan="5">Không thể tải dữ liệu lớp học phần.</td>
+                            </tr>
+                        <?php elseif ($cacLopMo === []): ?>
+                            <tr>
+                                <td colspan="5">Hiện không có lớp học phần phù hợp để đăng ký.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach (array_slice($cacLopMo, 0, 5) as $lop): ?>
+                                <?php
+                                $siSo = (int) $lop['si_so_hien_tai'];
+                                $siSoToiDa = (int) $lop['si_so_toi_da'];
+                                $conCho = max(0, $siSoToiDa - $siSo);
+                                ?>
+                                <tr>
+                                    <td>
+                                        <span class="class-code-tag">
+                                            <?= htmlspecialchars($lop['ma_lop'], ENT_QUOTES, 'UTF-8') ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($lop['ten_hoc_phan'], ENT_QUOTES, 'UTF-8') ?></strong><br>
+                                        <small style="color:#64748b;">
+                                            Mã HP: <?= htmlspecialchars($lop['ma_hoc_phan'], ENT_QUOTES, 'UTF-8') ?>
+                                            • <?= (int) $lop['so_tin_chi'] ?> tín chỉ
+                                        </small>
+                                    </td>
+                                    <td><?= htmlspecialchars($lop['ten_giang_vien'] ?? 'Chưa phân công', ENT_QUOTES, 'UTF-8') ?></td>
+                                    <td>
+                                        <?= $siSo ?>/<?= $siSoToiDa ?>
+                                        <span style="color:#059669; font-weight:700;">(còn <?= $conCho ?>)</span>
+                                    </td>
+                                    <td>
+                                        <form
+                                            method="POST"
+                                            action="/studenthub/public/index.php?route=dang_ky_hoc.php"
+                                            style="margin:0;"
+                                        >
+                                            <input type="hidden" name="lop_hoc_phan_id" value="<?= (int) $lop['id'] ?>">
+                                            <input
+                                                type="hidden"
+                                                name="csrf_token"
+                                                value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                            >
+                                            <button type="submit" class="btn-enroll-action">+ Đăng ký</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -317,7 +376,7 @@ $maSinhVien = $_SESSION['username'] ?? 'SV001';
                     </div>
                 </div>
 
-                <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="btn-cta-all-classes">
+                <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php" class="btn-cta-all-classes">
                     <span>Đi tới Danh sách lớp học phần</span>
                 </a>
             </div>

@@ -17,7 +17,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
         $activeMenu = 'tai_khoan';
     } elseif (strpos($currentUri, 'hoc_phan.php') !== false) {
         $activeMenu = 'hoc_phan';
-    } elseif (strpos($currentUri, 'hoc_ky.php') !== false) {
+    } elseif (strpos($currentUri, 'hoc_ky.php') !== false || strpos($currentUri, 'admin_hoc_ky.php') !== false) {
         $activeMenu = 'hoc_ky';
     } elseif (strpos($currentUri, 'lop_hoc_phan.php') !== false || strpos($currentUri, '/classes/') !== false) {
         $activeMenu = 'lop_hoc_phan';
@@ -75,7 +75,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
             </a>
 
             <!-- 4. Quản lý học kỳ -->
-            <a href="hoc_ky.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_ky' ? 'active' : '' ?>">
+            <a href="/studenthub/public/index.php?route=admin_hoc_ky.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_ky' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>

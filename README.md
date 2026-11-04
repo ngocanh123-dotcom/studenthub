@@ -27,6 +27,7 @@
 - `public/index.php` là điểm vào PHP duy nhất trong thư mục `public/`.
 - `public/.htaccess` chuyển các URL PHP cũ qua `public/index.php`; bộ định tuyến chỉ cho phép các handler đã liệt kê trong front controller.
 - Handler được lưu trong `routes/`. Các công cụ phát triển như `seed_users.php` và `test_db.php` được lưu ngoài `public/` trong `scripts/` và chỉ chạy bằng PHP CLI.
+- Các route `sinh_vien.php`, `giang_vien.php`, `giang_vien_lop_hoc_phan.php` và `giang_vien_sinh_vien.php` phục vụ trang theo vai trò, đồng thời kiểm tra session trước khi tải giao diện.
 - CSS, JavaScript và ảnh vẫn được phục vụ từ `assets/`.
 
 ## 3. Mục tiêu và chức năng chính

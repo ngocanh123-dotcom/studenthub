@@ -50,6 +50,7 @@ if (!function_exists('hienThi')) {
 
 $danhSachLop = [];
 $cacLopDaDangKy = [];
+$cacHocPhanDaDangKy = [];
 $loi = '';
 
 try {
@@ -62,10 +63,15 @@ try {
             lhp.giang_vien_id,
             lhp.trang_thai,
             lhp.si_so_toi_da,
+            lhp.thoi_gian_mo_rieng,
+            lhp.thoi_gian_dong_rieng,
             hp.ma_hoc_phan,
             hp.ten_hoc_phan,
             hp.so_tin_chi,
             hk.ten_hoc_ky,
+            hk.trang_thai_dang_ky,
+            hk.thoi_gian_mo_dk,
+            hk.thoi_gian_dong_dk,
             nd.ho_ten AS ten_giang_vien,
             (
                 SELECT COUNT(*)
@@ -76,7 +82,7 @@ try {
         FROM lop_hoc_phan lhp
         INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
         INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
-        INNER JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
+        LEFT JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
         ORDER BY hp.ten_hoc_phan ASC, lhp.ma_lop ASC
     ";
 
@@ -84,16 +90,17 @@ try {
 
     if ($sinhVienId > 0) {
         $stmt = $pdo->prepare("
-            SELECT lop_hoc_phan_id
-            FROM dang_ky_hoc
-            WHERE sinh_vien_id = :id
-              AND trang_thai = 'dang_ky'
+            SELECT dkh.lop_hoc_phan_id, lhp.hoc_phan_id
+            FROM dang_ky_hoc dkh
+            INNER JOIN lop_hoc_phan lhp ON lhp.id = dkh.lop_hoc_phan_id
+            WHERE dkh.sinh_vien_id = :id
+              AND dkh.trang_thai = 'dang_ky'
         ");
         $stmt->execute(['id' => $sinhVienId]);
-        $cacLopDaDangKy = array_map(
-            'intval',
-            $stmt->fetchAll(PDO::FETCH_COLUMN)
-        );
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $registration) {
+            $cacLopDaDangKy[] = (int) $registration['lop_hoc_phan_id'];
+            $cacHocPhanDaDangKy[] = (int) $registration['hoc_phan_id'];
+        }
     }
 } catch (PDOException $e) {
     error_log('StudentHub: ' . $e->getMessage());
@@ -107,11 +114,38 @@ foreach ($danhSachLop as $lop) {
     $id = (int)$lop['id'];
     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
+    $coHanRieng = !empty($lop['thoi_gian_mo_rieng'])
+        || !empty($lop['thoi_gian_dong_rieng']);
+
+    if ($coHanRieng) {
+        $moDangKy = !empty($lop['thoi_gian_mo_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_mo_rieng'])
+            : null;
+        $dongDangKy = !empty($lop['thoi_gian_dong_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_dong_rieng'])
+            : null;
+        $now = new DateTimeImmutable();
+        $trongHanDangKy = (!$moDangKy || $now >= $moDangKy)
+            && (!$dongDangKy || $now <= $dongDangKy);
+    } else {
+        $moDangKy = !empty($lop['thoi_gian_mo_dk'])
+            ? new DateTimeImmutable($lop['thoi_gian_mo_dk'])
+            : null;
+        $dongDangKy = !empty($lop['thoi_gian_dong_dk'])
+            ? new DateTimeImmutable($lop['thoi_gian_dong_dk'])
+            : null;
+        $now = new DateTimeImmutable();
+        $trongHanDangKy = (int) ($lop['trang_thai_dang_ky'] ?? 0) === 1
+            && (!$moDangKy || $now >= $moDangKy)
+            && (!$dongDangKy || $now <= $dongDangKy);
+    }
 
     if (
         ($lop['trang_thai'] ?? '') === 'mo'
         && $toiDa > 0
         && $siSo < $toiDa
+        && $trongHanDangKy
+        && !in_array((int) $lop['hoc_phan_id'], $cacHocPhanDaDangKy, true)
     ) {
         $soLopMo++;
     }
@@ -664,7 +698,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                          <form
     method="POST"
-    action="huy_dang_ky_hoc.php"
+    action="/studenthub/public/index.php?route=huy_dang_ky_hoc.php"
     onsubmit="return xacNhanHuyDangKy(this, <?= json_encode($lop['ten_hoc_phan'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>)"
     style="margin:0;"
 >
@@ -735,13 +769,48 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     }
 
                     $coLopChuaDangKy = true;
+                    $daDangKyHocPhan = in_array(
+                        (int) $lop['hoc_phan_id'],
+                        $cacHocPhanDaDangKy,
+                        true
+                    );
                     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
                     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
                     $tiLe = $toiDa > 0 ? min(100, $siSo / $toiDa * 100) : 0;
                     $dangMo = ($lop['trang_thai'] ?? '') === 'mo';
                     $conCho = $toiDa > 0 && $siSo < $toiDa;
-                    $coTheDangKy = $dangMo && $conCho;
-                    $trangThaiLoc = $coTheDangKy ? 'open' : (!$dangMo ? 'closed' : 'full');
+                    $now = new DateTimeImmutable();
+                    $coHanRieng = !empty($lop['thoi_gian_mo_rieng'])
+                        || !empty($lop['thoi_gian_dong_rieng']);
+
+                    if ($coHanRieng) {
+                        $moDangKy = !empty($lop['thoi_gian_mo_rieng'])
+                            ? new DateTimeImmutable($lop['thoi_gian_mo_rieng'])
+                            : null;
+                        $dongDangKy = !empty($lop['thoi_gian_dong_rieng'])
+                            ? new DateTimeImmutable($lop['thoi_gian_dong_rieng'])
+                            : null;
+                        $trongHanDangKy = (!$moDangKy || $now >= $moDangKy)
+                            && (!$dongDangKy || $now <= $dongDangKy);
+                    } else {
+                        $moDangKy = !empty($lop['thoi_gian_mo_dk'])
+                            ? new DateTimeImmutable($lop['thoi_gian_mo_dk'])
+                            : null;
+                        $dongDangKy = !empty($lop['thoi_gian_dong_dk'])
+                            ? new DateTimeImmutable($lop['thoi_gian_dong_dk'])
+                            : null;
+                        $trongHanDangKy = (int) $lop['trang_thai_dang_ky'] === 1
+                            && (!$moDangKy || $now >= $moDangKy)
+                            && (!$dongDangKy || $now <= $dongDangKy);
+                    }
+
+                    $coTheDangKy = $dangMo
+                        && $conCho
+                        && $trongHanDangKy
+                        && !$daDangKyHocPhan;
+                    $trangThaiLoc = $daDangKyHocPhan
+                        ? 'registered'
+                        : ($coTheDangKy ? 'open' : (!$dangMo || !$trongHanDangKy ? 'closed' : 'full'));
 
                     $tuKhoa = mb_strtolower(
                         ($lop['ten_hoc_phan'] ?? '') . ' ' .
@@ -779,8 +848,12 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         <td>
                             <?php if ($coTheDangKy): ?>
                                 <span class="registration-status registration-status-open">Đang mở</span>
+                            <?php elseif ($daDangKyHocPhan): ?>
+                                <span class="registration-status registration-status-registered">Đã đăng ký học phần</span>
                             <?php elseif (!$dangMo): ?>
                                 <span class="registration-status registration-status-closed">Đã khóa</span>
+                            <?php elseif (!$trongHanDangKy): ?>
+                                <span class="registration-status registration-status-closed">Ngoài hạn đăng ký</span>
                             <?php else: ?>
                                 <span class="registration-status registration-status-full">Đủ sĩ số</span>
                             <?php endif; ?>
@@ -790,10 +863,17 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                                 <a class="registration-button registration-button-primary"
                                    href="/studenthub/public/index.php">Đăng nhập</a>
                             <?php elseif ($coTheDangKy): ?>
-                                <a class="registration-button registration-button-primary"
-                                   href="dang_ky_hoc.php?lop_hoc_phan_id=<?= $idLop ?>">
-                                    + Đăng ký
-                                </a>
+                                <form
+                                    method="POST"
+                                    action="/studenthub/public/index.php?route=dang_ky_hoc.php"
+                                    style="margin:0;"
+                                >
+                                    <input type="hidden" name="lop_hoc_phan_id" value="<?= $idLop ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= hienThi($csrfToken) ?>">
+                                    <button type="submit" class="registration-button registration-button-primary">
+                                        + Đăng ký
+                                    </button>
+                                </form>
                             <?php else: ?>
                                 <button type="button" class="registration-button registration-button-disabled" disabled>
                                     Không khả dụng

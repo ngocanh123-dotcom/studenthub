@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 1. KIỂM TRA ĐĂNG NHẬP & PHÂN QUYỀN
 if (empty($_SESSION['username'])) {
@@ -14,6 +16,13 @@ if (!in_array($vaiTroSession, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'],
 
 // 2. KẾT NỐI CSDL & TẠO CSRF TOKEN
 require_once __DIR__ . '/../../../config/database.php';
+$conn = $pdo ?? $conn ?? null;
+if (!$conn instanceof PDO) {
+    throw new RuntimeException('Không thể kết nối cơ sở dữ liệu để quản lý học kỳ.');
+}
+
+$semesterUrl = '/studenthub/public/index.php?route=admin_hoc_ky.php';
+
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -53,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([':id' => $idToggle]);
                     $_SESSION['semester_notice'] = 'Đã thay đổi trạng thái đăng ký.';
                 }
-                header('Location: hoc_ky.php'); exit;
+                header('Location: ' . $semesterUrl); exit;
             }
 
             if ($hanhDong === 'them' || $hanhDong === 'sua') {
@@ -93,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([':ten' => $tenHocKy, ':bat_dau' => $ngayBatDau, ':ket_thuc' => $ngayKetThuc, ':mo_dk' => $thoiGianMo ?: null, ':dong_dk' => $thoiGianDong ?: null, ':trang_thai' => $trangThai, ':id' => $id]);
                     $_SESSION['semester_notice'] = 'Cập nhật học kỳ thành công.';
                 }
-                $_SESSION['semester_notice_type'] = 'success'; header('Location: hoc_ky.php'); exit;
+                $_SESSION['semester_notice_type'] = 'success'; header('Location: ' . $semesterUrl); exit;
             }
 
             if ($hanhDong === 'xoa') {
@@ -103,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ((int) $stmt->fetchColumn() > 0) throw new RuntimeException('Không thể xóa! Đã có lớp học phần thuộc học kỳ này.');
                 $stmt = $conn->prepare("DELETE FROM hoc_ky WHERE id = :id");
                 $stmt->execute([':id' => $idXoa]);
-                $_SESSION['semester_notice'] = 'Xóa học kỳ thành công.'; $_SESSION['semester_notice_type'] = 'success'; header('Location: hoc_ky.php'); exit;
+                $_SESSION['semester_notice'] = 'Xóa học kỳ thành công.'; $_SESSION['semester_notice_type'] = 'success'; header('Location: ' . $semesterUrl); exit;
             }
         } catch (Exception $e) { $thongBao = $e->getMessage(); $loaiThongBao = 'error'; }
     }
@@ -139,7 +148,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 <head>
     <meta charset="UTF-8">
     <title>Quản lý học kỳ | StudentHub</title>
-    <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
+    <link rel="stylesheet" href="/studenthub/assets/css/quantrivien.css">
     <style>
         /* CSS TÙY CHỈNH LÀM ĐẸP GIAO DIỆN */
         .banner-highlight {
@@ -205,10 +214,10 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
         <div class="brand"><div class="brand-icon">S</div><div><strong>StudentHub</strong><small>Quản lý học phần</small></div></div>
         <nav class="menu">
             <div class="menu-title">QUẢN TRỊ HỆ THỐNG</div>
-            <a class="menu-link" href="index.php"><span class="menu-icon">⌂</span> Tổng quan</a>
+            <a class="menu-link" href="/studenthub/app/Views/admin/index.php"><span class="menu-icon">⌂</span> Tổng quan</a>
             <a class="menu-link" href="tai_khoan.php"><span class="menu-icon">♙</span> Quản lý tài khoản</a>
             <a class="menu-link" href="hoc_phan.php"><span class="menu-icon">▤</span> Quản lý học phần</a>
-            <a class="menu-link active" href="hoc_ky.php"><span class="menu-icon">▣</span> Quản lý học kỳ</a>
+            <a class="menu-link active" href="<?= e($semesterUrl) ?>"><span class="menu-icon">▣</span> Quản lý học kỳ</a>
             <a class="menu-link" href="lop_hoc_phan.php"><span class="menu-icon">▦</span> Quản lý lớp học phần</a>
         </nav>
         <div class="sidebar-bottom"><a class="menu-link logout" href="../../../app/auth/logout.php"><span class="menu-icon">↪</span> Đăng xuất</a></div>
@@ -237,7 +246,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             <!-- FORM THÊM / SỬA -->
             <div class="section-card">
                 <h3><?= !empty($duLieuSua['id']) ? '✏️ Cập nhật học kỳ' : '➕ Thêm học kỳ mới' ?></h3>
-                <form method="POST" action="hoc_ky.php">
+                <form method="POST" action="<?= e($semesterUrl) ?>">
                     <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                     <input type="hidden" name="hanh_dong" value="<?= !empty($duLieuSua['id']) ? 'sua' : 'them' ?>">
                     <input type="hidden" name="id" value="<?= e($duLieuSua['id']) ?>">
@@ -260,7 +269,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                         <button type="submit" class="btn-primary" style="padding: 12px 25px; font-size: 15px; border-radius: 8px;">
                             <?= !empty($duLieuSua['id']) ? 'Lưu Thay Đổi' : 'Tạo Học Kỳ' ?>
                         </button>
-                        <a href="hoc_ky.php" class="btn-secondary" style="padding: 12px 25px; font-size: 15px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569;">Hủy</a>
+                        <a href="<?= e($semesterUrl) ?>" class="btn-secondary" style="padding: 12px 25px; font-size: 15px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569;">Hủy</a>
                     </div>
                 </form>
             </div>
@@ -269,10 +278,10 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             <div class="section-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
                     <h3 style="margin: 0; border: none; padding: 0;">Danh sách Học kỳ</h3>
-                    <form method="GET" action="hoc_ky.php" style="display: flex; gap: 10px;">
+                    <form method="GET" action="<?= e($semesterUrl) ?>" style="display: flex; gap: 10px;">
                         <input type="search" name="q" value="<?= e($tuKhoa) ?>" placeholder="Tìm tên học kỳ..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none;">
                         <button type="submit" class="btn-primary" style="padding: 10px 15px; border-radius: 8px;">Tìm</button>
-                        <a href="?export=csv&q=<?= urlencode($tuKhoa) ?>" class="btn-secondary" style="padding: 10px 15px; border-radius: 8px; text-decoration: none; border: 1px solid #059669; color: #059669; font-weight: 600;">⬇ Xuất Excel</a>
+                        <a href="<?= e($semesterUrl) ?>&amp;export=csv&amp;q=<?= urlencode($tuKhoa) ?>" class="btn-secondary" style="padding: 10px 15px; border-radius: 8px; text-decoration: none; border: 1px solid #059669; color: #059669; font-weight: 600;">⬇ Xuất Excel</a>
                     </form>
                 </div>
 
@@ -306,7 +315,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         </button>
                                     </td>
                                     <td>
-                                        <form method="POST" action="hoc_ky.php" style="margin:0;">
+                                        <form method="POST" action="<?= e($semesterUrl) ?>" style="margin:0;">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                             <input type="hidden" name="hanh_dong" value="toggle_status">
                                             <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
@@ -316,8 +325,8 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         </form>
                                     </td>
                                     <td style="text-align: right;">
-                                        <a href="hoc_ky.php?sua=<?= (int) $hk['id'] ?>" style="color: #2563eb; font-weight: 600; text-decoration: none; margin-right: 15px;">Sửa</a>
-                                        <form method="POST" action="hoc_ky.php" style="display:inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
+                                        <a href="<?= e($semesterUrl) ?>&amp;sua=<?= (int) $hk['id'] ?>" style="color: #2563eb; font-weight: 600; text-decoration: none; margin-right: 15px;">Sửa</a>
+                                        <form method="POST" action="<?= e($semesterUrl) ?>" style="display:inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                             <input type="hidden" name="hanh_dong" value="xoa">
                                             <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
