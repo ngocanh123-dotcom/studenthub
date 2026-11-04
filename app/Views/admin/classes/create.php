@@ -137,7 +137,7 @@
             <?php endif; ?>
 
             <div class="form-card-container">
-                <form method="POST" action="/studenthub/app/Views/admin/lop_hoc_phan.php?action=store" novalidate>
+                <form method="POST" action="lop_hoc_phan.php?action=store" novalidate>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
                     <!-- 1. THÔNG TIN CHUNG VÀ HỌC THUẬT -->
@@ -263,7 +263,7 @@
                         <button type="submit" class="btn-submit-save">
                             ✓ Lưu lớp học phần
                         </button>
-                        <a href="/studenthub/app/Views/admin/lop_hoc_phan.php" class="btn-cancel-back">
+                        <a href="lop_hoc_phan.php" class="btn-cancel-back">
                             &larr; Hủy bỏ &amp; Quay lại
                         </a>
                     </div>

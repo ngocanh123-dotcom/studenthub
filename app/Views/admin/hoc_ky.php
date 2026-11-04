@@ -122,6 +122,16 @@ $stmt = $conn->prepare($sql); $stmt->execute($thamSo);
 $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $tongHocKy = count($danhSach);
 
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    header('Content-Type: text/csv; charset=utf-8'); header('Content-Disposition: attachment; filename="Danh_Sach_Hoc_Ky.csv"');
+    $out = fopen('php://output', 'w'); fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    fputcsv($out, ['ID', 'Tên Học Kỳ', 'Ngày Bắt Đầu', 'Ngày Kết Thúc', 'Trạng Thái', 'Số Lớp']);
+    foreach ($danhSach as $r) {
+        fputcsv($out, [$r['id'], $r['ten_hoc_ky'], date('d/m/Y', strtotime($r['ngay_bat_dau'])), date('d/m/Y', strtotime($r['ngay_ket_thuc'])), $r['trang_thai_dang_ky'] == 1 ? 'Đang mở' : 'Đang đóng', $r['so_lop']]);
+    }
+    fclose($out); exit;
+}
+
 function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -131,6 +141,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
     <title>Quản lý học kỳ | StudentHub</title>
     <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
     <style>
+        /* CSS TÙY CHỈNH LÀM ĐẸP GIAO DIỆN */
         .banner-highlight {
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             border-radius: 16px;
@@ -190,8 +201,18 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 </head>
 <body>
 <div class="layout">
-    <!-- SỬ DỤNG SIDEBAR CHUNG THAY VÌ VIẾT CỨNG -->
-    <?php require_once __DIR__ . '/../layouts/admin_sidebar.php'; ?>
+    <aside class="sidebar">
+        <div class="brand"><div class="brand-icon">S</div><div><strong>StudentHub</strong><small>Quản lý học phần</small></div></div>
+        <nav class="menu">
+            <div class="menu-title">QUẢN TRỊ HỆ THỐNG</div>
+            <a class="menu-link" href="index.php"><span class="menu-icon">⌂</span> Tổng quan</a>
+            <a class="menu-link" href="tai_khoan.php"><span class="menu-icon">♙</span> Quản lý tài khoản</a>
+            <a class="menu-link" href="hoc_phan.php"><span class="menu-icon">▤</span> Quản lý học phần</a>
+            <a class="menu-link active" href="hoc_ky.php"><span class="menu-icon">▣</span> Quản lý học kỳ</a>
+            <a class="menu-link" href="lop_hoc_phan.php"><span class="menu-icon">▦</span> Quản lý lớp học phần</a>
+        </nav>
+        <div class="sidebar-bottom"><a class="menu-link logout" href="../../../app/auth/logout.php"><span class="menu-icon">↪</span> Đăng xuất</a></div>
+    </aside>
 
     <main class="main">
         <header class="topbar">
@@ -200,6 +221,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
         </header>
 
         <div class="content">
+            <!-- BANNER ĐIỂM NHẤN (Giống trang tổng quan) -->
             <div class="banner-highlight">
                 <div>
                     <h2>Hệ thống Học kỳ</h2>
@@ -250,6 +272,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                     <form method="GET" action="hoc_ky.php" style="display: flex; gap: 10px;">
                         <input type="search" name="q" value="<?= e($tuKhoa) ?>" placeholder="Tìm tên học kỳ..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none;">
                         <button type="submit" class="btn-primary" style="padding: 10px 15px; border-radius: 8px;">Tìm</button>
+                        <a href="?export=csv&q=<?= urlencode($tuKhoa) ?>" class="btn-secondary" style="padding: 10px 15px; border-radius: 8px; text-decoration: none; border: 1px solid #059669; color: #059669; font-weight: 600;">⬇ Xuất Excel</a>
                     </form>
                 </div>
 
@@ -277,15 +300,10 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         <div style="font-size: 13px; color: #64748b;">KT: <?= date('d/m/Y', strtotime($hk['ngay_ket_thuc'])) ?></div>
                                     </td>
                                     <td style="text-align: center;">
-                                        <!-- NÚT XEM VÀ IN DANH SÁCH -->
-                                        <div style="display: flex; gap: 5px; justify-content: center;">
-                                            <button type="button" class="btn-view-class" onclick="toggleDetail(<?= $hk['id'] ?>)">
-                                                👁️ <?= (int) $hk['so_lop'] ?> lớp
-                                            </button>
-                                            <a href="in_danh_sach_lop.php?hoc_ky_id=<?= $hk['id'] ?>" target="_blank" class="btn-view-class" style="background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; text-decoration: none;" title="In danh sách lớp ra PDF">
-                                                🖨️ In
-                                            </a>
-                                        </div>
+                                        <!-- NÚT XEM CHI TIẾT ĐÃ ĐƯỢC THIẾT KẾ LẠI ĐẸP HƠN -->
+                                        <button type="button" class="btn-view-class" onclick="toggleDetail(<?= $hk['id'] ?>)">
+                                            👁️ <?= (int) $hk['so_lop'] ?> lớp
+                                        </button>
                                     </td>
                                     <td>
                                         <form method="POST" action="hoc_ky.php" style="margin:0;">
@@ -308,6 +326,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                     </td>
                                 </tr>
                                 
+                                <!-- DÒNG CHI TIẾT (ẨN/HIỆN) -->
                                 <tr id="detail-<?= $hk['id'] ?>" class="detail-row" style="display: none;">
                                     <td colspan="6">
                                         <div class="detail-container">
@@ -360,8 +379,6 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
     </main>
 </div>
 
-<!-- Script để bật/tắt chi tiết và Đổi mật khẩu -->
-<script src="/studenthub/assets/js/change_password.js"></script>
 <script>
     function toggleDetail(id) {
         var row = document.getElementById('detail-' + id);

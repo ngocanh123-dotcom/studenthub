@@ -40,10 +40,9 @@ class LichSuModel {
     }
 
     // Cập nhật trạng thái thành đã hủy
-    public function huyDangKy($dangKyId, $sinhVienId = null) {
-        $sinhVienId = (int)($sinhVienId ?? ($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0));
-        $sql = "UPDATE dang_ky_hoc SET trang_thai = 'da_huy', ngay_huy = NOW() WHERE id = :id AND sinh_vien_id = :sinh_vien_id";
+    public function huyDangKy($dangKyId) {
+        $sql = "UPDATE dang_ky_hoc SET trang_thai = 'da_huy', ngay_huy = NOW() WHERE id = :id";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute(['id' => $dangKyId, 'sinh_vien_id' => $sinhVienId]);
+        return $stmt->execute(['id' => $dangKyId]);
     }
 }

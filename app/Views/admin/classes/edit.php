@@ -161,7 +161,7 @@
             <?php endif; ?>
 
             <div class="form-card-container">
-                <form method="POST" action="/studenthub/app/Views/admin/lop_hoc_phan.php?action=update" novalidate>
+                <form method="POST" action="lop_hoc_phan.php?action=update" novalidate>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="id" value="<?= (int)$class['id'] ?>">
 
@@ -289,7 +289,7 @@
                         <button type="submit" class="btn-submit-save">
                             ✓ Cập nhật lớp học phần
                         </button>
-                        <a href="/studenthub/app/Views/admin/lop_hoc_phan.php" class="btn-cancel-back">
+                        <a href="lop_hoc_phan.php" class="btn-cancel-back">
                             &larr; Hủy bỏ &amp; Quay lại
                         </a>
                     </div>
