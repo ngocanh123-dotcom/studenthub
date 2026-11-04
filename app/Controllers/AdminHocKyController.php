@@ -9,6 +9,7 @@ class AdminHocKyController {
         $this->model = new HocKyModel($conn);
         if (session_status() === PHP_SESSION_NONE) session_start();
         
+        // Kiểm tra quyền
         if (empty($_SESSION['username']) || !in_array(strtolower($_SESSION['role'] ?? ''), ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'])) {
             header('Location: /studenthub/public/index.php');
             exit;
@@ -24,6 +25,7 @@ class AdminHocKyController {
         $tuKhoa = trim($_GET['q'] ?? '');
         $duLieuSua = ['id' => '', 'ten_hoc_ky' => '', 'ngay_bat_dau' => '', 'ngay_ket_thuc' => '', 'thoi_gian_mo_dk' => '', 'thoi_gian_dong_dk' => ''];
 
+        // Lấy dữ liệu Sửa
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
             $idSua = (int) $_GET['sua'];
             if ($idSua > 0) {
@@ -32,6 +34,7 @@ class AdminHocKyController {
             }
         }
 
+        // Xử lý POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $csrfNhan = $_POST['csrf_token'] ?? '';
             if (!hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
@@ -65,9 +68,9 @@ class AdminHocKyController {
                         if ($tenHocKy === '') throw new RuntimeException('Vui lòng nhập tên học kỳ.');
                         if ($ngayBatDau === '' || $ngayKetThuc === '') throw new RuntimeException('Vui lòng nhập ngày bắt đầu và kết thúc.');
                         
-                        // 1. Validate ngày tháng (chặn tháng 13, 14, ngày 31/02...)
+                        // Validate ngày tháng
                         $d1 = DateTime::createFromFormat('Y-m-d', $ngayBatDau);
-                        if (!$d1 || $d1->format('Y-m-d') !== $ngayBatDau) throw new RuntimeException('Ngày bắt đầu không hợp lệ (Sai định dạng hoặc tháng/ngày không tồn tại).');
+                        if (!$d1 || $d1->format('Y-m-d') !== $ngayBatDau) throw new RuntimeException('Ngày bắt đầu không hợp lệ.');
                         
                         $d2 = DateTime::createFromFormat('Y-m-d', $ngayKetThuc);
                         if (!$d2 || $d2->format('Y-m-d') !== $ngayKetThuc) throw new RuntimeException('Ngày kết thúc không hợp lệ.');
@@ -84,7 +87,15 @@ class AdminHocKyController {
                         if (strtotime($ngayBatDau) > strtotime($ngayKetThuc)) throw new RuntimeException('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.');
                         if ($thoiGianMo !== '' && $thoiGianDong !== '' && strtotime($thoiGianMo) > strtotime($thoiGianDong)) throw new RuntimeException('Thời gian mở đăng ký phải trước thời gian đóng.');
 
-                        // 4. Chặn tạo học kỳ trong quá khứ (Ngày kết thúc nhỏ hơn hôm nay)
+                        // Validate: Thời gian đóng ĐK phải trước ngày bắt đầu ít nhất 7 ngày (tính đến 23:59:59 của ngày thứ 7)
+                        if ($thoiGianDong !== '') {
+                            $mocDongDK = strtotime($ngayBatDau . ' -7 days 23:59:59');
+                            if (strtotime($thoiGianDong) > $mocDongDK) {
+                                throw new RuntimeException('Thời gian đóng đăng ký phải kết thúc trước ngày bắt đầu học kỳ ít nhất 1 tuần (tức là trước 23:59 ngày ' . date('d/m/Y', $mocDongDK) . ').');
+                            }
+                        }
+
+                        // Chặn tạo học kỳ trong quá khứ (Ngày kết thúc nhỏ hơn hôm nay)
                         if ($ngayKetThuc < date('Y-m-d')) {
                             throw new RuntimeException('Không thể tạo/cập nhật học kỳ đã kết thúc trong quá khứ.');
                         }

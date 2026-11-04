@@ -8,6 +8,12 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
     <meta charset="UTF-8">
     <title>Quản lý học kỳ | StudentHub</title>
     <link rel="stylesheet" href="/studenthub/assets/css/quantrivien.css">
+    
+    <!-- Nhúng thư viện Flatpickr (Lịch chọn ngày) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+
     <style>
         .banner-highlight { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 16px; padding: 30px; color: white; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); }
         .banner-highlight h2 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; color: #fff; }
@@ -48,7 +54,6 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 </head>
 <body>
 <div class="layout">
-    <!-- SỬ DỤNG SIDEBAR CHUNG -->
     <?php require_once __DIR__ . '/../layouts/admin_sidebar.php'; ?>
 
     <main class="main">
@@ -73,7 +78,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             <!-- FORM THÊM / SỬA -->
             <div class="section-card">
                 <h3><?= !empty($duLieuSua['id']) ? '✏️ Cập nhật học kỳ' : '➕ Thêm học kỳ mới' ?></h3>
-                <form method="POST" action="admin_hoc_ky.php">
+                <form method="POST" action="admin_hoc_ky.php" id="formHocKy">
                     <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                     <input type="hidden" name="hanh_dong" value="<?= !empty($duLieuSua['id']) ? 'sua' : 'them' ?>">
                     <input type="hidden" name="id" value="<?= e($duLieuSua['id']) ?>">
@@ -87,11 +92,12 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                             </div>
                             <div class="form-field">
                                 <label>Ngày bắt đầu *</label>
-                                <input type="date" name="ngay_bat_dau" required value="<?= e($duLieuSua['ngay_bat_dau']) ?>">
+                                <!-- Đổi thành type="text" để dùng Flatpickr -->
+                                <input type="text" name="ngay_bat_dau" id="ngay_bat_dau" required value="<?= e($duLieuSua['ngay_bat_dau']) ?>" placeholder="dd/mm/yyyy">
                             </div>
                             <div class="form-field">
                                 <label>Ngày kết thúc *</label>
-                                <input type="date" name="ngay_ket_thuc" required value="<?= e($duLieuSua['ngay_ket_thuc']) ?>">
+                                <input type="text" name="ngay_ket_thuc" id="ngay_ket_thuc" required value="<?= e($duLieuSua['ngay_ket_thuc']) ?>" placeholder="dd/mm/yyyy">
                             </div>
                         </div>
 
@@ -99,11 +105,11 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                         <div class="form-column">
                             <div class="form-field">
                                 <label>Thời gian mở ĐK</label>
-                                <input type="datetime-local" name="thoi_gian_mo_dk" value="<?= e($duLieuSua['thoi_gian_mo_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_mo_dk'])) : '') ?>">
+                                <input type="text" name="thoi_gian_mo_dk" id="thoi_gian_mo_dk" value="<?= e($duLieuSua['thoi_gian_mo_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_mo_dk'])) : '') ?>" placeholder="dd/mm/yyyy HH:mm">
                             </div>
                             <div class="form-field">
                                 <label>Thời gian đóng ĐK</label>
-                                <input type="datetime-local" name="thoi_gian_dong_dk" value="<?= e($duLieuSua['thoi_gian_dong_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_dong_dk'])) : '') ?>">
+                                <input type="text" name="thoi_gian_dong_dk" id="thoi_gian_dong_dk" value="<?= e($duLieuSua['thoi_gian_dong_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_dong_dk'])) : '') ?>" placeholder="dd/mm/yyyy HH:mm">
                             </div>
                         </div>
                     </div>
@@ -155,14 +161,12 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                             <button type="button" class="btn-view-class" onclick="toggleDetail(<?= $hk['id'] ?>)">
                                                 👁️ <?= (int) $hk['so_lop'] ?> lớp
                                             </button>
-                                            <!-- Link In PDF trỏ về public -->
                                             <a href="/studenthub/public/admin_in_danh_sach_lop.php?hoc_ky_id=<?= $hk['id'] ?>" target="_blank" class="btn-view-class" style="background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; text-decoration: none;" title="In danh sách lớp ra PDF">
                                                 🖨️ In
                                             </a>
                                         </div>
                                     </td>
                                     <td>
-                                        <!-- NÚT CÔNG TẮC KẨN CẤP (CHỈ ĐỔI TRẠNG THÁI) -->
                                         <form method="POST" action="admin_hoc_ky.php" style="margin:0;">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                             <input type="hidden" name="hanh_dong" value="toggle_status">
@@ -235,6 +239,53 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             row.style.display = 'none';
         }
     }
+
+    // --- KHỞI TẠO LỊCH CHỌN NGÀY (FLATPICKR) CHUẨN VIỆT NAM ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cấu hình chung cho Flatpickr
+        const configDate = {
+            locale: "vn", // Hiển thị tiếng Việt
+            dateFormat: "Y-m-d", // Định dạng ngầm định gửi lên Server (giữ nguyên để Controller không lỗi)
+            altInput: true, // Hiển thị một ô input phụ
+            altFormat: "d/m/Y", // Hiển thị cho người dùng xem
+            allowInput: true,
+        };
+        
+        const configDateTime = {
+            locale: "vn",
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d\\TH:i", // Định dạng ngầm định
+            altInput: true,
+            altFormat: "d/m/Y H:i", // Hiển thị cho người dùng
+            allowInput: true,
+        };
+
+        // Khởi tạo các ô input
+        const fpNgayBatDau = flatpickr("#ngay_bat_dau", configDate);
+        const fpNgayKetThuc = flatpickr("#ngay_ket_thuc", configDate);
+        const fpMoDK = flatpickr("#thoi_gian_mo_dk", configDateTime);
+        const fpDongDK = flatpickr("#thoi_gian_dong_dk", configDateTime);
+
+        // Tự động tính toán thời gian khi chọn Ngày bắt đầu
+        fpNgayBatDau.config.onChange.push(function(selectedDates, dateStr) {
+            if (selectedDates.length > 0) {
+                const ngayBatDauObj = selectedDates[0];
+
+                // Đóng ĐK: Lùi 7 ngày so với ngày bắt đầu, đặt 23:59
+                const ngayDongDKObj = new Date(ngayBatDauObj);
+                ngayDongDKObj.setDate(ngayDongDKObj.getDate() - 7);
+                ngayDongDKObj.setHours(23, 59, 0);
+                fpDongDK.setDate(ngayDongDKObj);
+
+                // Mở ĐK: Lùi 14 ngày so với ngày bắt đầu, đặt 08:00
+                const ngayMoDKObj = new Date(ngayBatDauObj);
+                ngayMoDKObj.setDate(ngayMoDKObj.getDate() - 14);
+                ngayMoDKObj.setHours(8, 0, 0);
+                fpMoDK.setDate(ngayMoDKObj);
+            }
+        });
+    });
 </script>
 </body>
 </html>

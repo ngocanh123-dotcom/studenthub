@@ -349,7 +349,7 @@
                     <h2>Danh sách lớp học phần đào tạo</h2>
                 </div>
                 <div class="btn-toolbar-group">
-                    <a href="lop_hoc_phan.php?action=create" class="btn-create-class">
+                    <a href="/studenthub/app/Views/admin/lop_hoc_phan.php?action=create" class="btn-create-class">
                         <span>+ Thêm lớp học phần mới</span>
                     </a>
                     <button type="button" onclick="exportPDF()" class="btn-export-pdf" title="Xuất danh sách dạng PDF / In ấn trực tiếp">
@@ -366,7 +366,7 @@
             </div>
 
             <!-- 3. BỘ LỌC TÌM KIẾM ĐA TIÊU CHÍ (SEARCH & FILTERS) -->
-            <form method="GET" action="lop_hoc_phan.php" class="filter-grid-classes">
+            <form method="GET" action="/studenthub/app/Views/admin/lop_hoc_phan.php" class="filter-grid-classes">
                 <input type="hidden" name="action" value="index">
                 
                 <div>
@@ -422,7 +422,7 @@
                         Lọc
                     </button>
                     <?php if (!empty($filters['tu_khoa']) || !empty($filters['hoc_ky_id']) || !empty($filters['hoc_phan_id']) || !empty($filters['giang_vien_id']) || !empty($filters['trang_thai'])): ?>
-                        <a href="lop_hoc_phan.php" class="btn-secondary" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; text-decoration: none; color: #64748b; background: #e2e8f0; font-size: 13px; font-weight: 600;">
+                        <a href="/studenthub/app/Views/admin/lop_hoc_phan.php" class="btn-secondary" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; text-decoration: none; color: #64748b; background: #e2e8f0; font-size: 13px; font-weight: 600;">
                             Xóa lọc
                         </a>
                     <?php endif; ?>
@@ -557,7 +557,7 @@
 
                                     <!-- CẦU DAO MỞ / KHÓA ĐĂNG KÝ (MỤC H DEMO) -->
                                     <td style="text-align: center;">
-                                        <form method="POST" action="lop_hoc_phan.php?action=toggle" style="display: inline;">
+                                        <form method="POST" action="/studenthub/app/Views/admin/lop_hoc_phan.php?action=toggle" style="display: inline;">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
                                             
@@ -579,12 +579,12 @@
 
                                     <!-- Hành động (Sửa, Xóa) -->
                                     <td style="text-align: center;">
-                                        <a href="lop_hoc_phan.php?action=edit&id=<?= (int)$c['id'] ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
+                                        <a href="/studenthub/app/Views/admin/lop_hoc_phan.php?action=edit&id=<?= (int)$c['id'] ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
                                             Sửa
                                         </a>
 
                                         <!-- Xóa có kiểm tra an toàn -->
-                                        <form method="POST" action="lop_hoc_phan.php?action=delete" style="display: inline;" 
+                                        <form method="POST" action="/studenthub/app/Views/admin/lop_hoc_phan.php?action=delete" style="display: inline;" 
                                               onsubmit="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>? Hệ thống sẽ chặn xóa nếu đã có sinh viên ghi danh.');">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
