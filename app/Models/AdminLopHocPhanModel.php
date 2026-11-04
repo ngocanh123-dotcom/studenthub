@@ -194,6 +194,11 @@ class AdminLopHocPhanModel {
      * Tạo lớp học phần mới
      */
     public function createClass(array $data): bool {
+        $siSoToiDa = (int)($data['si_so_toi_da'] ?? 0);
+        if ($siSoToiDa <= 0) {
+            return false;
+        }
+
         $sql = "INSERT INTO lop_hoc_phan (
                     ma_lop, 
                     hoc_phan_id, 
@@ -242,6 +247,18 @@ class AdminLopHocPhanModel {
      * Cập nhật thông tin lớp học phần
      */
     public function updateClass(int $id, array $data): bool {
+        $siSoToiDa = (int)($data['si_so_toi_da'] ?? 0);
+        if ($siSoToiDa <= 0) {
+            return false;
+        }
+
+        $stmtCount = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
+        $stmtCount->execute([':id' => $id]);
+        $daDangKy = (int)$stmtCount->fetchColumn();
+        if ($siSoToiDa < $daDangKy) {
+            return false;
+        }
+
         $sql = "UPDATE lop_hoc_phan SET
                     ma_lop = :ma_lop,
                     hoc_phan_id = :hoc_phan_id,
@@ -316,7 +333,7 @@ class AdminLopHocPhanModel {
                 return ['can_delete' => false, 'enrollment_count' => 0, 'trang_thai' => ''];
             }
 
-            $stmt = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id");
+            $stmt = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
             $stmt->execute([':id' => $id]);
             $count = (int)$stmt->fetchColumn();
 
@@ -341,9 +358,20 @@ class AdminLopHocPhanModel {
     }
 
     /**
-     * Xóa lớp học phần (Nguyên tắc kép: Sĩ số == 0 VÀ Trạng thái == 'khoa')
+     * Xóa lớp học phần (Chặn xóa nếu đã có sinh viên đăng ký trang_thai = 'dang_ky')
      */
     public function deleteClass(int $id): bool {
+        try {
+            $stmtCheck = $this->conn->prepare("SELECT COUNT(*) FROM dang_ky_hoc WHERE lop_hoc_phan_id = :id AND trang_thai = 'dang_ky'");
+            $stmtCheck->execute([':id' => $id]);
+            if ((int)$stmtCheck->fetchColumn() > 0) {
+                return false;
+            }
+        } catch (PDOException $e) {
+            error_log("Lỗi kiểm tra sĩ số trước khi xóa lớp: " . $e->getMessage());
+            return false;
+        }
+
         $check = $this->checkCanDelete($id);
         if (!$check['can_delete']) {
             return false;
