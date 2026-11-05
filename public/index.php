@@ -31,6 +31,42 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
+// Route every public module through this single web entry point.
+$route = strtolower(trim((string) ($_GET['route'] ?? ''), '/'));
+if ($route === 'danh_sach_lop_hoc_phan') {
+    $route = 'danh_sach_lop_hoc_phan.php';
+}
+
+$publicRoutes = [
+    'admin_hoc_ky.php' => __DIR__ . '/../routes/admin_hoc_ky.php',
+    'admin_in_danh_sach_lop.php' => __DIR__ . '/../routes/admin_in_danh_sach_lop.php',
+    'admin_lop_hoc_phan.php' => __DIR__ . '/../routes/admin_lop_hoc_phan.php',
+    'api_huy_dang_ky.php' => __DIR__ . '/../routes/api_huy_dang_ky.php',
+    'chi_tiet_lop_hoc_phan.php' => __DIR__ . '/../routes/chi_tiet_lop_hoc_phan.php',
+    'dang_ky_hoc.php' => __DIR__ . '/../routes/dang_ky_hoc.php',
+    'dangky.php' => __DIR__ . '/../routes/dangky.php',
+    'danh_sach_lop_hoc_phan.php' => __DIR__ . '/../routes/danh_sach_lop_hoc_phan.php',
+    'doi_mat_khau.php' => __DIR__ . '/../routes/doi_mat_khau.php',
+    'giang_vien.php' => __DIR__ . '/../routes/giang_vien.php',
+    'giang_vien_lop_hoc_phan.php' => __DIR__ . '/../routes/giang_vien_lop_hoc_phan.php',
+    'giang_vien_sinh_vien.php' => __DIR__ . '/../routes/giang_vien_sinh_vien.php',
+    'huy_dang_ky_hoc.php' => __DIR__ . '/../routes/huy_dang_ky_hoc.php',
+    'lich_su_dang_ky.php' => __DIR__ . '/../routes/lich_su_dang_ky.php',
+    'logout.php' => __DIR__ . '/../routes/logout.php',
+    'sinh_vien.php' => __DIR__ . '/../routes/sinh_vien.php',
+    'trang_dang_ky_hoc.php' => __DIR__ . '/../routes/trang_dang_ky_hoc.php',
+];
+
+if ($route !== '') {
+    if (!isset($publicRoutes[$route])) {
+        http_response_code(404);
+        exit('Không tìm thấy trang yêu cầu.');
+    }
+
+    require $publicRoutes[$route];
+    exit;
+}
+
 // 2. KẾT NỐI DATABASE
 $pdo = null;
 $dbError = false;
@@ -71,15 +107,6 @@ if (!$pdo instanceof PDO) {
 
 if (!isset($conn) || !($conn instanceof PDO)) {
     $conn = $pdo;
-}
-
-// 2.5. FRONT CONTROLLER DISPATCHER CHO CÁC MODULE MVC
-$currentRoute = $_GET['route'] ?? $_GET['action'] ?? '';
-if ($currentRoute === 'danh_sach_lop_hoc_phan') {
-    require_once __DIR__ . '/../app/Controllers/DanhSachLopHocPhanController.php';
-    $controller = new DanhSachLopHocPhanController($pdo);
-    $controller->index();
-    exit;
 }
 
 // Ánh xạ vai trò hiển thị và vai trò CSDL
@@ -212,8 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_action'])) {
 }
 // 4. XỬ LÝ ĐĂNG NHẬP (AUTHENTICATION CONTROLLER)
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = (string)($_POST['password'] ?? '');
+    $username = trim($_POST['username'] ?? $_POST['ten_dang_nhap'] ?? '');
+    $password = trim($_POST['password'] ?? $_POST['mat_khau'] ?? '');
 
     $authenticated = false;
     $taiKhoan = null;
@@ -229,20 +256,20 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 // 4.1. Truy vấn trực tiếp vào bảng nguoi_dung bằng PDO
-                $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE (LOWER(ten_dang_nhap) = LOWER(:u) OR LOWER(email) = LOWER(:e)) LIMIT 1");
+                $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE (LOWER(TRIM(ten_dang_nhap)) = LOWER(TRIM(:u)) OR LOWER(TRIM(email)) = LOWER(TRIM(:e))) LIMIT 1");
                 $stmt->execute([':u' => $username, ':e' => $username]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 $loginSuccess = false;
                 if ($user) {
-                    $storedHash = (string)($user['mat_khau_hash'] ?? '');
+                    $storedHash = (string)($user['mat_khau_hash'] ?? $user['mat_khau'] ?? '');
 
                     // Ưu tiên kiểm tra bằng hash chuẩn Bcrypt
                     if (!empty($storedHash) && password_verify($password, $storedHash)) {
                         $loginSuccess = true;
                     }
                     // Chỉ chấp nhận nếu mật khẩu trong DB chưa băm (dữ liệu ban đầu) và khớp đúng
-                    elseif (!str_starts_with($storedHash, '$2y$') && ($password === $storedHash || md5($password) === $storedHash)) {
+                    elseif (!empty($storedHash) && !str_starts_with($storedHash, '$2y$') && ($password === $storedHash || md5($password) === $storedHash)) {
                         $loginSuccess = true;
                         // Tự động nâng cấp băm luôn vào CSDL
                         $newH = password_hash($password, PASSWORD_DEFAULT);
@@ -880,7 +907,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>Ghi nhớ phiên đăng nhập</span>
                     </label>
 
-                    <a href="javascript:void(0)" onclick="openForgotModal()" class="forgot-link">
+                    <a href="/studenthub/public/quen_mat_khau.php" class="forgot-link">
                         Quên mật khẩu?
                     </a>
                 </div>
@@ -908,7 +935,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <!-- MODAL QUÊN MẬT KHẨU 3 BƯỚC -->
-<?php 
+<?php
 $activeFpStep = ($fp_step > 0) ? $fp_step : 1;
 ?>
 <div id="forgotPasswordModal" class="fp-modal-overlay" style="<?= $fp_step > 0 ? 'display: flex;' : 'display: none;' ?>">

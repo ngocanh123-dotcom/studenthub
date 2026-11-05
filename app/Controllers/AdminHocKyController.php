@@ -8,13 +8,13 @@ class AdminHocKyController {
     public function __construct($conn) {
         $this->model = new HocKyModel($conn);
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         // Kiểm tra quyền
         if (empty($_SESSION['username']) || !in_array(strtolower($_SESSION['role'] ?? ''), ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'])) {
             header('Location: /studenthub/public/index.php');
             exit;
         }
-        
+
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
@@ -48,7 +48,7 @@ class AdminHocKyController {
                             $this->model->toggleStatus($idToggle);
                             $_SESSION['semester_notice'] = 'Đã thay đổi trạng thái đăng ký.';
                         }
-                        header('Location: admin_hoc_ky.php'); exit;
+                        header('Location: /studenthub/public/index.php?route=admin_hoc_ky.php'); exit;
                     }
 
                     if ($hanhDong === 'them' || $hanhDong === 'sua') {
@@ -67,11 +67,11 @@ class AdminHocKyController {
 
                         if ($tenHocKy === '') throw new RuntimeException('Vui lòng nhập tên học kỳ.');
                         if ($ngayBatDau === '' || $ngayKetThuc === '') throw new RuntimeException('Vui lòng nhập ngày bắt đầu và kết thúc.');
-                        
+
                         // Validate ngày tháng
                         $d1 = DateTime::createFromFormat('Y-m-d', $ngayBatDau);
                         if (!$d1 || $d1->format('Y-m-d') !== $ngayBatDau) throw new RuntimeException('Ngày bắt đầu không hợp lệ.');
-                        
+
                         $d2 = DateTime::createFromFormat('Y-m-d', $ngayKetThuc);
                         if (!$d2 || $d2->format('Y-m-d') !== $ngayKetThuc) throw new RuntimeException('Ngày kết thúc không hợp lệ.');
 
@@ -113,7 +113,7 @@ class AdminHocKyController {
                             $this->model->update($id, $tenHocKy, $ngayBatDau, $ngayKetThuc, $thoiGianMo, $thoiGianDong);
                             $_SESSION['semester_notice'] = 'Cập nhật học kỳ thành công.';
                         }
-                        $_SESSION['semester_notice_type'] = 'success'; header('Location: admin_hoc_ky.php'); exit;
+                        $_SESSION['semester_notice_type'] = 'success'; header('Location: /studenthub/public/index.php?route=admin_hoc_ky.php'); exit;
                     }
 
                     if ($hanhDong === 'xoa') {
@@ -122,7 +122,7 @@ class AdminHocKyController {
                             throw new RuntimeException('Không thể xóa! Đã có lớp học phần thuộc học kỳ này.');
                         }
                         $this->model->delete($idXoa);
-                        $_SESSION['semester_notice'] = 'Xóa học kỳ thành công.'; $_SESSION['semester_notice_type'] = 'success'; header('Location: admin_hoc_ky.php'); exit;
+                        $_SESSION['semester_notice'] = 'Xóa học kỳ thành công.'; $_SESSION['semester_notice_type'] = 'success'; header('Location: /studenthub/public/index.php?route=admin_hoc_ky.php'); exit;
                     }
                 } catch (Exception $e) { $thongBao = $e->getMessage(); $loaiThongBao = 'error'; }
             }

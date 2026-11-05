@@ -1,6 +1,8 @@
 <?php
-// public/admin_in_danh_sach_lop.php
-session_start();
+// Print the classes for one semester.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra quyền Admin
 if (empty($_SESSION['username']) || !in_array(strtolower($_SESSION['role'] ?? ''), ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'])) {
@@ -10,11 +12,14 @@ if (empty($_SESSION['username']) || !in_array(strtolower($_SESSION['role'] ?? ''
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/Models/HocKyModel.php';
+if (!$pdo instanceof PDO) {
+    throw new RuntimeException('Không thể kết nối cơ sở dữ liệu để in danh sách lớp.');
+}
 
 $hocKyId = (int)($_GET['hoc_ky_id'] ?? 0);
 if ($hocKyId <= 0) die("Học kỳ không hợp lệ.");
 
-$model = new HocKyModel($conn);
+$model = new HocKyModel($pdo);
 $hocKy = $model->getById($hocKyId);
 $dsLop = $model->getClassesBySemester($hocKyId);
 
@@ -33,7 +38,7 @@ if (!$hocKy) die("Không tìm thấy học kỳ.");
         th { background: #f2f2f2; }
         .no-print { text-align: center; margin-bottom: 20px; }
         @media print {
-            .no-print { display: none; } 
+            .no-print { display: none; }
         }
     </style>
 </head>
@@ -43,7 +48,7 @@ if (!$hocKy) die("Không tìm thấy học kỳ.");
     </div>
 
     <h2>Danh sách lớp học phần - <?= htmlspecialchars($hocKy['ten_hoc_ky']) ?></h2>
-    
+
     <table>
         <thead>
             <tr>

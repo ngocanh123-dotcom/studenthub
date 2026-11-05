@@ -15,7 +15,7 @@ class DanhSachLopHocPhanModel {
     /**
      * Lấy danh sách lớp học phần kèm bộ lọc tra cứu động
      * Đồng bộ đầy đủ lịch học (lhp.lich_hoc, lhp.phong_hoc) và thời gian học kỳ (hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk)
-     * 
+     *
      * @param int $sinhVienId ID sinh viên đang đăng nhập để kiểm tra sv_da_dang_ky
      * @param array $filters Mảng tham số lọc: tu_khoa, hoc_ky_id, giang_vien_id
      * @return array Danh sách các lớp học phần
@@ -47,7 +47,7 @@ class DanhSachLopHocPhanModel {
         $whereSql = implode(' AND ', $where);
 
         $sql = "
-            SELECT 
+            SELECT
                 lhp.id,
                 lhp.ma_lop,
                 lhp.hoc_phan_id,
@@ -75,17 +75,17 @@ class DanhSachLopHocPhanModel {
                 nd.email AS email_giang_vien,
 
                 (
-                    SELECT COUNT(*) 
-                    FROM dang_ky_hoc dkh 
-                    WHERE dkh.lop_hoc_phan_id = lhp.id 
+                    SELECT COUNT(*)
+                    FROM dang_ky_hoc dkh
+                    WHERE dkh.lop_hoc_phan_id = lhp.id
                       AND dkh.trang_thai = 'dang_ky'
                 ) AS si_so_hien_tai,
 
                 (
-                    SELECT COUNT(*) 
-                    FROM dang_ky_hoc dkh_sv 
-                    WHERE dkh_sv.lop_hoc_phan_id = lhp.id 
-                      AND dkh_sv.sinh_vien_id = :sv_id 
+                    SELECT COUNT(*)
+                    FROM dang_ky_hoc dkh_sv
+                    WHERE dkh_sv.lop_hoc_phan_id = lhp.id
+                      AND dkh_sv.sinh_vien_id = :sv_id
                       AND dkh_sv.trang_thai = 'dang_ky'
                 ) AS sv_da_dang_ky
 
@@ -109,7 +109,7 @@ class DanhSachLopHocPhanModel {
 
     /**
      * Lấy danh sách tất cả học kỳ cho dropdown bộ lọc
-     * 
+     *
      * @return array Danh sách học kỳ
      */
     public function getAllHocKy(): array {
@@ -124,7 +124,7 @@ class DanhSachLopHocPhanModel {
 
     /**
      * Lấy danh sách tất cả giảng viên cho dropdown bộ lọc
-     * 
+     *
      * @return array Danh sách giảng viên
      */
     public function getAllGiangVien(): array {
@@ -140,17 +140,17 @@ class DanhSachLopHocPhanModel {
     /**
      * Lấy thông tin học kỳ đang mở cổng đăng ký (trang_thai_dang_ky = 1)
      * Phục vụ hiển thị sidebar-semester-pill đồng bộ với Admin
-     * 
+     *
      * @return array|null
      */
     public function getActiveHocKy(): ?array {
         try {
             // Ưu tiên học kỳ có cổng đăng ký đang mở
             $stmt = $this->conn->query("
-                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky 
-                FROM hoc_ky 
-                WHERE trang_thai_dang_ky = 1 
-                ORDER BY id DESC 
+                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky
+                FROM hoc_ky
+                WHERE trang_thai_dang_ky = 1
+                ORDER BY id DESC
                 LIMIT 1
             ");
             $active = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -160,9 +160,9 @@ class DanhSachLopHocPhanModel {
 
             // Fallback lấy học kỳ mới nhất nếu không có học kỳ nào đang mở
             $stmt = $this->conn->query("
-                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky 
-                FROM hoc_ky 
-                ORDER BY id DESC 
+                SELECT id, ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky
+                FROM hoc_ky
+                ORDER BY id DESC
                 LIMIT 1
             ");
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;

@@ -17,25 +17,6 @@ if (!in_array($vaiTroSession, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'],
 
 require_once __DIR__ . '/../../../config/database.php';
 
-// Tự động kiểm tra và bổ sung 2 cột (nếu chưa có) vào bảng hoc_phan (Migration idempotent)
-try {
-    $pdo->exec("ALTER TABLE hoc_phan 
-                ADD COLUMN IF NOT EXISTS dieu_kien_tien_quyet VARCHAR(255) NULL DEFAULT NULL,
-                ADD COLUMN IF NOT EXISTS mo_ta TEXT NULL DEFAULT NULL");
-} catch (PDOException $e) {
-    try {
-        $cols = $pdo->query("SHOW COLUMNS FROM hoc_phan")->fetchAll(PDO::FETCH_COLUMN);
-        if (!in_array('dieu_kien_tien_quyet', $cols, true)) {
-            $pdo->exec("ALTER TABLE hoc_phan ADD COLUMN dieu_kien_tien_quyet VARCHAR(255) NULL DEFAULT NULL");
-        }
-        if (!in_array('mo_ta', $cols, true)) {
-            $pdo->exec("ALTER TABLE hoc_phan ADD COLUMN mo_ta TEXT NULL DEFAULT NULL");
-        }
-    } catch (PDOException $e2) {
-        error_log("StudentHub hoc_phan migration check error: " . $e2->getMessage());
-    }
-}
-
 // Tạo CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -51,14 +32,16 @@ $duLieuSua = [
     'id' => '',
     'ma_hoc_phan' => '',
     'ten_hoc_phan' => '',
-    'so_tin_chi' => ''
+    'so_tin_chi' => '',
+    'dieu_kien_tien_quyet' => '',
+    'mo_ta' => ''
 ];
 
 // XỬ LÝ THÊM, SỬA, XÓA
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrfNhan = $_POST['csrf_token'] ?? '';
 
-    if (!hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
+    if (!is_string($csrfNhan) || !hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
         $thongBao = 'Phiên làm việc không hợp lệ. Vui lòng tải lại trang.';
         $loaiThongBao = 'error';
     } else {
@@ -71,11 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tenHocPhan = trim($_POST['ten_hoc_phan'] ?? '');
                 $soTinChiNhap = trim((string) ($_POST['so_tin_chi'] ?? ''));
 
+                // Lấy thêm điều kiện tiên quyết và mô tả
+                $dieuKienTienQuyet = trim($_POST['dieu_kien_tien_quyet'] ?? '');
+                $moTa = trim($_POST['mo_ta'] ?? '');
+
                 $duLieuSua = [
                     'id' => $id,
                     'ma_hoc_phan' => $maHocPhan,
                     'ten_hoc_phan' => $tenHocPhan,
-                    'so_tin_chi' => $soTinChiNhap
+                    'so_tin_chi' => $soTinChiNhap,
+                    'dieu_kien_tien_quyet' => $dieuKienTienQuyet,
+                    'mo_ta' => $moTa
                 ];
 
                 if (!preg_match('/^[A-Z0-9_-]{2,30}$/', $maHocPhan)) {
@@ -90,6 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (mb_strlen($tenHocPhan, 'UTF-8') > 150) {
                     throw new RuntimeException('Tên học phần không được vượt quá 150 ký tự.');
+                }
+
+                // Kiểm tra điều kiện tiên quyết
+                if (mb_strlen($dieuKienTienQuyet, 'UTF-8') > 255) {
+                    throw new RuntimeException(
+                        'Điều kiện tiên quyết không được vượt quá 255 ký tự.'
+                    );
                 }
 
                 if (
@@ -128,28 +124,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if ($hanhDong === 'them') {
-                    // Đã bổ sung cột so_tin_chi
+                    // Thêm học phần cùng điều kiện tiên quyết và mô tả
                     $stmt = $pdo->prepare(
                         "INSERT INTO hoc_phan
-                            (ma_hoc_phan, ten_hoc_phan, so_tin_chi)
+                            (
+                                ma_hoc_phan,
+                                ten_hoc_phan,
+                                so_tin_chi,
+                                dieu_kien_tien_quyet,
+                                mo_ta
+                            )
                          VALUES
-                            (:ma, :ten, :so_tin_chi)"
+                            (
+                                :ma,
+                                :ten,
+                                :so_tin_chi,
+                                :dieu_kien_tien_quyet,
+                                :mo_ta
+                            )"
                     );
 
                     $stmt->execute([
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
-                        ':so_tin_chi' => $soTinChi
+                        ':so_tin_chi' => $soTinChi,
+                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
+                            ? $dieuKienTienQuyet : null,
+                        ':mo_ta' => $moTa !== ''
+                            ? $moTa : null
                     ]);
 
                     $thongBao = 'Thêm học phần thành công.';
                 } else {
-                    // Cập nhật cả số tín chỉ
+                    // Cập nhật cả số tín chỉ, điều kiện tiên quyết và mô tả
                     $stmt = $pdo->prepare(
                         "UPDATE hoc_phan
                          SET ma_hoc_phan = :ma,
                              ten_hoc_phan = :ten,
-                             so_tin_chi = :so_tin_chi
+                             so_tin_chi = :so_tin_chi,
+                             dieu_kien_tien_quyet = :dieu_kien_tien_quyet,
+                             mo_ta = :mo_ta
                          WHERE id = :id"
                     );
 
@@ -157,6 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
+                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
+                            ? $dieuKienTienQuyet : null,
+                        ':mo_ta' => $moTa !== ''
+                            ? $moTa : null,
                         ':id' => $id
                     ]);
 
@@ -239,7 +257,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
     if ($idSua > 0) {
         try {
             $stmt = $pdo->prepare(
-                "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi
+                "SELECT
+                    id,
+                    ma_hoc_phan,
+                    ten_hoc_phan,
+                    so_tin_chi,
+                    dieu_kien_tien_quyet,
+                    mo_ta
                  FROM hoc_phan
                  WHERE id = :id
                  LIMIT 1"
@@ -312,24 +336,14 @@ function e($value)
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý học phần | StudentHub</title>
     <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
-    <style>
-        .col-12 { grid-column: 1 / -1; width: 100%; }
-        .mt-3 { margin-top: 10px; }
-        .form-label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #334155; }
-        .form-control { display: block; width: 100%; min-width: 0; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; color: #172033; background: #fff; box-sizing: border-box; }
-        .form-control:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
-        .text-slate-400 { color: #94a3b8; font-size: 12.5px; display: block; margin-top: 5px; }
-        .font-medium { font-weight: 600; }
-        .text-slate-700 { color: #334155; }
-    </style>
 </head>
 <body>
 <div class="layout">
 
     <!-- THANH MENU BÊN TRÁI -->
-    <?php 
+    <?php
     $activeMenu = 'hoc_phan';
-    require __DIR__ . '/../layouts/admin_sidebar.php'; 
+    require __DIR__ . '/../layouts/admin_sidebar.php';
     ?>
 
     <main class="main">
@@ -424,18 +438,44 @@ function e($value)
                             >
                         </div>
 
-                        <!-- 1. Điều kiện tiên quyết (Tùy chọn) -->
-                        <div class="col-12 mt-3 form-field" style="grid-column: 1 / -1;">
-                            <label class="form-label font-medium text-slate-700">Điều kiện tiên quyết</label>
-                            <input type="text" name="dieu_kien_tien_quyet" class="form-control" value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>" placeholder="Ví dụ: WEB102 - Lập Trình Web Cơ Bản">
-                            <small class="text-slate-400">Để trống nếu học phần không có môn tiên quyết bắt buộc.</small>
+                        <!-- BỔ SUNG: ĐIỀU KIỆN TIÊN QUYẾT -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <label for="dieu_kien_tien_quyet">Điều kiện tiên quyết</label>
+                            <input
+                                type="text"
+                                id="dieu_kien_tien_quyet"
+                                name="dieu_kien_tien_quyet"
+                                maxlength="255"
+                                value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>"
+                                placeholder="Ví dụ: WEB102 - Lập trình Web cơ bản"
+                            >
+                            <small class="text-slate-400">
+                                Để trống nếu học phần không có môn tiên quyết bắt buộc.
+                            </small>
                         </div>
 
-                        <!-- 2. Mô tả & Mục tiêu học phần (Tùy chọn) -->
-                        <div class="col-12 mt-3 form-field" style="grid-column: 1 / -1;">
-                            <label class="form-label font-medium text-slate-700">Mô tả &amp; Mục tiêu học phần</label>
-                            <textarea name="mo_ta" rows="3" class="form-control" placeholder="Nhập mục tiêu học thuật, kiến thức trọng tâm của học phần..."><?= e($duLieuSua['mo_ta'] ?? '') ?></textarea>
-                            <small class="text-slate-400">Để trống nếu học phần chưa có mô tả hoặc đề cương chi tiết.</small>
+                        <!-- BỔ SUNG: MÔ TẢ HỌC PHẦN -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <label for="mo_ta">Mô tả và mục tiêu học phần</label>
+                            <textarea
+    id="mo_ta"
+    name="mo_ta"
+    rows="4"
+    placeholder="Nhập mô tả, nội dung và mục tiêu của học phần..."
+    style="
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: vertical;
+        outline: none;
+    "
+><?= e($duLieuSua['mo_ta'] ?? '') ?></textarea>
                         </div>
                     </div>
 

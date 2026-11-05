@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$currentUri = $_SERVER['REQUEST_URI'] ?? '';
+$currentUri = $_SERVER['REQUEST_URI'];
 ?>
 
 <aside class="sh-sidebar">
@@ -21,8 +21,8 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
         <div class="sidebar-category-title">CỔNG SINH VIÊN</div>
         <nav class="sidebar-menu-list">
             <!-- 1. Tổng quan -->
-            <a href="/studenthub/app/Views/sinhvien/index.php" 
-               class="sh-nav-item <?= (strpos($currentUri, '/sinhvien/index.php') !== false || (strpos($currentUri, 'sinhvien') !== false && strpos($currentUri, 'classes') === false)) ? 'active' : '' ?>">
+            <a href="/studenthub/public/index.php?route=sinh_vien.php"
+               class="sh-nav-item <?= (strpos($currentUri, 'route=sinh_vien.php') !== false || strpos($currentUri, '/sinhvien/index.php') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -31,7 +31,7 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
             </a>
 
             <!-- 2. Danh sách lớp học phần -->
-            <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" 
+            <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php"
                class="sh-nav-item <?= (strpos($currentUri, 'danh_sach_lop_hoc_phan') !== false && strpos($currentUri, 'dang_ky') === false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7"></rect>
@@ -42,20 +42,37 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
                 <span>Danh sách lớp học phần</span>
             </a>
 
-            <!-- 3. Đăng ký học phần -->
-            <a href="/studenthub/public/trang_dang_ky_hoc.php"
-               class="sh-nav-item <?= (strpos($currentUri, 'trang_dang_ky_hoc.php') !== false) ? 'active' : '' ?>">
+            
+<!-- 3. ĐĂNG KÝ HỌC PHẦN -->
+<a href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
+   class="sh-nav-item <?= (strpos($currentUri, 'trang_dang_ky_hoc.php') !== false) ? 'active' : '' ?>">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+    <span>Đăng ký học phần</span>
+</a>
+
+
+            <!-- 4. Chi tiết lớp học phần -->
+            <a href="/studenthub/public/index.php?route=chi_tiet_lop_hoc_phan.php&id=1"
+               class="sh-nav-item <?= (strpos($currentUri, 'route=chi_tiet_lop_hoc_phan.php') !== false || strpos($currentUri, '/classes/detail.php') !== false) ? 'active' : '' ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                <span>Đăng ký học phần</span>
+                <span>Chi tiết lớp học phần</span>
             </a>
 
 
+
             <!-- 5. Lịch sử đăng ký -->
-            <a href="/studenthub/public/lich_su_dang_ky.php" 
+            <a href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
                class="sh-nav-item <?= (strpos($currentUri, 'lich_su_dang_ky') !== false || strpos($currentUri, 'lichsu') !== false || (isset($activeSidebar) && $activeSidebar === 'lich_su')) ? 'active' : '' ?>">
+
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 14 14"></polyline>
@@ -63,15 +80,7 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
                 <span>Lịch sử đăng ký</span>
             </a>
 
-
-            <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                </svg>
-                <span>Đổi mật khẩu</span>
-            </a>
-
-
+            <!-- 6. Đăng xuất -->
             <a href="/studenthub/public/index.php?action=logout" class="sh-nav-item logout-link" title="Đăng xuất khỏi hệ thống">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -92,4 +101,3 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
         <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
     </div>
 </aside>
-<script src="/studenthub/assets/js/change_password.js"></script>
