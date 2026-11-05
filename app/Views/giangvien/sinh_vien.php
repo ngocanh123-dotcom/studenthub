@@ -149,48 +149,15 @@ function e($value): string
 
 <div class="layout">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-
-        <div class="sidebar-brand">
-            <div class="brand-icon">S</div>
-            <div>
-                <h1>StudentHub</h1>
-                <p>CỔNG THÔNG TIN GIẢNG VIÊN</p>
-            </div>
-        </div>
-
-        <p class="menu-title">MENU CHÍNH</p>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item">
-            <span>▦</span>
-            Tổng quan
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$lop['hoc_phan_id'] ?>"
-           class="menu-item">
-            <span>▤</span>
-            Lớp học phần
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien_sinh_vien.php&lop_id=<?= (int)$lop['id'] ?>"
-           class="menu-item active">
-            <span>♙</span>
-            Sinh viên theo lớp
-        </a>
-
-        <div class="sidebar-bottom">
-            <a href="/studenthub/public/index.php?action=logout" class="menu-item logout">
-                <span>⇥</span>
-                Quay lại đăng nhập
-            </a>
-        </div>
-
-    </aside>
+    <?php
+    $lecturerActiveMenu = 'students';
+    $lecturerCourseId = (int)$lop['hoc_phan_id'];
+    $lecturerClassId = (int)$lop['id'];
+    require __DIR__ . '/../layouts/lecturer_sidebar.php';
+    ?>
 
     <!-- NỘI DUNG CHÍNH -->
     <main class="main-content">
-
         <!-- TOPBAR -->
         <header class="student-topbar">
 

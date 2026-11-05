@@ -351,7 +351,8 @@
             </div>
 
             <!-- 3. BỘ LỌC TÌM KIẾM ĐA TIÊU CHÍ (SEARCH & FILTERS) -->
-            <form method="GET" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php" class="filter-grid-classes">
+            <form method="GET" action="/studenthub/public/index.php" class="filter-grid-classes">
+                <input type="hidden" name="route" value="admin_lop_hoc_phan.php">
                 <input type="hidden" name="action" value="index">
 
                 <div>

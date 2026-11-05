@@ -41,7 +41,39 @@ if ($route === 'danh_sach_lop_hoc_phan') {
     $route = 'danh_sach_lop_hoc_phan.php';
 }
 
+switch ($route) {
+    case 'tong_quan_sv':
+    case 'tong_quan_sv.php':
+    case 'sinh_vien.php':
+        require_once __DIR__ . '/../routes/sinh_vien.php';
+        exit;
+    case 'quen_mat_khau':
+    case 'quen_mat_khau.php':
+        // Nếu dự án đã tách Controller:
+        if (file_exists(__DIR__ . '/../app/Controllers/AuthController.php')) {
+            require_once __DIR__ . '/../app/Controllers/AuthController.php';
+            $authController = new AuthController();
+            if (method_exists($authController, 'quenMatKhau')) {
+                $authController->quenMatKhau();
+                exit;
+            }
+        }
+        // Hoặc nạp trực tiếp file giao diện/xử lý:
+        if (file_exists(__DIR__ . '/quen_mat_khau.php')) {
+            require_once __DIR__ . '/quen_mat_khau.php';
+            exit;
+        } elseif (file_exists(__DIR__ . '/../app/Views/auth/quen_mat_khau.php')) {
+            require_once __DIR__ . '/../app/Views/auth/quen_mat_khau.php';
+            exit;
+        }
+        break;
+}
+
 $publicRoutes = [
+    'tong_quan_sv' => __DIR__ . '/../routes/sinh_vien.php',
+    'tong_quan_sv.php' => __DIR__ . '/../routes/sinh_vien.php',
+    'quen_mat_khau' => __DIR__ . '/quen_mat_khau.php',
+    'quen_mat_khau.php' => __DIR__ . '/quen_mat_khau.php',
     'admin_hoc_ky.php' => __DIR__ . '/../routes/admin_hoc_ky.php',
     'admin_in_danh_sach_lop.php' => __DIR__ . '/../routes/admin_in_danh_sach_lop.php',
     'admin_lop_hoc_phan.php' => __DIR__ . '/../routes/admin_lop_hoc_phan.php',
@@ -363,13 +395,14 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email'         => (string)($taiKhoan['email'] ?? '')
         ];
         $trangDich = [
-                'sinhvien'  => '../app/Views/sinhvien/index.php',
-                'giangvien' => '../app/Views/giangvien/index.php',
-                'quantri'   => '../app/Views/admin/index.php'
-            ];
+            'sinhvien'  => '/studenthub/public/index.php?route=tong_quan_sv',
+            'giangvien' => '/studenthub/public/index.php?route=giang_vien.php',
+            'quantri'   => '/studenthub/public/index.php?route=admin_lop_hoc_phan.php'
+        ];
 
-            header('Location: ' . $trangDich[$role]);
-            exit;
+        session_write_close(); // Bắt buộc ghi hoàn tất session vào disk trước khi redirect
+        header('Location: ' . $trangDich[$role]);
+        exit(); // Bắt buộc có exit
         }
     }
 ?>
@@ -911,7 +944,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>Ghi nhớ phiên đăng nhập</span>
                     </label>
 
-                    <a href="/studenthub/public/quen_mat_khau.php" class="forgot-link">
+                    <a href="/studenthub/public/index.php?route=quen_mat_khau" class="forgot-link">
                         Quên mật khẩu?
                     </a>
                 </div>

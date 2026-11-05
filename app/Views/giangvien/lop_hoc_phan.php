@@ -213,53 +213,16 @@ function trangThaiLop($status): string
 
 <div class="layout">
 
-    <!-- ==================================
-         SIDEBAR
-    =================================== -->
-    <aside class="sidebar">
-
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">S</div>
-
-            <div class="sidebar-brand-text">
-                <h1>StudentHub</h1>
-                <p>Cổng thông tin giảng viên</p>
-            </div>
-        </div>
-
-        <p class="menu-title">CỔNG GIẢNG VIÊN</p>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item">
-            <span>⌂</span>
-            Tổng quan
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien_lop_hoc_phan.php&hoc_phan_id=<?= (int)$hocPhan['id'] ?>"
-           class="menu-item active">
-            <span>▦</span>
-            Lớp học phần
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
-            <span>♙</span>
-            Sinh viên theo lớp
-        </a>
-
-        <div class="sidebar-bottom">
-            <a href="/studenthub/public/index.php?action=logout"
-               class="menu-item logout">
-                <span>⇥</span>
-                Quay lại đăng nhập
-            </a>
-        </div>
-
-    </aside>
+    <?php
+    $lecturerActiveMenu = 'course';
+    $lecturerCourseId = (int)$hocPhan['id'];
+    require __DIR__ . '/../layouts/lecturer_sidebar.php';
+    ?>
 
     <!-- ==================================
          NỘI DUNG CHÍNH
     =================================== -->
     <main class="main-content">
-
         <!-- TOPBAR -->
         <div class="student-topbar">
 

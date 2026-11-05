@@ -23,6 +23,7 @@ if (file_exists(__DIR__ . '/../config/database.php')) {
 } elseif (file_exists(__DIR__ . '/../config/db.php')) {
     require_once __DIR__ . '/../config/db.php';
 }
+require_once __DIR__ . '/../app/Core/ClassSchedule.php';
 
 if (!isset($pdo) || !($pdo instanceof PDO)) {
     try {
@@ -44,9 +45,9 @@ if (!isset($pdo) || !($pdo instanceof PDO)) {
 $hoTen = $_SESSION['ho_ten'] ?? $_SESSION['username'] ?? 'Sinh viên';
 $maSinhVien = $_SESSION['ma_sinh_vien'] ?? $_SESSION['username'] ?? '';
 
-$pageTitle = 'Đăng ký học phần';
-$breadcrumb = 'Trang chủ / Đăng ký học phần';
-$pageSubtitle = 'Tìm kiếm học phần, theo dõi lớp đã đăng ký và lựa chọn lớp phù hợp với kế hoạch học tập.';
+$pageTitle = 'Đăng ký lớp học phần';
+$breadcrumb = 'Trang chủ / Đăng ký lớp học phần';
+$pageSubtitle = 'Xem lịch học, phòng học và sĩ số để chọn lớp phù hợp. Hệ thống cảnh báo nếu lớp trùng lịch với lớp đã đăng ký.';
 
 if (!function_exists('hienThi')) {
     function hienThi($value) {
@@ -57,6 +58,8 @@ if (!function_exists('hienThi')) {
 $danhSachLop = [];
 $cacLopDaDangKy = [];
 $cacHocPhanDaDangKy = [];
+$lopDaDangKyTheoHocPhan = [];
+$lichHocDaDangKy = [];
 $loi = '';
 $thongBaoHuy = (string)($_GET['huy'] ?? '');
 if ($thongBaoHuy !== '') {
@@ -80,6 +83,8 @@ try {
             lhp.giang_vien_id,
             lhp.trang_thai,
             lhp.si_so_toi_da,
+            lhp.lich_hoc,
+            lhp.phong_hoc,
             lhp.thoi_gian_mo_rieng,
             lhp.thoi_gian_dong_rieng,
             hp.ma_hoc_phan,
@@ -107,7 +112,7 @@ try {
 
     if ($sinhVienId > 0) {
         $stmt = $pdo->prepare("
-            SELECT dkh.lop_hoc_phan_id, lhp.hoc_phan_id
+            SELECT dkh.lop_hoc_phan_id, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.ma_lop, lhp.lich_hoc
             FROM dang_ky_hoc dkh
             INNER JOIN lop_hoc_phan lhp ON lhp.id = dkh.lop_hoc_phan_id
             WHERE dkh.sinh_vien_id = :id
@@ -117,6 +122,8 @@ try {
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $registration) {
             $cacLopDaDangKy[] = (int) $registration['lop_hoc_phan_id'];
             $cacHocPhanDaDangKy[] = (int) $registration['hoc_phan_id'];
+            $lopDaDangKyTheoHocPhan[(int)$registration['hoc_phan_id']] = $registration;
+            $lichHocDaDangKy[(int)$registration['hoc_ky_id']][] = $registration;
         }
     }
 } catch (PDOException $e) {
@@ -294,6 +301,17 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
     margin-bottom: 20px;
 }
 
+.registration-guide {
+    margin: -4px 0 20px;
+    padding: 12px 15px;
+    color: #35547a;
+    background: #f0f7ff;
+    border: 1px solid #d5e7fb;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
 .registration-search {
     position: relative;
 }
@@ -413,6 +431,21 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
     line-height: 1.6;
 }
 
+.registration-schedule {
+    min-width: 190px;
+    color: #243b5a;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.registration-schedule-room {
+    display: block;
+    margin-top: 3px;
+    color: #75869c;
+    font-size: 11px;
+    font-weight: 500;
+}
+
 .registration-status {
     display: inline-flex;
     align-items: center;
@@ -434,6 +467,44 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 .registration-status-closed {
     color: #bd5a16;
     background: #fff1e5;
+}
+
+.registration-status-conflict {
+    color: #b4233b;
+    background: #fff1f2;
+}
+
+.registration-status-note {
+    display: block;
+    max-width: 190px;
+    margin-top: 5px;
+    color: #667991;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: normal;
+}
+
+.registration-action-note {
+    max-width: 190px;
+    color: #667991;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.registration-action-note strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #344b69;
+    font-size: 11.5px;
+}
+
+.registration-action-note.is-blocked strong {
+    color: #9a4f18;
+}
+
+.registration-action-note.is-conflict strong {
+    color: #b4233b;
 }
 
 .registration-capacity {
@@ -562,7 +633,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
     }
 
     .registration-table {
-        min-width: 760px;
+        min-width: 1100px;
     }
 }
 
@@ -611,7 +682,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
         <article class="registration-summary-card">
             <div class="registration-summary-icon">▣</div>
             <div>
-                <p>Học phần đã đăng ký</p>
+                <p>Lớp học phần đã đăng ký</p>
                 <h2><?= $soLopDaDangKy ?></h2>
             </div>
         </article>
@@ -620,8 +691,8 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
     <section class="registration-panel">
         <div class="registration-panel-heading">
             <div>
-                <h2>Quản lý đăng ký học phần</h2>
-                <p>Tìm kiếm học phần theo tên, mã lớp hoặc giảng viên.</p>
+                <h2>Đăng ký lớp học phần</h2>
+                <p>Mỗi dòng là một lớp cụ thể. Hãy xem lịch học và phòng học trước khi chọn lớp.</p>
             </div>
         </div>
 
@@ -631,23 +702,32 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                 <input
                     type="search"
                     id="registrationSearch"
-                    placeholder="Tìm tên học phần, mã học phần, giảng viên..."
+                    placeholder="Tìm học phần, mã lớp, lịch học, phòng hoặc giảng viên..."
                     autocomplete="off"
                 >
             </label>
 
             <select id="registrationFilter" class="registration-filter">
                 <option value="all">Tất cả trạng thái</option>
-                <option value="open">Đang mở đăng ký</option>
-                <option value="full">Đã đủ sĩ số</option>
-                <option value="closed">Đã khóa</option>
-                <option value="registered">Đã đăng ký</option>
+                <option value="open">Có thể đăng ký</option>
+                <option value="full">Đã đủ chỗ</option>
+                <option value="closed">Chưa mở / đã hết hạn</option>
+                <option value="conflict">Bị trùng lịch</option>
+                <option value="schedule_unknown">Cần cập nhật lịch</option>
+                <option value="unscheduled">Chưa xếp lịch</option>
+                <option value="registered">Đã đăng ký lớp</option>
+                <option value="selected_other">Đã chọn lớp khác cùng học phần</option>
             </select>
+        </div>
+
+        <div class="registration-guide">
+            <strong>Cách chọn lớp:</strong> Mỗi dòng là một lớp học phần riêng. So sánh lịch học và phòng trước khi bấm
+            <strong>“Đăng ký lớp này”</strong>. Cột tình trạng cho biết lý do lớp có thể hoặc chưa thể đăng ký.
         </div>
 
         <div class="registration-section-title">
             <span class="registration-section-dot green"></span>
-            Học phần đã đăng ký
+            Lớp học phần đã đăng ký
             <span class="registration-count"><?= $soLopDaDangKy ?></span>
         </div>
 
@@ -657,11 +737,12 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     <tr>
                         <th>HỌC PHẦN</th>
                         <th>MÃ LỚP</th>
+                        <th>LỊCH HỌC / PHÒNG</th>
                         <th>GIẢNG VIÊN</th>
                         <th>HỌC KỲ</th>
                         <th>SĨ SỐ</th>
-                        <th>TRẠNG THÁI</th>
-                        <th>THAO TÁC</th>
+                        <th>TÌNH TRẠNG LỚP</th>
+                        <th>BẠN CÓ THỂ LÀM GÌ?</th>
                     </tr>
                 </thead>
                 <tbody id="registeredList">
@@ -683,7 +764,9 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         ($lop['ma_hoc_phan'] ?? '') . ' ' .
                         ($lop['ma_lop'] ?? '') . ' ' .
                         ($lop['ten_giang_vien'] ?? '') . ' ' .
-                        ($lop['ten_hoc_ky'] ?? ''),
+                        ($lop['ten_hoc_ky'] ?? '') . ' ' .
+                        ($lop['lich_hoc'] ?? '') . ' ' .
+                        ($lop['phong_hoc'] ?? ''),
                         'UTF-8'
                     );
                 ?>
@@ -698,6 +781,10 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                             <div class="registration-muted"><?= (int)$lop['so_tin_chi'] ?> tín chỉ</div>
                         </td>
                         <td><?= hienThi($lop['ma_lop']) ?></td>
+                        <td class="registration-schedule">
+                            <?= hienThi($lop['lich_hoc'] ?: 'Chưa xếp lịch') ?>
+                            <span class="registration-schedule-room"><?= hienThi($lop['phong_hoc'] ?: 'Chưa phân phòng') ?></span>
+                        </td>
                         <td><?= hienThi($lop['ten_giang_vien'] ?: 'Chưa phân công') ?></td>
                         <td><?= hienThi($lop['ten_hoc_ky']) ?></td>
                         <td>
@@ -711,7 +798,10 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                                 </div>
                             </div>
                         </td>
-                        <td><span class="registration-status registration-status-registered">Đã đăng ký</span></td>
+                        <td>
+                            <span class="registration-status registration-status-registered">Đã đăng ký lớp này</span>
+                            <span class="registration-status-note">Bạn đang có tên trong lớp học phần này.</span>
+                        </td>
                         <td>
                         <?php
                             $thoiGianDong = !empty($lop['thoi_gian_dong_rieng']) ? $lop['thoi_gian_dong_rieng'] : ($lop['thoi_gian_dong_dk'] ?? null);
@@ -755,10 +845,10 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                                 class="registration-button registration-button-disabled"
                                 disabled
                             >
-                                Không thể hủy
+                                Đã hết hạn hủy
                             </button>
                             <div style="font-size: 11px; color: #dc2626; margin-top: 4px; font-weight: 600; white-space: nowrap;">
-                                Đã hết hạn hủy
+                                Liên hệ phòng đào tạo nếu cần hỗ trợ.
                             </div>
                         <?php endif; ?>
                         </td>
@@ -767,9 +857,9 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 
                 <?php if (!$coLopDaDangKy): ?>
                     <tr id="registeredEmpty">
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="registration-empty-state">
-                                <strong>Bạn chưa đăng ký học phần nào</strong>
+                                <strong>Bạn chưa đăng ký lớp học phần nào</strong>
                                 Chọn một lớp trong danh sách bên dưới để bắt đầu đăng ký.
                             </div>
                         </td>
@@ -781,7 +871,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 
         <div class="registration-section-title">
             <span class="registration-section-dot"></span>
-            Danh sách học phần
+            Lớp học phần có thể đăng ký
             <span class="registration-count"><?= count($danhSachLop) - $soLopDaDangKy ?></span>
         </div>
 
@@ -791,11 +881,12 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     <tr>
                         <th>HỌC PHẦN</th>
                         <th>MÃ LỚP</th>
+                        <th>LỊCH HỌC / PHÒNG</th>
                         <th>GIẢNG VIÊN</th>
                         <th>HỌC KỲ</th>
                         <th>SĨ SỐ</th>
-                        <th>TRẠNG THÁI</th>
-                        <th>THAO TÁC</th>
+                        <th>TÌNH TRẠNG LỚP</th>
+                        <th>BẠN CÓ THỂ LÀM GÌ?</th>
                     </tr>
                 </thead>
                 <tbody id="availableList">
@@ -814,6 +905,26 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         $cacHocPhanDaDangKy,
                         true
                     );
+                    $lopDaChonCungHocPhan = $lopDaDangKyTheoHocPhan[(int)$lop['hoc_phan_id']] ?? null;
+                    $lichHocMoi = (string)($lop['lich_hoc'] ?? '');
+                    $lichHocPhanTich = ClassSchedule::parse($lichHocMoi);
+                    $lopTrungLich = null;
+                    $lopLichChuaRo = null;
+                    if ($lichHocPhanTich !== null) {
+                        foreach ($lichHocDaDangKy[(int)$lop['hoc_ky_id']] ?? [] as $lopDaDangKy) {
+                            if (ClassSchedule::parse((string)($lopDaDangKy['lich_hoc'] ?? '')) === null) {
+                                $lopLichChuaRo = $lopDaDangKy;
+                                break;
+                            }
+                            if (ClassSchedule::overlaps(
+                                $lichHocMoi,
+                                (string)($lopDaDangKy['lich_hoc'] ?? '')
+                            )) {
+                                $lopTrungLich = $lopDaDangKy;
+                                break;
+                            }
+                        }
+                    }
                     $siSo = (int)($lop['si_so_hien_tai'] ?? 0);
                     $toiDa = (int)($lop['si_so_toi_da'] ?? 0);
                     $tiLe = $toiDa > 0 ? min(100, $siSo / $toiDa * 100) : 0;
@@ -847,17 +958,28 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     $coTheDangKy = $dangMo
                         && $conCho
                         && $trongHanDangKy
-                        && !$daDangKyHocPhan;
+                        && !$daDangKyHocPhan
+                        && $lichHocPhanTich !== null
+                        && $lopLichChuaRo === null
+                        && $lopTrungLich === null;
                     $trangThaiLoc = $daDangKyHocPhan
-                        ? 'registered'
-                        : ($coTheDangKy ? 'open' : (!$dangMo || !$trongHanDangKy ? 'closed' : 'full'));
+                        ? 'selected_other'
+                        : ($lopTrungLich !== null
+                            ? 'conflict'
+                            : ($lopLichChuaRo !== null
+                                ? 'schedule_unknown'
+                                : ($lichHocPhanTich === null
+                                    ? 'unscheduled'
+                                    : ($coTheDangKy ? 'open' : (!$dangMo || !$trongHanDangKy ? 'closed' : 'full')))));
 
                     $tuKhoa = mb_strtolower(
                         ($lop['ten_hoc_phan'] ?? '') . ' ' .
                         ($lop['ma_hoc_phan'] ?? '') . ' ' .
                         ($lop['ma_lop'] ?? '') . ' ' .
                         ($lop['ten_giang_vien'] ?? '') . ' ' .
-                        ($lop['ten_hoc_ky'] ?? ''),
+                        ($lop['ten_hoc_ky'] ?? '') . ' ' .
+                        ($lop['lich_hoc'] ?? '') . ' ' .
+                        ($lop['phong_hoc'] ?? ''),
                         'UTF-8'
                     );
                 ?>
@@ -872,6 +994,10 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                             <div class="registration-muted"><?= (int)$lop['so_tin_chi'] ?> tín chỉ</div>
                         </td>
                         <td><?= hienThi($lop['ma_lop']) ?></td>
+                        <td class="registration-schedule">
+                            <?= hienThi($lop['lich_hoc'] ?: 'Chưa xếp lịch') ?>
+                            <span class="registration-schedule-room"><?= hienThi($lop['phong_hoc'] ?: 'Chưa phân phòng') ?></span>
+                        </td>
                         <td><?= hienThi($lop['ten_giang_vien'] ?: 'Chưa phân công') ?></td>
                         <td><?= hienThi($lop['ten_hoc_ky']) ?></td>
                         <td>
@@ -887,15 +1013,35 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         </td>
                         <td>
                             <?php if ($coTheDangKy): ?>
-                                <span class="registration-status registration-status-open">Đang mở</span>
+                                <span class="registration-status registration-status-open">Có thể đăng ký</span>
+                                <span class="registration-status-note">Còn chỗ, đúng hạn và không trùng lịch.</span>
                             <?php elseif ($daDangKyHocPhan): ?>
-                                <span class="registration-status registration-status-registered">Đã đăng ký học phần</span>
+                                <span class="registration-status registration-status-registered">Đã chọn lớp khác</span>
+                                <span class="registration-status-note">Bạn đã đăng ký lớp <?= hienThi($lopDaChonCungHocPhan['ma_lop'] ?? '') ?> của học phần này.</span>
+                            <?php elseif ($lopTrungLich !== null): ?>
+                                <span class="registration-status registration-status-conflict"
+                                      title="Trùng lịch với lớp <?= hienThi($lopTrungLich['ma_lop']) ?>">
+                                    Trùng lịch
+                                </span>
+                                <span class="registration-status-note">Trùng với lớp <?= hienThi($lopTrungLich['ma_lop']) ?>: <?= hienThi($lopTrungLich['lich_hoc']) ?>.</span>
+                            <?php elseif ($lichHocPhanTich === null): ?>
+                                <span class="registration-status registration-status-closed">Chưa có lịch hợp lệ</span>
+                                <span class="registration-status-note">Chưa thể kiểm tra trùng lịch. Liên hệ phòng đào tạo.</span>
+                            <?php elseif ($lopLichChuaRo !== null): ?>
+                                <span class="registration-status registration-status-closed"
+                                      title="Chưa thể đối chiếu lịch với lớp <?= hienThi($lopLichChuaRo['ma_lop']) ?>">
+                                    Chưa xác định được lịch
+                                </span>
+                                <span class="registration-status-note">Lớp bạn đã đăng ký <?= hienThi($lopLichChuaRo['ma_lop']) ?> chưa có lịch hợp lệ.</span>
                             <?php elseif (!$dangMo): ?>
-                                <span class="registration-status registration-status-closed">Đã khóa</span>
+                                <span class="registration-status registration-status-closed">Lớp đã khóa</span>
+                                <span class="registration-status-note">Lớp hiện không nhận đăng ký.</span>
                             <?php elseif (!$trongHanDangKy): ?>
-                                <span class="registration-status registration-status-closed">Ngoài hạn đăng ký</span>
+                                <span class="registration-status registration-status-closed">Ngoài thời gian đăng ký</span>
+                                <span class="registration-status-note">Hiện chưa mở hoặc đã hết hạn đăng ký.</span>
                             <?php else: ?>
-                                <span class="registration-status registration-status-full">Đủ sĩ số</span>
+                                <span class="registration-status registration-status-full">Đã đủ chỗ</span>
+                                <span class="registration-status-note">Lớp đã đạt sĩ số tối đa.</span>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -911,13 +1057,44 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                                     <input type="hidden" name="lop_hoc_phan_id" value="<?= $idLop ?>">
                                     <input type="hidden" name="csrf_token" value="<?= hienThi($csrfToken) ?>">
                                     <button type="submit" class="registration-button registration-button-primary">
-                                        + Đăng ký
+                                        Đăng ký lớp này
                                     </button>
                                 </form>
+                            <?php elseif ($daDangKyHocPhan): ?>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Không cần đăng ký thêm</strong>
+                                    Bạn đã chọn lớp <?= hienThi($lopDaChonCungHocPhan['ma_lop'] ?? '') ?> cho học phần này.
+                                </div>
+                            <?php elseif ($lopTrungLich !== null): ?>
+                                <div class="registration-action-note is-conflict">
+                                    <strong>Hãy chọn lớp khác</strong>
+                                    Lớp này trùng lịch với <?= hienThi($lopTrungLich['ma_lop']) ?>.
+                                </div>
+                            <?php elseif ($lopLichChuaRo !== null): ?>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Chưa thể đăng ký</strong>
+                                    Cần cập nhật lịch lớp <?= hienThi($lopLichChuaRo['ma_lop']) ?> để kiểm tra xung đột.
+                                </div>
+                            <?php elseif ($lichHocPhanTich === null): ?>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Chưa thể đăng ký</strong>
+                                    Lớp chưa được xếp lịch hợp lệ. Vui lòng liên hệ phòng đào tạo.
+                                </div>
+                            <?php elseif (!$dangMo): ?>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Chưa thể đăng ký</strong>
+                                    Lớp đã bị khóa.
+                                </div>
+                            <?php elseif (!$trongHanDangKy): ?>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Chưa thể đăng ký</strong>
+                                    Cổng đăng ký lớp hiện chưa mở hoặc đã hết hạn.
+                                </div>
                             <?php else: ?>
-                                <button type="button" class="registration-button registration-button-disabled" disabled>
-                                    Không khả dụng
-                                </button>
+                                <div class="registration-action-note is-blocked">
+                                    <strong>Chưa thể đăng ký</strong>
+                                    Lớp đã đủ sĩ số.
+                                </div>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -925,9 +1102,9 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
 
                 <?php if (!$coLopChuaDangKy): ?>
                     <tr id="availableEmpty">
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="registration-empty-state">
-                                <strong>Bạn đã đăng ký tất cả lớp hiện có</strong>
+                                <strong>Không còn lớp học phần phù hợp</strong>
                                 Hiện không còn lớp nào trong danh sách để đăng ký thêm.
                             </div>
                         </td>
@@ -938,7 +1115,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
         </div>
 
         <p class="registration-footer-note">
-            Lưu ý: Kiểm tra mã lớp, học kỳ và sĩ số trước khi đăng ký. Chỉ những lớp đang mở và còn chỗ mới có thể đăng ký.
+            Lưu ý: Mỗi dòng là một lớp học phần. Hãy kiểm tra lịch học, phòng, học kỳ và sĩ số; hệ thống không cho đăng ký lớp trùng lịch hoặc trùng học phần đã chọn.
         </p>
     </section>
 </div>
@@ -986,9 +1163,9 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                     tr.className = 'registration-filter-empty';
 
                     tr.innerHTML =
-                        '<td colspan="7">' +
+                        '<td colspan="8">' +
                         '<div class="registration-empty-state">' +
-                        '<strong>Không tìm thấy học phần phù hợp</strong>' +
+                        '<strong>Không tìm thấy lớp học phần phù hợp</strong>' +
                         'Thử thay đổi từ khóa tìm kiếm hoặc trạng thái lọc.' +
                         '</div></td>';
 

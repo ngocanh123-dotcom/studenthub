@@ -53,8 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email = trim($_POST['email'] ?? '');
                 $soDienThoai = trim($_POST['so_dien_thoai'] ?? '');
                 $vaiTro = trim($_POST['vai_tro'] ?? '');
-                $matKhau = $_POST['mat_khau'] ?? '';
-
                 // Chuẩn hóa khoảng trắng trong họ tên.
                 $hoTen = preg_replace('/\s+/u', ' ', $hoTen);
 
@@ -90,10 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (!in_array($vaiTro, ['sinh_vien', 'giang_vien', 'admin'], true)) {
                     throw new RuntimeException('Vui lòng chọn vai trò hợp lệ.');
-                }
-
-                if ($hanhDong === 'them' && strlen($matKhau) < 6) {
-                    throw new RuntimeException('Mật khẩu phải có ít nhất 6 ký tự.');
                 }
 
                 if ($hanhDong === 'sua' && $id <= 0) {
@@ -137,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([
                         ':username' => $tenDangNhap,
-                        ':password' => password_hash($matKhau, PASSWORD_DEFAULT),
+                        ':password' => password_hash('123456', PASSWORD_DEFAULT),
                         ':fullname' => $hoTen,
                         ':email' => $email !== '' ? $email : null,
                         ':phone' => $soDienThoai !== '' ? $soDienThoai : null,
@@ -146,10 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $thongBao = 'Thêm tài khoản thành công.';
                 } else {
-                    if ($matKhau !== '' && strlen($matKhau) < 6) {
-                        throw new RuntimeException('Mật khẩu mới phải có ít nhất 6 ký tự.');
-                    }
-
                     $sql = "UPDATE nguoi_dung
                             SET ten_dang_nhap = :username,
                                 ho_ten = :fullname,
@@ -165,12 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':role' => $vaiTro,
                         ':id' => $id
                     ];
-
-                    // Chỉ đổi mật khẩu nếu người quản trị nhập mật khẩu mới.
-                    if ($matKhau !== '') {
-                        $sql .= ", mat_khau_hash = :password";
-                        $thamSo[':password'] = password_hash($matKhau, PASSWORD_DEFAULT);
-                    }
 
                     $sql .= " WHERE id = :id";
 
@@ -312,7 +296,7 @@ try {
         $thamSoTim[':role'] = $locVaiTro;
     }
 
-    $sql .= " ORDER BY id DESC";
+    $sql .= " ORDER BY id ASC";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($thamSoTim);
@@ -444,11 +428,12 @@ function tenVaiTro($role)
                         </div>
 
                         <div class="form-field">
-                            <label for="email">Email</label>
+                            <label for="email">Email <?= empty($duLieuSua['id']) ? '<span>*</span>' : '' ?></label>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
+                                <?= empty($duLieuSua['id']) ? 'required' : '' ?>
                                 maxlength="150"
                                 value="<?= e($duLieuSua['email'] ?? '') ?>"
                                 placeholder="example@email.com"
@@ -456,13 +441,19 @@ function tenVaiTro($role)
                         </div>
 
                         <div class="form-field">
-                            <label for="so_dien_thoai">Số điện thoại</label>
+                            <label for="so_dien_thoai">Số điện thoại <?= empty($duLieuSua['id']) ? '<span>*</span>' : '' ?></label>
                             <input
                                 id="so_dien_thoai"
                                 name="so_dien_thoai"
-                                maxlength="20"
+                                type="tel"
+                                inputmode="numeric"
+                                pattern="[0-9]{10}"
+                                minlength="10"
+                                maxlength="10"
+                                <?= empty($duLieuSua['id']) ? 'required' : '' ?>
                                 value="<?= e($duLieuSua['so_dien_thoai'] ?? '') ?>"
-                                placeholder="Nhập số điện thoại"
+                                placeholder="Nhập đúng 10 chữ số"
+                                title="Số điện thoại phải gồm đúng 10 chữ số."
                             >
                         </div>
 
@@ -475,36 +466,11 @@ function tenVaiTro($role)
                             </select>
                         </div>
 
-                        <div class="form-field">
-                            <label for="mat_khau">
-                                Mật khẩu
-                                <?php if (empty($duLieuSua['id'])): ?>
-                                    <span>*</span>
-                                <?php else: ?>
-                                    <small>(Để trống nếu không đổi)</small>
-                                <?php endif; ?>
-                            </label>
-
-                            <input
-                                id="mat_khau"
-                                name="mat_khau"
-                                type="password"
-                                <?= empty($duLieuSua['id']) ? 'required' : '' ?>
-                                minlength="6"
-                                maxlength="128"
-                                autocomplete="new-password"
-                                placeholder="<?= empty($duLieuSua['id'])
-                                    ? 'Nhập mật khẩu, tối thiểu 6 ký tự'
-                                    : 'Nhập mật khẩu mới nếu muốn đổi' ?>"
-                            >
-
-                            <?php if (empty($duLieuSua['id'])): ?>
-                                <small class="password-help">
-                                    Mật khẩu này sẽ được cấp cho sinh viên khi đăng nhập.
-                                </small>
-                            <?php endif; ?>
-                        </div>
                     </div>
+
+                    <?php if (empty($duLieuSua['id'])): ?>
+                        <p class="password-help">Mật khẩu ban đầu của tài khoản mới là <strong>123456</strong>.</p>
+                    <?php endif; ?>
 
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">

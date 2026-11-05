@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../app/Core/ClassSchedule.php';
 
 /**
  * [TC 4] Kiểm tra phiên đăng nhập ($_SESSION['user_id'] và $_SESSION['vai_tro'] === 'sinh_vien').
@@ -170,30 +171,36 @@ if (!$lopId || $lopId <= 0) {
 
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
-        // [L10 Hotfix]: Kiểm tra trùng lịch học (lich_hoc) với các lớp đang đăng ký trong cùng học kỳ
-        $lopTrungLich = false;
-        $lichHocMoi = trim((string)($lop['lich_hoc'] ?? ''));
-        if ($lichHocMoi !== '' && mb_strtolower($lichHocMoi, 'UTF-8') !== 'chưa xếp lịch') {
+        // Compare parsed weekdays and lesson periods, not raw schedule strings.
+        $lopTrungLich = null;
+        $lopLichChuaRo = null;
+        $lichHocMoi = (string)($lop['lich_hoc'] ?? '');
+        $lichHocMoiPhanTich = ClassSchedule::parse($lichHocMoi);
+        if ($lichHocMoiPhanTich !== null) {
             $stmtTrungLich = $pdo->prepare("
-                SELECT lhp.id, lhp.ma_lop, lhp.lich_hoc
+                SELECT lhp.ma_lop, lhp.lich_hoc
                 FROM dang_ky_hoc AS dk
                 INNER JOIN lop_hoc_phan AS lhp ON lhp.id = dk.lop_hoc_phan_id
                 WHERE dk.sinh_vien_id = :sv_id
                   AND lhp.hoc_ky_id = :hoc_ky_id
                   AND dk.trang_thai = 'dang_ky'
                   AND dk.lop_hoc_phan_id <> :lop_id
-                  AND lhp.lich_hoc IS NOT NULL
-                  AND TRIM(lhp.lich_hoc) <> ''
-                  AND LOWER(TRIM(lhp.lich_hoc)) = LOWER(TRIM(:lich_hoc))
-                LIMIT 1
             ");
             $stmtTrungLich->execute([
-                'sv_id'     => $sinhVienId,
+                'sv_id' => $sinhVienId,
                 'hoc_ky_id' => $lop['hoc_ky_id'],
-                'lop_id'    => $lopId,
-                'lich_hoc'  => $lichHocMoi
+                'lop_id' => $lopId
             ]);
-            $lopTrungLich = $stmtTrungLich->fetch();
+            foreach ($stmtTrungLich->fetchAll(PDO::FETCH_ASSOC) as $lopDaDangKy) {
+                if (ClassSchedule::parse((string)($lopDaDangKy['lich_hoc'] ?? '')) === null) {
+                    $lopLichChuaRo = $lopDaDangKy;
+                    break;
+                }
+                if (ClassSchedule::overlaps($lichHocMoi, (string)($lopDaDangKy['lich_hoc'] ?? ''))) {
+                    $lopTrungLich = $lopDaDangKy;
+                    break;
+                }
+            }
         }
 
         // [TC 3 & TC 5]: Đếm sĩ số hiện tại của lớp trực tiếp từ CSDL
@@ -247,8 +254,20 @@ if (!$lopId || $lopId <= 0) {
                 . $lopTrungHocPhan['ma_lop']
                 . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
 
+        } elseif ($lichHocMoiPhanTich === null) {
+            $thongBao = 'Lớp học phần này chưa có lịch học hợp lệ nên chưa thể kiểm tra trùng lịch. Vui lòng liên hệ phòng đào tạo để cập nhật lịch.';
+
+        } elseif ($lopLichChuaRo) {
+            $thongBao = 'Chưa thể xác nhận lịch lớp này không bị trùng vì lớp đã đăng ký '
+                . $lopLichChuaRo['ma_lop']
+                . ' chưa có lịch học hợp lệ. Vui lòng liên hệ phòng đào tạo để cập nhật lịch.';
+
         } elseif ($lopTrungLich) {
-            $thongBao = 'Trùng lịch học với một lớp học phần đã đăng ký trong học kỳ này!';
+            $thongBao = 'Lịch học bị trùng với lớp '
+                . $lopTrungLich['ma_lop']
+                . ' ('
+                . $lopTrungLich['lich_hoc']
+                . '). Vui lòng chọn lớp có lịch khác.';
 
         } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';
@@ -309,7 +328,7 @@ if (!$lopId || $lopId <= 0) {
                 ]);
             }
 
-            $thongBao = 'Đăng ký học phần thành công!';
+            $thongBao = 'Đăng ký lớp học phần thành công!';
             $loaiThongBao = 'success';
         }
 
@@ -324,7 +343,7 @@ if (!$lopId || $lopId <= 0) {
         }
 
         error_log(
-            'StudentHub đăng ký học phần: '
+            'StudentHub đăng ký lớp học phần: '
             . $e->getMessage()
         );
 
@@ -426,7 +445,7 @@ if (!$lopId || $lopId <= 0) {
 
         <h1>
             <?= $loaiThongBao === 'success'
-                ? 'Đăng ký học phần'
+                ? 'Đăng ký lớp học phần'
                 : 'Chưa thể đăng ký' ?>
         </h1>
 
@@ -443,7 +462,7 @@ if (!$lopId || $lopId <= 0) {
                 class="primary"
                 href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
             >
-                Quay lại đăng ký học phần
+                Quay lại chọn lớp học phần
             </a>
 
 

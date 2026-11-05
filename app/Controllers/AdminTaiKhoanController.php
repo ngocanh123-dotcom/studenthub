@@ -160,7 +160,6 @@ class AdminTaiKhoanController
             'so_dien_thoai' => trim((string) ($_POST['so_dien_thoai'] ?? '')),
             'vai_tro' => trim((string) ($_POST['vai_tro'] ?? '')),
         ];
-
         if (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $account['ten_dang_nhap'])) {
             throw new RuntimeException('Tên đăng nhập phải gồm 3–30 ký tự chữ, số hoặc dấu gạch dưới.');
         }
@@ -169,15 +168,23 @@ class AdminTaiKhoanController
             throw new RuntimeException('Vui lòng nhập họ và tên.');
         }
 
+        if ($action === 'them' && $account['email'] === '') {
+            throw new RuntimeException('Vui lòng nhập địa chỉ email.');
+        }
+
         if ($account['email'] !== '' && !filter_var($account['email'], FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException('Địa chỉ email không hợp lệ.');
+        }
+
+        if ($action === 'them' && $account['so_dien_thoai'] === '') {
+            throw new RuntimeException('Vui lòng nhập số điện thoại.');
         }
 
         if (
             $account['so_dien_thoai'] !== ''
             && !preg_match('/^[0-9]{10}$/', $account['so_dien_thoai'])
         ) {
-            throw new RuntimeException('Số điện thoại phải gồm đúng 10 chữ số.');
+            throw new RuntimeException('Số điện thoại phải gồm đúng 10 chữ số, không chứa khoảng trắng hoặc ký tự khác.');
         }
 
         if (!in_array($account['vai_tro'], ['sinh_vien', 'giang_vien', 'admin'], true)) {
@@ -209,7 +216,7 @@ class AdminTaiKhoanController
                 password_hash('123456', PASSWORD_DEFAULT)
             );
 
-            $notice = 'Thêm tài khoản thành công. Mật khẩu mặc định là 123456.';
+            $notice = 'Thêm tài khoản thành công. Mật khẩu ban đầu là 123456.';
             return;
         }
 

@@ -1,25 +1,5 @@
 <?php
 // app/Views/sinhvien/index.php
-// Khởi tạo phòng thủ cho dữ liệu tổng quan (BUG-05 Hotfix)
-if (!isset($dashboardData) || !is_array($dashboardData)) {
-    $dashboardData = [
-        'summary' => [
-            'so_lop_dang_mo' => 0,
-            'so_lop_da_dang_ky' => 0,
-            'tong_tin_chi_da_dk' => 0,
-        ],
-        'semester' => [
-            'ten_hoc_ky' => 'Học kỳ 1 (2026 - 2027)',
-            'trang_thai_dang_ky' => 'mo'
-        ],
-        'registered_classes' => [],
-        'open_classes' => [],
-        'registration_open' => true,
-    ];
-}
-if (!isset($dashboardError) || $dashboardError === null) {
-    $dashboardError = '';
-}
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -30,13 +10,33 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'sinhvien') {
     exit;
 }
 
+// Nếu view được truy cập mà chưa có dữ liệu từ Controller, tự động nạp controller để không bao giờ bị số 0
+if (!isset($dashboardData) || !is_array($dashboardData) || !isset($dashboardData['summary'])) {
+    if (!isset($pdo) || !$pdo instanceof PDO) {
+        $dbFile = __DIR__ . '/../../../config/database.php';
+        if (file_exists($dbFile)) {
+            require_once $dbFile;
+        }
+    }
+    if (isset($pdo) && $pdo instanceof PDO) {
+        require_once __DIR__ . '/../../controllers/SinhVienDashboardController.php';
+        $dashboardController = new SinhVienDashboardController($pdo);
+        $dashboardController->index();
+        exit;
+    }
+}
+
+if (!isset($dashboardError) || $dashboardError === null) {
+    $dashboardError = '';
+}
+
 $hoTen = $_SESSION['ho_ten'] ?? $_SESSION['username'] ?? 'Sinh viên';
 $maSinhVien = $_SESSION['username'] ?? '';
 $hocKyHienTai = $dashboardData['semester'] ?? null;
 $cacLopMo = $dashboardData['open_classes'] ?? [];
-$soLopDangMo = count($cacLopMo) ?: ($dashboardData['summary']['so_lop_dang_mo'] ?? 0);
-$soLopDaDangKy = is_array($dashboardData['registered_classes'] ?? null) ? count($dashboardData['registered_classes']) : ($dashboardData['registered_classes'] ?? ($dashboardData['summary']['so_lop_da_dang_ky'] ?? null));
-$soTinChiDaDangKy = $dashboardData['registered_credits'] ?? ($dashboardData['summary']['tong_tin_chi_da_dk'] ?? null);
+$soLopDangMo = $dashboardData['summary']['so_lop_dang_mo'] ?? count($cacLopMo);
+$soLopDaDangKy = $dashboardData['summary']['so_lop_da_dang_ky'] ?? (is_array($dashboardData['registered_classes'] ?? null) ? count($dashboardData['registered_classes']) : ($dashboardData['registered_classes'] ?? 0));
+$soTinChiDaDangKy = $dashboardData['summary']['tong_tin_chi_da_dk'] ?? ($dashboardData['registered_credits'] ?? 0);
 $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
 ?>
 <!DOCTYPE html>
@@ -102,7 +102,7 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
-                    <span>Đăng ký học phần</span>
+                    <span>Đăng ký lớp học phần</span>
                 </a>
 
                 <a href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
@@ -113,6 +113,12 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
                         <polyline points="12 6 12 12 14 14"/>
                     </svg>
                     <span>Lịch sử đăng ký</span>
+                </a>
+
+                <a href="/studenthub/public/index.php?route=doi_mat_khau.php"
+                   class="sh-nav-item change-pass-link">
+                    <span style="font-size: 16px; width: 18px; text-align: center;">🔑</span>
+                    <span>Đổi mật khẩu</span>
                 </a>
 
                 <a href="/studenthub/public/index.php?action=logout"
