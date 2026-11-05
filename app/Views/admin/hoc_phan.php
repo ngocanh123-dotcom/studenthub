@@ -309,7 +309,7 @@ try {
         $thamSo[':q2'] = $tim;
     }
 
-    $sql .= " ORDER BY id DESC";
+    $sql .= " ORDER BY id ASC";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($thamSo);

@@ -182,64 +182,16 @@ function e($value): string
 
 <div class="layout">
 
-    <!-- ==================================
-         SIDEBAR BÊN TRÁI
-    =================================== -->
-    <aside class="sidebar">
-
-        <!-- Logo StudentHub -->
-        <div class="sidebar-brand">
-
-            <div class="sidebar-brand-icon">
-                S
-            </div>
-
-            <div class="sidebar-brand-text">
-                <h1>StudentHub</h1>
-                <p>Cổng thông tin giảng viên</p>
-            </div>
-
-        </div>
-
-        <!-- Menu -->
-        <p class="menu-title">CỔNG GIẢNG VIÊN</p>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php" class="menu-item active">
-            <span>⌂</span>
-            Tổng quan
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
-            <span>▦</span>
-            Lớp học phần
-        </a>
-
-        <a href="/studenthub/public/index.php?route=giang_vien.php#course-list" class="menu-item">
-            <span>♙</span>
-            Sinh viên theo lớp
-        </a>
-
-        <!-- Đăng xuất -->
-        <div class="sidebar-bottom">
-
-            <a href="/studenthub/public/index.php?action=logout"
-               class="menu-item logout">
-
-                <span>⇥</span>
-                Quay lại đăng nhập
-
-            </a>
-
-        </div>
-
-    </aside>
+    <?php
+    $lecturerActiveMenu = 'overview';
+    require __DIR__ . '/../layouts/lecturer_sidebar.php';
+    ?>
 
 
     <!-- ==================================
          NỘI DUNG CHÍNH
     =================================== -->
     <main class="main-content">
-
         <!-- TOP BAR: THÔNG TIN GIẢNG VIÊN -->
         <div class="student-topbar">
 

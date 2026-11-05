@@ -40,14 +40,17 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 
         .btn-view-class { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
         .btn-view-class:hover { background: #dbeafe; transform: translateY(-1px); }
-<<<<<<< HEAD
-        
-=======
         .btn-toggle-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
         .btn-toggle-on { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .btn-toggle-off { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
->>>>>>> 50854c6a2f528897454b0c8dc775d4a01db54462
+        .semester-close-time { color: #dc2626; font-weight: 700; }
+        .semester-time-empty { color: #94a3b8; font-style: italic; }
+        .semester-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; white-space: nowrap; }
+        .semester-action-link, .semester-action-button { display: inline-flex; align-items: center; justify-content: center; min-width: 56px; padding: 7px 12px; border: 1px solid transparent; border-radius: 7px; font: inherit; font-size: 14px; font-weight: 600; line-height: 1.2; text-decoration: none; cursor: pointer; }
+        .semester-action-link { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; }
+        .semester-action-button { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
+        .semester-action-link:hover { background: #dbeafe; }
+        .semester-action-button:hover { background: #fee2e2; }
         .detail-row { background: #f8fafc; }
         .detail-row td { padding: 0; border: none; }
         .detail-container { padding: 20px; border: 1px dashed #cbd5e1; border-radius: 12px; margin: 10px 0; background: #fff; }
@@ -104,14 +107,14 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                             </div>
                         </div>
 
-                        <!-- CỘT BÊN PHẢI: THỜI GIAN ĐĂNG KÝ -->
+                        <!-- Thời gian mở và đóng đăng ký -->
                         <div class="form-column">
                             <div class="form-field">
-                                <label>Thời gian mở ĐK</label>
+                                <label>Thời gian mở đăng ký</label>
                                 <input type="text" name="thoi_gian_mo_dk" id="thoi_gian_mo_dk" value="<?= e($duLieuSua['thoi_gian_mo_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_mo_dk'])) : '') ?>" placeholder="dd/mm/yyyy HH:mm">
                             </div>
                             <div class="form-field">
-                                <label>Thời gian đóng ĐK</label>
+                                <label style="color: #dc2626;">Thời gian đóng đăng ký</label>
                                 <input type="text" name="thoi_gian_dong_dk" id="thoi_gian_dong_dk" value="<?= e($duLieuSua['thoi_gian_dong_dk'] ? date('Y-m-d\TH:i', strtotime($duLieuSua['thoi_gian_dong_dk'])) : '') ?>" placeholder="dd/mm/yyyy HH:mm">
                             </div>
                         </div>
@@ -144,13 +147,15 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                             <th>Tên học kỳ</th>
                             <th>Thời gian diễn ra</th>
                             <th style="text-align: center;">Lớp đã mở</th>
-                            <th>Thời gian đăng ký</th> <!-- Cột gộp mới -->
+                            <th>Thời gian mở</th>
+                            <th style="color: #dc2626;">Thời gian đóng</th>
+                            <th>Trạng thái đăng ký</th>
                             <th style="text-align: right;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($danhSach)): ?>
-                            <tr><td colspan="6" style="text-align: center; color: #64748b;">Chưa có dữ liệu học kỳ.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; color: #64748b;">Chưa có dữ liệu học kỳ.</td></tr>
                         <?php else: ?>
                             <?php foreach ($danhSach as $hk): ?>
                                 <tr>
@@ -171,7 +176,20 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         </div>
                                     </td>
                                     
-                                    <!-- CỘT GỘP: THỜI GIAN ĐĂNG KÝ -->
+                                    <td>
+                                        <?php if (!empty($hk['thoi_gian_mo_dk'])): ?>
+                                            <?= date('d/m/Y H:i', strtotime($hk['thoi_gian_mo_dk'])) ?>
+                                        <?php else: ?>
+                                            <span class="semester-time-empty">Chưa thiết lập</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($hk['thoi_gian_dong_dk'])): ?>
+                                            <span class="semester-close-time"><?= date('d/m/Y H:i', strtotime($hk['thoi_gian_dong_dk'])) ?></span>
+                                        <?php else: ?>
+                                            <span class="semester-close-time semester-time-empty">Chưa thiết lập</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_ky.php" style="margin:0;">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
@@ -182,19 +200,21 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                             </button>
                                         </form>
                                     </td>
-                                    <td style="text-align: right;">
-                                        <a href="/studenthub/public/index.php?route=admin_hoc_ky.php&amp;sua=<?= (int) $hk['id'] ?>" style="color: #2563eb; font-weight: 600; text-decoration: none; margin-right: 15px;">Sửa</a>
-                                        <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_ky.php" style="display:inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
-                                            <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
-                                            <input type="hidden" name="hanh_dong" value="xoa">
-                                            <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
-                                            <button type="submit" style="background: none; border: none; color: #dc2626; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px;">Xóa</button>
-                                        </form>
+                                    <td>
+                                        <div class="semester-actions">
+                                            <a class="semester-action-link" href="/studenthub/public/index.php?route=admin_hoc_ky.php&amp;sua=<?= (int) $hk['id'] ?>">Sửa</a>
+                                            <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_ky.php" style="margin: 0;" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
+                                                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                                <input type="hidden" name="hanh_dong" value="xoa">
+                                                <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
+                                                <button type="submit" class="semester-action-button">Xóa</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
 
                                 <tr id="detail-<?= $hk['id'] ?>" class="detail-row" style="display: none;">
-                                    <td colspan="6"> <!-- Đã sửa colspan thành 6 -->
+                                    <td colspan="8">
                                         <div class="detail-container">
                                             <?php $dsLop = $dsLopTheoHocKy[$hk['id']] ?? []; ?>
                                             <?php if (empty($dsLop)): ?>

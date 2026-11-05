@@ -422,7 +422,7 @@
                     <span>Lịch sử đăng ký</span>
                 </a>
 
-                <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
+                <a href="/studenthub/public/index.php?route=doi_mat_khau.php" class="sh-nav-item change-pass-link" style="color: #38bdf8;">
                     <span style="font-size: 16px; width: 18px; text-align: center;">🔑</span>
                     <span>Đổi mật khẩu</span>
                 </a>

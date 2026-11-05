@@ -94,7 +94,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
     </div>
 
     <div class="sidebar-bottom sidebar-footer-action">
-        <a href="javascript:void(0)" onclick="openChangePasswordModal()" class="menu-link change-pass-link sh-nav-item" style="color: #38bdf8;">
+        <a href="/studenthub/public/index.php?route=doi_mat_khau.php" class="menu-link change-pass-link sh-nav-item" style="color: #38bdf8;">
             <span style="font-size: 16px;">🔑</span> <span>Đổi mật khẩu</span>
         </a>
         <a href="/studenthub/public/index.php?action=logout" class="menu-link logout sh-nav-item logout-link" title="Đăng xuất khỏi hệ thống">
