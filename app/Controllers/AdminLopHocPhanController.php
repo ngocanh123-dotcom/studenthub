@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/../Models/AdminLopHocPhanModel.php';
+require_once __DIR__ . '/../Core/ClassSchedule.php';
 
 class AdminLopHocPhanController {
     private AdminLopHocPhanModel $model;
@@ -178,6 +179,33 @@ class AdminLopHocPhanController {
             $this->redirectBackWithError('Vui lòng chọn Học kỳ áp dụng.', $_POST);
         }
 
+        if ($giangVienId !== null && $lichHoc !== '') {
+            if (ClassSchedule::parse($lichHoc) === null) {
+                $this->redirectBackWithError(
+                    'Không nhận diện được lịch học. Vui lòng nhập theo định dạng ví dụ: Thứ 2 & Thứ 4 (Tiết 1 - 3, Sáng).',
+                    $_POST
+                );
+            }
+
+            try {
+                $lecturerConflict = $this->model->findLecturerScheduleConflict(
+                    $hocKyId,
+                    $giangVienId,
+                    $lichHoc
+                );
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch giảng viên khi tạo lớp học phần: " . $e->getMessage());
+                $this->redirectBackWithError('Không thể kiểm tra lịch giảng viên. Vui lòng thử lại.', $_POST);
+            }
+
+            if ($lecturerConflict) {
+                $this->redirectBackWithError(
+                    "Giảng viên đã có lịch dạy trùng với lớp '{$lecturerConflict['ma_lop']}' ({$lecturerConflict['lich_hoc']}) trong học kỳ đã chọn.",
+                    $_POST
+                );
+            }
+        }
+
         if ($lichHoc !== '' && $phongHoc !== '') {
             try {
                 $conflict = $this->model->findScheduleRoomConflict($hocKyId, $lichHoc, $phongHoc);
@@ -323,6 +351,34 @@ class AdminLopHocPhanController {
 
         if ($hocKyId <= 0) {
             $this->redirectEditWithError($id, 'Vui lòng chọn Học kỳ.');
+        }
+
+        if ($giangVienId !== null && $lichHoc !== '') {
+            if (ClassSchedule::parse($lichHoc) === null) {
+                $this->redirectEditWithError(
+                    $id,
+                    'Không nhận diện được lịch học. Vui lòng nhập theo định dạng ví dụ: Thứ 2 & Thứ 4 (Tiết 1 - 3, Sáng).'
+                );
+            }
+
+            try {
+                $lecturerConflict = $this->model->findLecturerScheduleConflict(
+                    $hocKyId,
+                    $giangVienId,
+                    $lichHoc,
+                    $id
+                );
+            } catch (PDOException $e) {
+                error_log("Lỗi kiểm tra trùng lịch giảng viên khi cập nhật lớp học phần: " . $e->getMessage());
+                $this->redirectEditWithError($id, 'Không thể kiểm tra lịch giảng viên. Vui lòng thử lại.');
+            }
+
+            if ($lecturerConflict) {
+                $this->redirectEditWithError(
+                    $id,
+                    "Giảng viên đã có lịch dạy trùng với lớp '{$lecturerConflict['ma_lop']}' ({$lecturerConflict['lich_hoc']}) trong học kỳ đã chọn."
+                );
+            }
         }
 
         if ($lichHoc !== '' && $phongHoc !== '') {

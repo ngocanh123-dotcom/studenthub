@@ -15,13 +15,12 @@ if (
     exit;
 }
 
-$username = $_SESSION['username'];
-
 // ==========================================
 // 2. KẾT NỐI CƠ SỞ DỮ LIỆU
 // ==========================================
 // [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
 require_once __DIR__ . '/../../../config/database.php';
+$username = $_SESSION['username'];
 
 if (!isset($pdo) || !($pdo instanceof PDO)) {
     exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
@@ -136,6 +135,8 @@ try {
         SELECT
             lhp.id,
             lhp.ma_lop,
+            lhp.lich_hoc,
+            lhp.phong_hoc,
             hk.ten_hoc_ky,
             lhp.si_so_toi_da,
             lhp.trang_thai,
@@ -155,6 +156,8 @@ try {
         GROUP BY
             lhp.id,
             lhp.ma_lop,
+            lhp.lich_hoc,
+            lhp.phong_hoc,
             hk.ten_hoc_ky,
             lhp.si_so_toi_da,
             lhp.trang_thai
@@ -277,14 +280,14 @@ function trangThaiLop($status): string
                     </h3>
 
                     <p>
-                        Chọn một lớp để xem danh sách sinh viên đã đăng ký.
+                        Lịch học và phòng học được hiển thị bên dưới. Chọn một lớp để xem danh sách sinh viên đã đăng ký.
                     </p>
                 </div>
 
                 <input
                     type="search"
                     id="searchClass"
-                    placeholder="Tìm mã lớp hoặc học kỳ..."
+                    placeholder="Tìm mã lớp, học kỳ, lịch học hoặc phòng..."
                     aria-label="Tìm lớp học phần"
                 >
 
@@ -299,6 +302,8 @@ function trangThaiLop($status): string
                             <th>STT</th>
                             <th>Mã lớp</th>
                             <th>Học kỳ</th>
+                            <th>Lịch học</th>
+                            <th>Phòng học</th>
                             <th>Sĩ số</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
@@ -310,7 +315,7 @@ function trangThaiLop($status): string
                     <?php if (empty($classes)): ?>
 
                         <tr>
-                            <td colspan="6" class="empty">
+                            <td colspan="8" class="empty">
                                 Học phần này chưa có lớp học phần được phân công.
                             </td>
                         </tr>
@@ -333,6 +338,14 @@ function trangThaiLop($status): string
 
                                 <td>
                                     <?= e($class['ten_hoc_ky']) ?>
+                                </td>
+
+                                <td>
+                                    <?= e($class['lich_hoc'] ?: 'Chưa xếp lịch') ?>
+                                </td>
+
+                                <td>
+                                    <?= e($class['phong_hoc'] ?: 'Chưa phân phòng') ?>
                                 </td>
 
                                 <td>

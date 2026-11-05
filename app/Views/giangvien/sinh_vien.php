@@ -13,11 +13,10 @@ if (
     exit;
 }
 
-$username = $_SESSION['username'];
-
 // 2. Kết nối cơ sở dữ liệu
 // [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
 require_once __DIR__ . '/../../../config/database.php';
+$username = $_SESSION['username'];
 
 if (!isset($pdo) || !($pdo instanceof PDO)) {
     exit('Không thể kết nối cơ sở dữ liệu StudentHub.');

@@ -227,7 +227,7 @@
                             <input type="text" name="lich_hoc" id="lich_hoc"
                                    value="<?= htmlspecialchars($oldData['lich_hoc'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                    placeholder="Ví dụ: Thứ 2 &amp; Thứ 4 (Tiết 1 - 3, Sáng)">
-                            <span class="form-hint">Nhập lịch theo định dạng trên để hệ thống nhận biết trùng lịch; lịch và phòng không được trùng với lớp khác trong cùng học kỳ</span>
+                            <span class="form-hint">Khi phân công giảng viên, nhập đúng định dạng trên để hệ thống kiểm tra lịch dạy trùng trong cùng học kỳ.</span>
                         </div>
 
                         <!-- Phòng học -->
