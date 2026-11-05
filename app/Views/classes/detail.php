@@ -8,9 +8,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // 1. Nhận diện phiên đăng nhập sinh viên (chuẩn hóa các khóa Session theo kiến trúc hệ thống)
-$currentUserId = (int)($_SESSION['user_id'] ?? ($_SESSION['nguoi_dung_id'] ?? 4));
-$hoTenSv       = (string)($_SESSION['ho_ten'] ?? 'Nguyễn Thu Trang');
-$maSv          = (string)($_SESSION['ten_dang_nhap'] ?? ($_SESSION['username'] ?? 'SV001'));
+// Kiểm tra phiên đăng nhập an toàn
+if (empty($_SESSION['user_id']) && empty($_SESSION['nguoi_dung_id'])) {
+    header('Location: /studenthub/public/index.php');
+    exit;
+}
+$currentUserId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id']);
+$hoTenSv       = (string)($_SESSION['ho_ten'] ?? ($_SESSION['username'] ?? 'Sinh viên'));
+$maSv          = (string)($_SESSION['ten_dang_nhap'] ?? ($_SESSION['username'] ?? ''));
 
 // 2. Nhận ID hoặc Mã lớp học phần từ URL (mặc định lấy lớp 1 nếu không truyền)
 $classId = $_GET['id'] ?? ($_GET['ma_lop'] ?? 1);
@@ -57,6 +62,7 @@ if ($db instanceof PDO) {
 
 // Xử lý trường hợp không tìm thấy lớp học phần
 if (!$lop) {
+    http_response_code(404);
     ?>
     <!DOCTYPE html>
     <html lang="vi">

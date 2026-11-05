@@ -33,6 +33,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 
 // Route every public module through this single web entry point.
 $route = strtolower(trim((string) ($_GET['route'] ?? ''), '/'));
+if ($route === 'dangky' || $route === 'dangky.php') {
+    header('Location: /studenthub/public/index.php?route=trang_dang_ky_hoc.php');
+    exit;
+}
 if ($route === 'danh_sach_lop_hoc_phan') {
     $route = 'danh_sach_lop_hoc_phan.php';
 }

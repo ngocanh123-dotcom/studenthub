@@ -111,7 +111,7 @@ if (!$lopId || $lopId <= 0) {
         // [TC 1 & TC 5]: Lấy thông tin lớp học phần trực tiếp từ CSDL (khóa dòng FOR UPDATE)
         $stmtLop = $pdo->prepare("
             SELECT lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.trang_thai, 
-                   lhp.si_so_toi_da, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
+                   lhp.si_so_toi_da, lhp.lich_hoc, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
                    hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
             FROM lop_hoc_phan lhp
             INNER JOIN hoc_ky hk ON hk.id = lhp.hoc_ky_id
@@ -170,6 +170,32 @@ if (!$lopId || $lopId <= 0) {
 
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
+        // [L10 Hotfix]: Kiểm tra trùng lịch học (lich_hoc) với các lớp đang đăng ký trong cùng học kỳ
+        $lopTrungLich = false;
+        $lichHocMoi = trim((string)($lop['lich_hoc'] ?? ''));
+        if ($lichHocMoi !== '' && mb_strtolower($lichHocMoi, 'UTF-8') !== 'chưa xếp lịch') {
+            $stmtTrungLich = $pdo->prepare("
+                SELECT lhp.id, lhp.ma_lop, lhp.lich_hoc
+                FROM dang_ky_hoc AS dk
+                INNER JOIN lop_hoc_phan AS lhp ON lhp.id = dk.lop_hoc_phan_id
+                WHERE dk.sinh_vien_id = :sv_id
+                  AND lhp.hoc_ky_id = :hoc_ky_id
+                  AND dk.trang_thai = 'dang_ky'
+                  AND dk.lop_hoc_phan_id <> :lop_id
+                  AND lhp.lich_hoc IS NOT NULL
+                  AND TRIM(lhp.lich_hoc) <> ''
+                  AND LOWER(TRIM(lhp.lich_hoc)) = LOWER(TRIM(:lich_hoc))
+                LIMIT 1
+            ");
+            $stmtTrungLich->execute([
+                'sv_id'     => $sinhVienId,
+                'hoc_ky_id' => $lop['hoc_ky_id'],
+                'lop_id'    => $lopId,
+                'lich_hoc'  => $lichHocMoi
+            ]);
+            $lopTrungLich = $stmtTrungLich->fetch();
+        }
+
         // [TC 3 & TC 5]: Đếm sĩ số hiện tại của lớp trực tiếp từ CSDL
         $stmtSiSo = $pdo->prepare("
             SELECT COUNT(*)
@@ -220,6 +246,9 @@ if (!$lopId || $lopId <= 0) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
                 . $lopTrungHocPhan['ma_lop']
                 . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
+
+        } elseif ($lopTrungLich) {
+            $thongBao = 'Trùng lịch học với một lớp học phần đã đăng ký trong học kỳ này!';
 
         } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';

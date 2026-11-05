@@ -64,8 +64,8 @@
 - Quản lý học phần và lớp học phần.
 - Quản lý các thông tin phục vụ hoạt động đăng ký học phần.
 - Hỗ trợ kiểm soát dữ liệu chung của hệ thống.
+
 ## 4. Phân công nhiệm vụ các thành viên
-- Nhóm trưởng: Thành viên 1 — Form đăng nhập
 I. Nhóm trưởng: Thành viên 1 - Phạm Ngọc Anh — Form đăng nhập
 - Hoàn thiện wireframe đăng nhập.
 - Bố trí 3 vai trò: Sinh viên, Giảng viên, Quản trị viên.
@@ -73,14 +73,14 @@ I. Nhóm trưởng: Thành viên 1 - Phạm Ngọc Anh — Form đăng nhập
 - Xác định luồng đăng nhập thành công và thất bại.
 - <img width="786" height="591" alt="image" src="https://github.com/user-attachments/assets/e808a6b3-5498-43bd-990e-3aac18eb47a2" />
 1. Mô tả các thành phần
-- Sinh viên: 	Chọn vai trò sinh viên để đăng nhập
-- Giảng viên:	Chọn vai trò giảng viên
-- Quản trị viên:	Chọn vai trò quản trị hệ thống
-- Tên đăng nhập:	Nhập tài khoản được cấp
+- Sinh viên: Chọn vai trò sinh viên để đăng nhập
+- Giảng viên: Chọn vai trò giảng viên
+- Quản trị viên: Chọn vai trò quản trị hệ thống
+- Tên đăng nhập: Nhập tài khoản được cấp
 - Mật khẩu: Nhập mật khẩu; có thể hiện hoặc ẩn
-- Ghi nhớ tên đăng nhập:	Cho phép ghi nhớ tên đăng nhập trên thiết bị nếu triển khai chức năng này
-- Quên mật khẩu:	Hướng dẫn khôi phục tài khoản
-- Đăng nhập:	Gửi thông tin để hệ thống kiểm tra
+- Ghi nhớ tên đăng nhập: Cho phép ghi nhớ tên đăng nhập trên thiết bị nếu triển khai chức năng này
+- Quên mật khẩu: Hướng dẫn khôi phục tài khoản
+- Đăng nhập: Gửi thông tin để hệ thống kiểm tra
 2. Luồng đăng nhập thành công và thất bại
   <img width="1089" height="537" alt="image" src="https://github.com/user-attachments/assets/e15c0b9e-98f2-445a-822d-343173651e35" />
 - Khi đăng nhập thành công, hệ thống phải xác minh vai trò và quyền của tài khoản ở phía máy chủ, không chỉ dựa vào vai trò người dùng tự chọn trên giao diện.
@@ -91,17 +91,16 @@ Kết quả cần đạt là giao diện rõ ràng, dễ sử dụng, thống nh
 
 II. Thành viên 2 - Lê Khánh Ly – Luồng điều hướng
 1. Nhiệm vụ được phân công
-- Thành viên 3 phụ trách xác định và xây dựng luồng điều hướng của hệ thống StudentHub sau khi người dùng đăng nhập. Nội dung tập trung vào việc xác định hướng điều hướng tương ứng với từng vai trò, bao gồm Sinh viên, Giảng viên và Quản trị viên, đồng thời xác định cách xử lý khi đăng nhập thành công, đăng nhập thất bại và đăng xuất khỏi hệ thống.
+- Thành viên 2 phụ trách xác định và xây dựng luồng điều hướng của hệ thống StudentHub sau khi người dùng đăng nhập. Nội dung tập trung vào việc xác định hướng điều hướng tương ứng với từng vai trò, bao gồm Sinh viên, Giảng viên và Quản trị viên, đồng thời xác định cách xử lý khi đăng nhập thành công, đăng nhập thất bại và đăng xuất khỏi hệ thống.
 2. Mô tả luồng điều hướng
 - Sinh viên: Sau khi đăng nhập thành công và được hệ thống xác minh quyền truy cập, người dùng được điều hướng đến khu vực chức năng dành cho sinh viên.
-Giảng viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực chức năng dành cho giảng viên.
+- Giảng viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực chức năng dành cho giảng viên.
 - Quản trị viên: Sau khi đăng nhập thành công và được xác minh quyền, người dùng được điều hướng đến khu vực quản trị hệ thống.
 - Đăng nhập thất bại: Hệ thống giữ người dùng tại trang đăng nhập và hiển thị thông báo khi tài khoản, mật khẩu không chính xác hoặc thông tin nhập vào chưa đầy đủ.
 - Đăng xuất: Hệ thống kết thúc phiên đăng nhập và đưa người dùng trở về trang đăng nhập.
 - Truy cập không hợp lệ: Hệ thống kiểm tra trạng thái đăng nhập và quyền của người dùng trước khi cho phép truy cập các khu vực chức năng, tránh việc truy cập trái phép.
 3. Kết quả cần đạt
 - Xác định rõ luồng di chuyển giữa màn hình đăng nhập và các khu vực chức năng theo từng vai trò, tạo cơ sở cho việc triển khai lập trình và kiểm thử hệ thống. Việc điều hướng phải dựa trên vai trò đã được xác minh ở phía máy chủ, kết hợp với cơ chế quản lý phiên đăng nhập và kiểm tra quyền truy cập.
-- Ở giai đoạn demo hiện tại, thành viên 3 thực hiện xác định luồng điều hướng dự kiến theo ba vai trò. Việc chuyển đến các trang chức năng cụ thể sẽ được hoàn thiện khi các trang đích của hệ thống được xây dựng.
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/b0e7a6a6-c3da-4ae5-a3f9-87758fff6bae" />
 
 III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
@@ -111,7 +110,7 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
   + Tên đăng nhập không đúng định dạng: Kiểm tra độ dài (3-30 ký tự) và ký tự hợp lệ.
   + Mật khẩu không đạt yêu cầu: Yêu cầu tối thiểu 6 ký tự.
 - Xác định cơ chế kiểm tra chéo vai trò và tài khoản ở cả phía Client (JavaScript) và Server (PHP):
-  + Đối chiếu tên đăng nhập và mật khẩu với cơ sở dữ liệu/danh sách demo (hỗ trợ Sinh viên, Giảng viên và 3 tài khoản Quản trị viên).
+  + Đối chiếu tên đăng nhập và mật khẩu với cơ sở dữ liệu/danh sách demo (hỗ trợ Sinh viên, Giảng viên và Quản trị viên).
   + Kiểm tra tính khớp lệnh giữa vai trò người dùng chọn trên giao diện và phân quyền thực tế của tài khoản đó trong hệ thống.
 - Lập bảng các trường hợp kiểm thử (Test Cases) cho chức năng đăng nhập:
   + TC01: Bỏ trống toàn bộ các trường bắt buộc.
@@ -121,22 +120,19 @@ III. Thành viên 3 - Nguyễn Thị Thu Huyền — Validation đăng nhập
   <img width="285" height="410" alt="image" src="https://github.com/user-attachments/assets/d6703b0c-6615-4392-8e5c-d71502bbf4ab" />
 
   + TC03: Sai thông tin tài khoản hoặc mật khẩu.
-<img width="284" height="401" alt="image" src="https://github.com/user-attachments/assets/af7f9e6c-81fc-4639-bab4-160ba43e2978" />
+  <img width="284" height="401" alt="image" src="https://github.com/user-attachments/assets/af7f9e6c-81fc-4639-bab4-160ba43e2978" />
 
   + TC04: Chọn đúng tài khoản nhưng chọn sai vai trò đăng nhập.
-<img width="287" height="390" alt="image" src="https://github.com/user-attachments/assets/3099c351-3a0b-4f1c-854b-a672a787ff41" />
+  <img width="287" height="390" alt="image" src="https://github.com/user-attachments/assets/3099c351-3a0b-4f1c-854b-a672a787ff41" />
 
   + TC05: Đăng nhập thành công với phân quyền hợp lệ (Sinh viên, Giảng viên, Quản trị viên).
-<img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
-
+  <img width="284" height="383" alt="image" src="https://github.com/user-attachments/assets/9d5a32fe-f009-4082-84f1-215061aa300a" />
 
 IV. Thành viên 4 - Tạ Như Quỳnh - Quy chuẩn giao diện
 ### 4.1. Hình ảnh thực tế giao diện hệ thống
 
-
-![Giao diện Đăng nhập Hệ thống - Eduportal](image8.png)
+![Giao diện Đăng nhập Hệ thống - Eduportal](docs/images/image8.png)
 *Hình 3.1: Giao diện Cổng đăng ký học phần & Quản trị học vụ (Bố cục Split-Screen trên Desktop)*
-
 
 ### 4.2. Hệ thống quy chuẩn thiết kế dùng chung (Design Tokens)
 Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (`:root`) nhằm thiết lập khung quy chuẩn nhất quán cho toàn bộ các màn hình chức năng của dự án:
@@ -159,12 +155,13 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
 * **Khắc phục triệt để hiện tượng "hộp nổi trôi dạt" (Floating Box):** Chuyển dịch từ form đơn trơ trọi giữa màn hình sang mô hình **Bố cục chia đôi màn hình (Split-Screen Layout)** chuyên nghiệp:
   * **Cột trái (Brand & Showcase — 55% Viewport):**
     * Áp dụng hiệu ứng ánh sáng cực quang mờ đa tầng (*Aurora Radial Glow*) với họa tiết lưới điểm tinh tế.
-    * Tích hợp khối nhận diện thương hiệu `EDUPORTAL - Hệ Thống Đào Tạo Tín Chỉ` kèm huy hiệu học kỳ hiển thị trạng thái hoạt động trực tiếp (`pulse-dot animation`).
+    * Tích hợp khối nhận diện thương hiệu `STUDENTHUB - Hệ Thống Đào Tạo Tín Chỉ` kèm huy hiệu học kỳ hiển thị trạng thái hoạt động trực tiếp (`pulse-dot animation`).
     * Khối **Feature Highlights** giới thiệu hai tính năng cốt lõi (Đăng ký tín chỉ trực tuyến & Thời khóa biểu tích lũy) sử dụng icon nét đôi tối giản.
   * **Cột phải (Auth Interaction — 45% Viewport):**
     * Không gian tối giản hóa (*Clean Minimalist Surface*), căn lề và độ đệm chuẩn mực, hướng sự chú ý tối đa của người dùng vào form tương tác xác thực.
 * **Tối ưu hóa đa thiết bị (Responsive Breakpoints):**
   * Tự động tái sắp xếp linh hoạt từ 2 cột thành 1 cột duy nhất mượt mà trên Tablet và Mobile (dưới `1024px`), ẩn bớt các khối phụ để ưu tiên trải nghiệm đăng nhập nhanh.
+
 ### 4.4. Thiết kế thành phần tương tác & Phản hồi vi mô (Micro-interactions)
 * **Bộ chọn vai trò dạng Bento Grid (Role Tiles):**
   * Thay thế các nút radio truyền thống bằng cụm 3 thẻ trực quan ngang hàng (Sinh viên, Giảng viên, Quản trị).
@@ -182,13 +179,11 @@ Toàn bộ mã nguồn giao diện được đóng gói thành các biến CSS (
   * Thông báo trạng thái toàn cục (`.status-banner`) dạng banner nổi với hiệu ứng trượt nhẹ (`slideInDown`).
 
 ### 4.5. Bảo toàn tính toàn vẹn chức năng & Bảo mật
-* **Phân quyền và phiên làm việc:** Giữ nguyên 100% logic đối chiếu tài khoản demo (3 Quản trị viên, 1 Giảng viên, 1 Sinh viên) và lưu trữ thông tin phiên `$_SESSION` trong PHP.
+* **Phân quyền và phiên làm việc:** Giữ nguyên 100% logic đối chiếu tài khoản và lưu trữ thông tin phiên `$_SESSION` trong PHP.
 * **Cơ chế xác thực hai tầng (Two-tier Validation):**
   * *Tầng Client (JavaScript):* Xử lý Regex định dạng tài khoản, kiểm tra độ dài mật khẩu và phản hồi lỗi tức thì không cần tải lại trang.
   * *Tầng Server (PHP):* Xử lý kiểm tra dữ liệu nghiêm ngặt, bọc lọc dữ liệu đầu ra bằng `htmlspecialchars` ngăn chặn triệt để lỗ hổng XSS.
 * **Ghi nhớ đăng nhập an toàn:** Tự động lưu trữ và phục hồi tên tài khoản thông qua `localStorage` khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
-
-* **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 * **Làm sạch mã nguồn:** Loại bỏ hoàn toàn các chuỗi ký tự rác, đảm bảo cây DOM và file CSS đạt chuẩn W3C sạch sẽ, dễ bảo trì.
 
 ### V. Thành viên 5 — Nguyễn Thị Kim Anh
@@ -201,14 +196,17 @@ Trong dự án xây dựng **Hệ thống Quản lý khóa học và Đăng ký 
 
 **a) Xây dựng tài liệu kỹ thuật cốt lõi (`README.md`)**
 - **Mô tả bài toán và kiến trúc:** Soạn thảo file `README.md` đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần, bối cảnh ứng dụng, kiến trúc mã nguồn (`MVC tự xây dựng`) và công nghệ sử dụng (`PHP 8.x`, `MySQL`, `PDO`, `HTML5/CSS3/JS`).
-- **Hướng dẫn cài đặt & Triển khai (Deployment Guide):** Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (`XAMPP/Apache/MySQL`), hướng dẫn import cơ sở dữ liệu từ file `studenthub.sql` và cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
-- **Cung cấp dữ liệu mẫu & Tài khoản Demo:** Xây dựng danh sách tài khoản demo đầy đủ cho cả 3 vai trò (Sinh viên, Giảng viên, Quản trị viên) kèm thông tin đăng nhập thực tế để giảng viên và người kiểm thử có thể đánh giá nhanh chóng.
+- **Hướng dẫn cài đặt & Triển khai (Deployment Guide):** Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (`XAMPP/Apache/MySQL`), hướng dẫn import cơ sở dữ liệu từ `database/schema.sql` và `database/seed.sql`, cấu hình các tham số kết nối CSDL trong `config/database.php`.
+- **Cung cấp dữ liệu mẫu & Tài khoản Demo:** Xây dựng danh sách tài khoản demo đầy đủ cho cả 3 vai trò (Sinh viên, Giảng viên, Quản trị viên) kèm thông tin đăng nhập thực tế để giảng viên và người kiểm thử có thể đánh giá nhanh chóng:
+  * Sinh viên: `SV001` / `123456`
+  * Giảng viên: `GV001` / `123456`
+  * Quản trị viên: `admin` / `123456`
 - **Tổng hợp tài liệu mô tả màn hình:** Viết phần mô tả tổng hợp cho màn hình Form đăng nhập, kết hợp hài hòa giữa `Wireframe thiết kế` (Thành viên 1), `Quy chuẩn giao diện` (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
 
 **b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm**
 - **Đồng bộ hóa đặc tả kỹ thuật:** Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên:
-  - Kế thừa quy tắc **Validation** từ Thành viên 2 & 4 (ràng buộc độ dài, ký tự đặc biệt, kiểm tra rỗng, mã hóa lỗi).
-  - Kế thừa **Sơ đồ luồng điều hướng (`Route System`)** từ Thành viên 3 (điều hướng Sinh viên, Giảng viên, Admin, xử lý Đăng xuất và Truy cập trái phép).
+  - Kế thừa quy tắc **Validation** từ Thành viên 3 & 4 (ràng buộc độ dài, ký tự đặc biệt, kiểm tra rỗng, mã hóa lỗi).
+  - Kế thừa **Sơ đồ luồng điều hướng (`Route System`)** từ Thành viên 2 (điều hướng Sinh viên, Giảng viên, Admin, xử lý Đăng xuất và Truy cập trái phép).
   - Kế thừa **Quy chuẩn UI/UX** từ Thành viên 4 (mã màu chủ đạo, font chữ, quy định viền đỏ khi lỗi, hiển thị thông báo alert).
 - **Tổ chức tài liệu nhóm:** Sắp xếp cấu trúc báo cáo bài tập lớn mạch lạc theo đúng yêu cầu đề bài (Mục tiêu, Phân công nhiệm vụ, Sơ đồ ERD, Luồng nghiệp vụ, Kế hoạch kiểm thử).
 
@@ -232,185 +230,63 @@ Trong dự án xây dựng **Hệ thống Quản lý khóa học và Đăng ký 
 - 📊 **Báo cáo Phân tích & Phân công nhiệm vụ nhóm:** Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
 - ✅ **Bảng Kế hoạch Kiểm thử (Test Plan & Checklist):** Ma trận kiểm thử tối thiểu 15 trường hợp, phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.
 
-5. Cơ sở dữ liệu (Database)
+## 5. Cơ sở dữ liệu (Database)
 
+### 5.1. Mô tả các bảng
+![Mô tả các bảng](docs/images/image-3.png)
 
-5.1. Mô tả các bảng
-<img width="1024" height="506" alt="image" src="https://github.com/user-attachments/assets/7bf9bbff-1a70-4ede-bd52-f6fcea7dc328" />
-=======
-Không gian nền trắng tối giản, tập trung thị giác vào form đăng nhập, căn lề và khoảng đệm chuẩn mực.
+### 5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
 
-Tối ưu hóa khả năng thích ứng (Responsive):
+- **Khóa chính (PK):** Xác định duy nhất mỗi bản ghi trong một bảng.
+- **Khóa ngoại (FK):** Liên kết dữ liệu giữa các bảng và bảo đảm tính toàn vẹn tham chiếu.
+- **UNIQUE:** Ngăn dữ liệu bị trùng tại các trường hoặc nhóm trường được quy định.
 
-Tự động co gọn thành 1 cột mượt mà khi xem trên máy tính bảng hoặc màn hình điện thoại dưới 1024px.
+Các mối quan hệ:
+- `nguoi_dung` – `dang_ky_hoc`: Một sinh viên có thể đăng ký nhiều lớp học phần.
+- `hoc_phan` – `lop_hoc_phan`: Một học phần có thể được tổ chức thành nhiều lớp học phần.
+- `hoc_ky` – `lop_hoc_phan`: Một học kỳ có thể có nhiều lớp học phần.
+- `nguoi_dung` – `lop_hoc_phan`: Một giảng viên có thể phụ trách nhiều lớp học phần.
+- `lop_hoc_phan` – `dang_ky_hoc`: Một lớp học phần có thể có nhiều lượt đăng ký.
 
-3. Tái thiết kế các Thành phần tương tác (UI Components & Micro-interactions)
-Bộ chọn vai trò dạng Bento Grid (Role Tiles):
+Bảng `dang_ky_hoc` có khóa ngoại liên kết đến người đăng ký và lớp học phần, kèm ràng buộc `UNIQUE (sinh_vien_id, lop_hoc_phan_id)` để ngăn một sinh viên đăng ký trùng cùng một lớp học phần.
 
-Chuyển các radio button thông thường thành 3 thẻ khối ngang hàng (Sinh viên, Giảng viên, Quản trị).
+### 5.3. Sơ đồ ERD
 
-Tích hợp khung icon riêng biệt, hiệu ứng nổi khối (translateY(-2px)) khi rê chuột, và viền xanh kèm bóng đổ khi được chọn (:checked).
+![Sơ đồ ERD](docs/images/image-4.png)
 
-Ô nhập dữ liệu (Input Fields):
+### 5.4. Chi tiết bảng `nguoi_dung`
+Mô tả: Bảng `nguoi_dung` lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
+![Chi tiết bảng nguoi_dung][def2]
 
-Tích hợp biểu tượng chỉ dẫn (User, Lock) bên trong ô nhập.
+[def2]: docs/images/image-2.png
 
-Hiệu ứng viền chuyển sắc và tạo viền sáng (box-shadow glow) khi trỏ chuột vào ô (:focus).
+### 5.5. Chi tiết bảng `dang_ky_hoc`
 
-Trạng thái cảnh báo lỗi: Ô nhập tự đổi viền đỏ và nền hồng nhạt khi dữ liệu không hợp lệ.
-
-Nút ẩn/hiện mật khẩu:
-
-Đặt gọn bên phải ô mật khẩu, chuyển đổi mượt mà giữa biểu tượng mắt mở và mắt đóng.
-
-Nút gửi biểu mẫu (Submit Button):
-
-Thiết kế dải màu Gradient chuyển sắc, hiệu ứng đổ bóng mềm, kèm trạng thái khóa nút và hiển thị "Đang xác thực hệ thống..." khi người dùng bấm gửi.
-
-Hệ thống thông báo & Phản hồi (Feedback System):
-
-Báo lỗi tức thì tại chân từng ô nhập (.field-error-msg).
-
-Hộp thông báo kết quả chung (.status-banner) dạng banner nổi có hiệu ứng trượt nhẹ (slideInDown).
-
-4. Đảm bảo & Giữ nguyên 100% Chức năng cốt lõi
-Giữ nguyên toàn bộ logic đăng nhập, đối chiếu danh sách tài khoản demo (3 Admin, 1 Giảng viên, 1 Sinh viên) và lưu thông tin $_SESSION trong index.php.
-
-Giữ nguyên cơ chế kiểm tra lỗi hai lớp: Kiểm tra tính hợp lệ bằng JavaScript trước khi gửi và kiểm tra bảo mật ở phía server PHP.
-
-Duy trì tính năng ghi nhớ tên đăng nhập bằng localStorage khi người dùng tích chọn "Ghi nhớ phiên đăng nhập".
-
-Loại bỏ toàn bộ các ký tự rác, chuỗi tham chiếu không mong muốn để giao diện hiển thị sạch sẽ, chuyên nghiệp.
-
-V. Thành viên 5 - Nguyễn Thị Kim Anh 
-1. Mô tả chi tiết vai trò và trách nhiệmTrong dự án xây dựng Hệ thống Quản lý khóa học và Đăng ký học phần (StudentHub), 
-   - tôi đảm nhận vị trí Quản lý tài liệu kỹ thuật, Tổng hợp hệ thống và Đảm bảo chất lượng (QA/Testing). Nhiệm vụ của tôi đóng vai trò là cầu nối tổng hợp toàn bộ các kết quả phân tích, thiết kế giao diện, luồng nghiệp vụ và quy định validation từ các thành viên khác, chuyển hóa thành bộ tài liệu kỹ thuật chuẩn mực, đồng thời thiết lập quy trình kiểm thử toàn diện cho hệ thống trước khi nghiệm thu.
-2. Các nhiệm vụ cụ thể được phân công và triển khai
-
-   a) Xây dựng tài liệu kỹ thuật cốt lõi (README.md):
-   - Mô tả bài toán và kiến trúc: Soạn thảo file README.md đặt tại thư mục gốc của kho lưu trữ Git theo đúng chuẩn Markdown. Cung cấp cái nhìn tổng quan về bài toán Quản lý khóa học và Đăng ký học phần (Chủ đề 1), bối cảnh ứng dụng, kiến trúc mã nguồn (MVC tự xây dựng), công nghệ sử dụng (PHP 8.x, MySQL, PDO, HTML5/CSS3/JS, Bootstrap).
-   - Hướng dẫn cài đặt & Triển khai (Deployment Guide): Viết chi tiết từng bước thiết lập môi trường chạy cục bộ (XAMPP/Apache/MySQL), hướng dẫn import cơ sở dữ liệu từ file studenthub.sql, cấu hình các tham số kết nối CSDL trong file cấu hình dự án.
-@@ -95,6 +96,7 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
-      +  Quản trị viên: admin01 / admin123 (Quyền quản trị toàn hệ thống)
-  -  Tổng hợp tài liệu mô tả màn hình: Viết phần mô tả tổng hợp cho màn hình Form đăng nhập,
-    + kết hợp giữa Wireframe thiết kế (Thành viên 1), Quy chuẩn giao diện (Thành viên 4) và Cơ chế xử lý đăng nhập thực tế.
-     
-    b) Tổng hợp, rà soát và chuẩn hóa tài liệu đặc tả của nhóm:
-
-    - Đồng bộ hóa đặc tả kỹ thuật: Thu thập dữ liệu và đồng bộ hóa các đóng góp chuyên môn từ các thành viên khác:
-@@ -108,12 +110,15 @@ V. Thành viên 5 –Nguyễn THị Kim Anh- TỔNG HỢP TÀI LIỆU, XÂY DỰ
-    -  Checkpoint 5-6: Tổ chức cấu trúc MVC, Đăng nhập, Phân quyền Server-side và bảo mật CSRF.
-    -  Checkpoint 7-8: Tích hợp Fetch API, Kiểm thử Smoke test, hoàn thiện tài liệu README và URL chạy thử.
-    - Giám sát tuân thủ Git: Kiểm tra và nhắc nhở các thành viên tuân thủ quy trình làm việc trên Git, đảm bảo mỗi thành viên đều có commit đóng góp thực tế thể hiện trên lịch sử phát triển dự án.
-    
-  d) Lập Kế hoạch kiểm thử (Test Plan) & Xây dựng Bộ bộ kiểm thử nghiệm thu:
-    - Thiết lập Khung kiểm thử (Test Plan Matrix): Phối hợp với Thành viên 4 để chuẩn bị kịch bản kiểm thử toàn diện cho chức năng Đăng nhập & Phân quyền, bao gồm 15+ trường hợp kiểm thử (Test Cases) từ cơ bản đến nâng cao:
-    -  Kiểm thử Validation Client-side: Bỏ trống trường, nhập ký tự đặc biệt, độ dài chuỗi mật khẩu không đủ.
-    -  Kiểm thử Logic Server-side: Tài khoản không tồn tại, sai mật khẩu, chọn sai vai trò so với phân quyền trong CSDL.
-    - Kiểm thử Bảo mật & Phân quyền: Cố tình truy cập trực tiếp URL trang Admin khi chưa đăng nhập, thay đổi thông số Role trên LocalStorage/Cookie, vô hiệu hóa CSRF Token.
-    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn.   3. Kết quả đầu ra dự kiến (Deliverables)
-    -  Chuẩn bị Ma trận báo cáo kết quả: Xây dựng sẵn bảng ghi nhận kết quả nghiệm thu (chứa các cột: Mã TC, Mô tả, Các bước thực hiện, Dữ liệu đầu vào, Kết quả mong đợi, Kết quả thực tế, Trạng thái Pass/Fail) để tiến hành test và ghi nhận ngay sau khi bộ phận lập trình hoàn thành mã nguồn. 
-    
-3. Kết quả đầu ra dự kiến (Deliverables)
-     - File README.md hoàn chỉnh: Đạt chuẩn Markdown, cung cấp đầy đủ hướng dẫn cài đặt, tài khoản demo và mô tả kiến trúc.
-     -   Báo cáo Phân tích & Phân công nhiệm vụ nhóm: Bộ tài liệu Word/PDF tổng hợp toàn bộ sơ đồ, luồng điều hướng, quy chuẩn UI và bảng tiến độ công việc.
-     -     Bảng Kế hoạch Kiểm thử (Test Plan & Checklist): Ma trận kiểm thử tối thiểu 15 trường hợp để phục vụ công tác kiểm thử nghiệm thu và báo cáo/phản biện bài tập lớn với giảng viên.  
-
-
-
-5. Cơ sở dữ liệu (Database)
-5.1. Mô tả các bảng
-![alt text](image-3.png)
-
-
-5.2. Khóa chính, khóa ngoại và ràng buộc dữ liệu
-
-Khóa chính (PK): Xác định duy nhất mỗi bản ghi trong một bảng.
-
-Khóa ngoại (FK): Liên kết dữ liệu giữa các bảng và bảo đảm tính toàn vẹn tham chiếu.
-
-UNIQUE: Ngăn dữ liệu bị trùng tại các trường hoặc nhóm trường được quy định.
-
-Các mối quan hệ dự kiến:
-
-nguoi_dung – dang_ky_hoc: Một sinh viên có thể đăng ký nhiều lớp học phần.
-
-hoc_phan – lop_hoc_phan: Một học phần có thể được tổ chức thành nhiều lớp học phần.
-
-hoc_ky – lop_hoc_phan: Một học kỳ có thể có nhiều lớp học phần.
-
-nguoi_dung – lop_hoc_phan: Một giảng viên có thể phụ trách nhiều lớp học phần.
-
-lop_hoc_phan – dang_ky_hoc: Một lớp học phần có thể có nhiều lượt đăng ký.
-
-Bảng dang_ky_hoc cần có khóa ngoại liên kết đến người đăng ký và lớp học phần. Nên có ràng buộc UNIQUE trên cặp khóa ngoại này để ngăn một sinh viên đăng ký trùng cùng một lớp học phần.
-
-Lưu ý: Tên cột và các ràng buộc cụ thể phải khớp với file schema.sql chính thức của nhóm.
-
-5.3. Sơ đồ ERD
-
-<img width="1209" height="764" alt="image" src="https://github.com/user-attachments/assets/ee0f2444-ddd1-4678-bb14-280ea5693d7b" />
-
-=======
-![alt text](image-4.png)
-
-5.4. Chi tiết bảng nguoi_dung
-Mô tả: Bảng nguoi_dung lưu trữ thông tin tài khoản của ba nhóm người dùng trong hệ thống StudentHub: sinh viên, giảng viên và quản trị viên. Bảng được sử dụng để xác thực đăng nhập, xác định vai trò và phục vụ việc phân quyền truy cập các chức năng của hệ thống.
-![alt text][def2]
-
-[def2]: image-2.png
-
-5.5 Chi tiết bảng dang_ky_hoc
-
-
-<img width="397" height="79" alt="Ảnh chụp màn hình 2026-10-25 225003" src="https://github.com/user-attachments/assets/62ed0d6d-9f82-401b-bce7-b28ebfa8f498" />
+<img width="397" height="79" alt="Bảng dang_ky_hoc" src="https://github.com/user-attachments/assets/62ed0d6d-9f82-401b-bce7-b28ebfa8f498" />
 
 Đây là bảng đăng ký học trong hệ thống StudentHub, có chức năng lưu trữ thông tin đăng ký lớp học phần của sinh viên.
 
+Về các ràng buộc dữ liệu, bảng sử dụng khóa chính `id` để tránh trùng định danh bản ghi. Hai trường `sinh_vien_id` và `lop_hoc_phan_id` được kết hợp thành một ràng buộc `UNIQUE` nhằm ngăn sinh viên đăng ký trùng một lớp học phần. Ngoài ra, các khóa ngoại giúp liên kết dữ liệu đăng ký với sinh viên và lớp học phần, bảo đảm tính toàn vẹn tham chiếu.
 
-Về các ràng buộc dữ liệu, bảng sử dụng khóa chính id để tránh trùng định danh bản ghi. Hai trường sinh_vien_id và lop_hoc_phan_id được kết hợp thành một ràng buộc UNIQUE nhằm ngăn sinh viên đăng ký trùng một lớp học phần. Ngoài ra, các khóa ngoại giúp liên kết dữ liệu đăng ký với sinh viên và lớp học phần, bảo đảm tính toàn vẹn tham chiếu.
-
-Như vậy, bảng dang_ky_hoc đóng vai trò quan trọng trong việc quản lý quá trình sinh viên đăng ký lớp học phần trên hệ thống StudentHub.
-
-5.6. Chi tiết bảng hoc_ky
-- Mô tả chung
-Bảng hoc_ky lưu trữ thông tin tổng quan về các học kỳ trong hệ thống StudentHub. Đây là bảng cơ sở đóng vai trò thiết lập khung thời gian đào tạo, quản lý các mốc thời gian quan trọng phục vụ cho công tác học vụ.
-
+### 5.6. Chi tiết bảng `hoc_ky`
+- **Mô tả chung:** Bảng `hoc_ky` lưu trữ thông tin tổng quan về các học kỳ trong hệ thống StudentHub. Đây là bảng cơ sở đóng vai trò thiết lập khung thời gian đào tạo, quản lý các mốc thời gian quan trọng phục vụ cho công tác học vụ.
 - <img width="1003" height="608" alt="image-6" src="https://github.com/user-attachments/assets/e24df44c-e20e-4d42-9f25-93b0ca972f36" />
-- Chức năng chính
-Cấu hình thời gian: Thiết lập ngày bắt đầu và ngày kết thúc của từng học kỳ.
+- **Chức năng chính:**
+  - Cấu hình thời gian: Thiết lập ngày bắt đầu và ngày kết thúc của từng học kỳ.
+  - Quản lý đợt đăng ký: Thiết lập thời gian mở/đóng cổng đăng ký tín chỉ, tạo điều kiện kiểm soát chặt chẽ thời gian đăng ký của sinh viên.
+  - Bảng `hoc_ky` có quan hệ 1 - Nhiều (1-N) với bảng `lop_hoc_phan` thông qua khóa ngoại `hoc_ky_id`.
 
-Quản lý đợt đăng ký: Thiết lập thời gian mở/đóng cổng đăng ký tín chỉ, tạo điều kiện kiểm soát chặt chẽ thời gian đăng ký của sinh viên.
+### 5.7. Chi tiết bảng `lop_hoc_phan`
+- **Mô tả chung và cấu trúc bảng (`lop_hoc_phan`):** Bảng `lop_hoc_phan` đóng vai trò trung tâm lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ. Bảng liên kết trực tiếp với các bảng `hoc_phan` (môn học), `hoc_ky`, `nguoi_dung` (giảng viên) và `dang_ky_hoc` để quản lý sĩ số giới hạn, phục vụ quá trình tra cứu và đăng ký tín chỉ trực tuyến của sinh viên.
+<img width="619" height="162" alt="Bảng lop_hoc_phan" src="https://github.com/user-attachments/assets/7f20fcfd-3c3f-4d71-8f17-69907615bd83" />
 
-Bảng hoc_ky có quan hệ 1 - Nhiều (1-N) với bảng lop_hoc_phan thông qua khóa ngoại hoc_ky_id.
-(Ghi chú: Một học kỳ có thể chứa nhiều lớp học phần, nhưng mỗi lớp học phần chỉ thuộc về duy nhất một học kỳ).
+- **Chức năng chính của Module Danh sách Lớp học phần & Đăng ký học phần:**
+  * **Hiển thị danh sách lớp học phần trực quan:** Liệt kê đầy đủ các thông tin thiết yếu của từng lớp mở bao gồm: Mã lớp mở, Tên học phần (kèm mã học phần & số tín chỉ), Giảng viên phụ trách, Học kỳ, Lịch học/Thời gian mở đăng ký, Sĩ số hiện tại và Trạng thái lớp.
+  * **Thống kê tổng quan thời gian thực (Real-time Dashboard Cards):** Tự động tính toán và hiển thị 3 chỉ số quan trọng cho sinh viên.
+  * **Tìm kiếm và Bộ lọc đa tiêu chí:** Tìm kiếm theo từ khóa (`tu_khoa`), lọc theo Học kỳ (`hoc_ky_id`), Giảng viên phụ trách (`giang_vien_id`) và Trạng thái lớp.
+  * **Kiểm soát sĩ số & Trạng thái tự động:** Tự động đếm số lượng sinh viên đã đăng ký (`si_so_hien_tai`) từ bảng `dang_ky_hoc` để tính số chỗ còn lại (`si_so_toi_da - si_so_hien_tai`) và hiển thị trực quan.
 
-- Kết luận về vai trò của bảng
-Bảng hoc_ky đóng vai trò là "bộ điều phối thời gian" cốt lõi của hệ thống. Dữ liệu từ bảng này đảm bảo quy trình đào tạo và đăng ký môn học diễn ra đúng tiến độ và tuân thủ quy định.
-
-Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ tự động đối chiếu thời gian thực tế (thời điểm hiện tại) với các mốc thoi_gian_mo_dk (thời gian mở đăng ký) và thoi_gian_dong_dk (thời gian đóng đăng ký) để quyết định xem có cho phép thao tác hay không, từ đó ngăn chặn các hành vi đăng ký sai quy định.
-
-5.7 Chi tiết bảng (`lop_hoc_phan`)
-- Mô tả chung và cấu trúc bảng (`lop_hoc_phan`):Bảng `lop_hoc_phan` đóng vai trò trung tâm lưu trữ thông tin về các lớp học phần được mở trong từng học kỳ. Bảng liên kết trực tiếp với các bảng `hoc_phan` (môn học), `hoc_ky`, `nguoi_dung` (giảng viên) và `dang_ky_hoc` để quản lý sĩ số giới hạn, phục vụ quá trình tra cứu và đăng ký tín chỉ trực tuyến của sinh viên.
-<img width="619" height="162" alt="Screenshot 2026-10-25 230755" src="https://github.com/user-attachments/assets/7f20fcfd-3c3f-4d71-8f17-69907615bd83" />
-
-- Chức năng chính của Module Danh sách Lớp học phần (`public/danh_sach_lop_hoc_phan.php`)
-* **Hiển thị danh sách lớp học phần trực quan:** Liệt kê đầy đủ các thông tin thiết yếu của từng lớp mở bao gồm: Mã lớp mở, Tên học phần (kèm mã học phần & số tín chỉ), Giảng viên phụ trách, Học kỳ, Lịch học/Thời gian mở đăng ký, Sĩ số hiện tại và Trạng thái lớp.
-* **Thống kê tổng quan thời gian thực (Real-time Dashboard Cards):** Tự động tính toán và hiển thị 3 chỉ số quan trọng cho sinh viên:
-  * Tổng số lớp học phần hiện có.
-  * Số lớp đang mở và còn chỗ trống.
-  * Số lớp sinh viên hiện tại đã đăng ký thành công.
-* **Tìm kiếm và Bộ lọc đa tiêu chí:**
-  * Tìm kiếm theo từ khóa (`tu_khoa`): Tra cứu nhanh theo Mã lớp mở (`ma_lop`), Mã học phần (`ma_hoc_phan`) hoặc Tên học phần (`ten_hoc_phan`).
-  * Lọc theo Học kỳ (`hoc_ky_id`), Giảng viên phụ trách (`giang_vien_id`).
-  * Lọc theo Trạng thái lớp (`trang_thai`): *Đang mở*, *Còn chỗ trống*, *Đã đủ sĩ số*, hoặc *Đã khóa*.
-* **Kiểm soát sĩ số & Trạng thái tự động:**
-  * Tự động đếm số lượng sinh viên đã đăng ký (`si_so_hien_tai`) từ bảng `dang_ky_hoc` để tính số chỗ còn lại (`so_cho_con_lai = si_so_toi_da - si_so_hien_tai`) và hiển thị thanh tiến trình (Progress bar) trực quan.
-  * Tự động đổi trạng thái nút thao tác thành **`Đã ĐK`** (nếu sinh viên đã đăng ký lớp đó), **`Khóa ĐK`** (nếu lớp bị khóa hoặc đã đầy sĩ số `0 chỗ trống`), hoặc **`+ Đăng ký`** (nếu lớp đang mở và còn chỗ).
-* **Phân trang (Pagination) & Xuất báo cáo CSV/Excel:**
-  * Hỗ trợ chia trang (6 lớp/trang) giúp tối ưu tốc độ tải và giao diện gọn gàng.
-  * Tích hợp tính năng **Xuất Excel (CSV)** hỗ trợ chuẩn mã hóa UTF-8 BOM (hiển thị tiếng Việt có dấu trên Microsoft Excel) theo đúng điều kiện đang lọc.
-5.8 Chi tiết bảng học phần
+### 5.8. Chi tiết bảng `hoc_phan`
 * **Bảng thực thể:** `hoc_phan` (Lưu trữ danh mục môn học đào tạo của nhà trường).
 * **Cấu trúc trường & Kiểu dữ liệu:**
   * `id`: Khóa chính định danh (INT, Auto Increment).
@@ -423,10 +299,4 @@ Cụ thể, khi sinh viên thực hiện thao tác đăng ký, hệ thống sẽ
   * `PRIMARY KEY`: Đảm bảo định danh duy nhất cho từng bản ghi học phần.
   * `UNIQUE KEY`: Ràng buộc `ma_hoc_phan` không được phép trùng lặp trong toàn trường.
   * `CHECK (so_tin_chi > 0)`: Ngăn chặn nhập liệu số tín chỉ âm hoặc bằng 0.
-  * `FOREIGN KEY (hoc_phan_tien_quyet_id)`: Thiết lập toàn vẹn tham chiếu nội bộ với cơ chế `ON DELETE SET NULL` (nếu môn tiên quyết bị hủy/sáp nhập, môn học sau không bị xóa mà chỉ bỏ điều kiện tiên quyết).
-
-#### 2. Dữ liệu mẫu Tiếng Việt (Mock Data)
-Xây dựng bộ dữ liệu kiểm thử thực tế bằng Tiếng Việt có dấu chuẩn `utf8mb4`, mô phỏng đầy đủ các tình huống:
-* Học phần đại cương độc lập, không yêu cầu tiên quyết (`hoc_phan_tien_quyet_id = NULL`).
-* Cặp học phần có quan hệ tiên quyết (Ví dụ: môn *Giải tích 2* yêu cầu hoàn thành môn *Giải tích 1* trước).
-* Phân loại đa dạng theo các khối kiến thức: Đại cương, Cơ sở ngành, Chuyên ngành.
+  * `FOREIGN KEY (hoc_phan_tien_quyet_id)`: Thiết lập toàn vẹn tham chiếu nội bộ với cơ chế `ON DELETE SET NULL`.

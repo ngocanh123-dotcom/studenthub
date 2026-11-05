@@ -81,10 +81,10 @@ class HocKyModel {
 
     public function getClassesBySemester($hoc_ky_id) {
         $stmt = $this->conn->prepare("
-            SELECT lhp.ma_lop, hp.ten_hoc_phan, hp.so_tin_chi, nd.ho_ten AS gv, lhp.si_so_toi_da
+            SELECT lhp.ma_lop, hp.ten_hoc_phan, hp.so_tin_chi, COALESCE(nd.ho_ten, 'Chưa phân công') AS gv, lhp.si_so_toi_da
             FROM lop_hoc_phan lhp
             JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
-            JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
+            LEFT JOIN nguoi_dung nd ON lhp.giang_vien_id = nd.id
             WHERE lhp.hoc_ky_id = :id
         ");
         $stmt->execute([':id' => $hoc_ky_id]);
