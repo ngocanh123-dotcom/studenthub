@@ -5,6 +5,8 @@
  * Kiến trúc: MVC - PHP 8.x - PDO Prepared Statements
  */
 
+require_once __DIR__ . '/../Core/ClassSchedule.php';
+
 class AdminLopHocPhanModel {
     private PDO $conn;
 
@@ -188,6 +190,42 @@ class AdminLopHocPhanModel {
         $conflict = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $conflict ?: null;
+    }
+
+    /**
+     * Tìm lớp cùng học kỳ có lịch trùng với giảng viên được phân công
+     */
+    public function findLecturerScheduleConflict(
+        int $hocKyId,
+        int $giangVienId,
+        string $lichHoc,
+        ?int $excludeId = null
+    ): ?array {
+        $sql = "SELECT id, ma_lop, lich_hoc
+                FROM lop_hoc_phan
+                WHERE hoc_ky_id = :hoc_ky_id
+                  AND giang_vien_id = :giang_vien_id";
+        $params = [
+            ':hoc_ky_id' => $hocKyId,
+            ':giang_vien_id' => $giangVienId,
+        ];
+
+        if ($excludeId !== null && $excludeId > 0) {
+            $sql .= " AND id <> :exclude_id";
+            $params[':exclude_id'] = $excludeId;
+        }
+
+        $sql .= " ORDER BY id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $class) {
+            if (ClassSchedule::overlaps($lichHoc, (string)($class['lich_hoc'] ?? ''))) {
+                return $class;
+            }
+        }
+
+        return null;
     }
 
     /**
