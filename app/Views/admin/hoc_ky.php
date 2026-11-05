@@ -32,7 +32,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
         .form-field input:focus, .form-field select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         
         .table-modern { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        .table-modern th { padding: 15px; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; text-align: left; border-bottom: 2px solid #e2e8f0; }
+        .table-modern th { padding: 15px; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; text-align: left; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
         .table-modern td { padding: 15px; background: #fff; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
         .table-modern tr td:first-child { border-left: 1px solid #e2e8f0; border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
         .table-modern tr td:last-child { border-right: 1px solid #e2e8f0; border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
@@ -40,9 +40,6 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
         
         .btn-view-class { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
         .btn-view-class:hover { background: #dbeafe; transform: translateY(-1px); }
-        .btn-toggle-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
-        .btn-toggle-on { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .btn-toggle-off { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         
         .detail-row { background: #f8fafc; }
         .detail-row td { padding: 0; border: none; }
@@ -92,7 +89,6 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                             </div>
                             <div class="form-field">
                                 <label>Ngày bắt đầu *</label>
-                                <!-- Đổi thành type="text" để dùng Flatpickr -->
                                 <input type="text" name="ngay_bat_dau" id="ngay_bat_dau" required value="<?= e($duLieuSua['ngay_bat_dau']) ?>" placeholder="dd/mm/yyyy">
                             </div>
                             <div class="form-field">
@@ -140,7 +136,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                             <th>Tên học kỳ</th>
                             <th>Thời gian diễn ra</th>
                             <th style="text-align: center;">Lớp đã mở</th>
-                            <th>Cổng Đăng ký</th>
+                            <th>Thời gian đăng ký</th> <!-- Cột gộp mới -->
                             <th style="text-align: right;">Thao tác</th>
                         </tr>
                     </thead>
@@ -166,17 +162,26 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                             </a>
                                         </div>
                                     </td>
+                                    
+                                    <!-- CỘT GỘP: THỜI GIAN ĐĂNG KÝ -->
                                     <td>
-                                        <form method="POST" action="admin_hoc_ky.php" style="margin:0;">
-                                            <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
-                                            <input type="hidden" name="hanh_dong" value="toggle_status">
-                                            <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
-                                            <button type="submit" class="btn-toggle-status <?= $hk['trang_thai_dang_ky'] == 1 ? 'btn-toggle-on' : 'btn-toggle-off' ?>">
-                                                <?= $hk['trang_thai_dang_ky'] == 1 ? '🟢 Đang mở' : '🔴 Đang đóng' ?>
-                                            </button>
-                                        </form>
+                                        <?php if ($hk['thoi_gian_mo_dk'] || $hk['thoi_gian_dong_dk']): ?>
+                                            <?php if ($hk['thoi_gian_mo_dk']): ?>
+                                                <div style="font-size: 13px; color: #059669; margin-bottom: 2px;">
+                                                    Mở: <?= date('H:i d/m/Y', strtotime($hk['thoi_gian_mo_dk'])) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($hk['thoi_gian_dong_dk']): ?>
+                                                <div style="font-size: 13px; color: #dc2626;">
+                                                    Đóng: <?= date('H:i d/m/Y', strtotime($hk['thoi_gian_dong_dk'])) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span style="font-size: 13px; color: #94a3b8; font-style: italic;">Chưa thiết lập</span>
+                                        <?php endif; ?>
                                     </td>
-                                    <td style="text-align: right;">
+
+                                    <td style="text-align: right; white-space: nowrap;">
                                         <a href="admin_hoc_ky.php?sua=<?= (int) $hk['id'] ?>" style="color: #2563eb; font-weight: 600; text-decoration: none; margin-right: 15px;">Sửa</a>
                                         <form method="POST" action="admin_hoc_ky.php" style="display:inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
@@ -188,7 +193,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                 </tr>
                                 
                                 <tr id="detail-<?= $hk['id'] ?>" class="detail-row" style="display: none;">
-                                    <td colspan="6">
+                                    <td colspan="6"> <!-- Đã sửa colspan thành 6 -->
                                         <div class="detail-container">
                                             <?php $dsLop = $dsLopTheoHocKy[$hk['id']] ?? []; ?>
                                             <?php if (empty($dsLop)): ?>
@@ -242,12 +247,11 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
 
     // --- KHỞI TẠO LỊCH CHỌN NGÀY (FLATPICKR) CHUẨN VIỆT NAM ---
     document.addEventListener('DOMContentLoaded', function() {
-        // Cấu hình chung cho Flatpickr
         const configDate = {
-            locale: "vn", // Hiển thị tiếng Việt
-            dateFormat: "Y-m-d", // Định dạng ngầm định gửi lên Server (giữ nguyên để Controller không lỗi)
-            altInput: true, // Hiển thị một ô input phụ
-            altFormat: "d/m/Y", // Hiển thị cho người dùng xem
+            locale: "vn",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
             allowInput: true,
         };
         
@@ -255,30 +259,26 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
             locale: "vn",
             enableTime: true,
             time_24hr: true,
-            dateFormat: "Y-m-d\\TH:i", // Định dạng ngầm định
+            dateFormat: "Y-m-d\\TH:i",
             altInput: true,
-            altFormat: "d/m/Y H:i", // Hiển thị cho người dùng
+            altFormat: "d/m/Y H:i",
             allowInput: true,
         };
 
-        // Khởi tạo các ô input
         const fpNgayBatDau = flatpickr("#ngay_bat_dau", configDate);
         const fpNgayKetThuc = flatpickr("#ngay_ket_thuc", configDate);
         const fpMoDK = flatpickr("#thoi_gian_mo_dk", configDateTime);
         const fpDongDK = flatpickr("#thoi_gian_dong_dk", configDateTime);
 
-        // Tự động tính toán thời gian khi chọn Ngày bắt đầu
         fpNgayBatDau.config.onChange.push(function(selectedDates, dateStr) {
             if (selectedDates.length > 0) {
                 const ngayBatDauObj = selectedDates[0];
 
-                // Đóng ĐK: Lùi 7 ngày so với ngày bắt đầu, đặt 23:59
                 const ngayDongDKObj = new Date(ngayBatDauObj);
                 ngayDongDKObj.setDate(ngayDongDKObj.getDate() - 7);
                 ngayDongDKObj.setHours(23, 59, 0);
                 fpDongDK.setDate(ngayDongDKObj);
 
-                // Mở ĐK: Lùi 14 ngày so với ngày bắt đầu, đặt 08:00
                 const ngayMoDKObj = new Date(ngayBatDauObj);
                 ngayMoDKObj.setDate(ngayMoDKObj.getDate() - 14);
                 ngayMoDKObj.setHours(8, 0, 0);
