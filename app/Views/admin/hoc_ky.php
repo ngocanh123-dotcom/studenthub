@@ -175,7 +175,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                             </a>
                                         </div>
                                     </td>
-                                    
+
                                     <td>
                                         <?php if (!empty($hk['thoi_gian_mo_dk'])): ?>
                                             <?= date('d/m/Y H:i', strtotime($hk['thoi_gian_mo_dk'])) ?>
@@ -191,7 +191,7 @@ function e($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_ky.php" style="margin:0;">
+                                        <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_ky.php" style="margin: 0;">
                                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                             <input type="hidden" name="hanh_dong" value="toggle_status">
                                             <input type="hidden" name="id" value="<?= (int) $hk['id'] ?>">
