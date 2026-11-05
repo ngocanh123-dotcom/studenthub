@@ -392,21 +392,19 @@ class AdminLopHocPhanController {
      * Cầu dao Mở / Khóa trạng thái lớp học phần (Bắt buộc cho Demo Kịch bản Mục H)
      */
     public function toggleStatus(): void {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        if (!in_array($method, ['POST', 'GET'], true)) {
-            header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
-            exit;
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            http_response_code(405);
+            exit('Phương thức không được phép');
         }
 
-        // Kiểm tra CSRF token trên POST (hoặc trên GET nếu có gửi kèm)
-        $csrf = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? null);
-        if ($method === 'POST' || $csrf !== null) {
-            if (!$csrf || !hash_equals((string)($_SESSION['csrf_token'] ?? ''), (string)$csrf)) {
-                die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
-            }
+        // [BUG-07 Hotfix] Xác thực CSRF bắt buộc trên POST
+        $csrf = (string)($_POST['csrf_token'] ?? '');
+        if (!hash_equals((string)($_SESSION['csrf_token'] ?? ''), $csrf)) {
+            http_response_code(403);
+            die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
-        $id = (int)($_POST['id'] ?? ($_GET['id'] ?? 0));
+        $id = (int)($_POST['id'] ?? 0);
         $class = $this->model->getClassById($id);
         $redirectUrl = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/studenthub/public/index.php?route=admin_lop_hoc_phan.php';
 

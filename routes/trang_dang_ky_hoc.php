@@ -4,6 +4,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$role = strtolower(trim((string)($_SESSION['role'] ?? ($_SESSION['vai_tro'] ?? ''))));
+if (!in_array($role, ['sinhvien', 'sinh_vien'], true)) {
+    header('Location: /studenthub/public/index.php');
+    exit('Vui lòng đăng nhập tài khoản sinh viên.');
+}
+
 $sinhVienId = (int)($_SESSION['nguoi_dung_id'] ?? $_SESSION['user_id'] ?? 0);
 // Tạo mã bảo mật cho thao tác hủy đăng ký
 if (empty($_SESSION['csrf_token'])) {
@@ -52,6 +58,17 @@ $danhSachLop = [];
 $cacLopDaDangKy = [];
 $cacHocPhanDaDangKy = [];
 $loi = '';
+$thongBaoHuy = (string)($_GET['huy'] ?? '');
+if ($thongBaoHuy !== '') {
+    $dsThongBaoHuy = [
+        'thanh_cong' => 'Hủy đăng ký học phần thành công!',
+        'da_het_thoi_han_huy' => 'Đã hết thời hạn hủy học phần. Cổng đăng ký của lớp hoặc học kỳ đã đóng.',
+        'khong_tim_thay_dang_ky' => 'Không tìm thấy thông tin đăng ký để hủy.',
+        'lop_khong_hop_le' => 'Lớp học phần không hợp lệ.',
+        'loi_he_thong' => 'Lỗi hệ thống khi hủy đăng ký.',
+    ];
+    $loi = $dsThongBaoHuy[$thongBaoHuy] ?? 'Thông báo: ' . $thongBaoHuy;
+}
 
 try {
     $sql = "
@@ -696,31 +713,54 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                         </td>
                         <td><span class="registration-status registration-status-registered">Đã đăng ký</span></td>
                         <td>
-                         <form
-    method="POST"
-    action="/studenthub/public/index.php?route=huy_dang_ky_hoc.php"
-    onsubmit="return xacNhanHuyDangKy(this, <?= json_encode($lop['ten_hoc_phan'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>)"
-    style="margin:0;"
->
-    <input
-        type="hidden"
-        name="lop_hoc_phan_id"
-        value="<?= $idLop ?>"
-    >
+                        <?php
+                            $thoiGianDong = !empty($lop['thoi_gian_dong_rieng']) ? $lop['thoi_gian_dong_rieng'] : ($lop['thoi_gian_dong_dk'] ?? null);
+                            $tsDong = !empty($thoiGianDong) ? strtotime($thoiGianDong) : null;
+                            $conTrongHan = ($tsDong !== null) ? (time() <= $tsDong) : true;
+                        ?>
+                        <?php if ($conTrongHan): ?>
+                            <form
+                                method="POST"
+                                action="/studenthub/public/index.php?route=huy_dang_ky_hoc.php"
+                                onsubmit="return xacNhanHuyDangKy(this, <?= json_encode($lop['ten_hoc_phan'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>)"
+                                style="margin:0;"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="lop_hoc_phan_id"
+                                    value="<?= $idLop ?>"
+                                >
 
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= hienThi($csrfToken) ?>"
-    >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= hienThi($csrfToken) ?>"
+                                >
 
-    <button
-        type="submit"
-        class="registration-button registration-button-cancel"
-    >
-        Hủy đăng ký
-    </button>
-</form>
+                                <button
+                                    type="submit"
+                                    class="registration-button registration-button-cancel"
+                                >
+                                    Hủy đăng ký
+                                </button>
+                            </form>
+                            <?php if ($tsDong !== null): ?>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px; white-space: nowrap;">
+                                    Hạn hủy: <?= date('d/m/Y H:i', $tsDong) ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <button
+                                type="button"
+                                class="registration-button registration-button-disabled"
+                                disabled
+                            >
+                                Không thể hủy
+                            </button>
+                            <div style="font-size: 11px; color: #dc2626; margin-top: 4px; font-weight: 600; white-space: nowrap;">
+                                Đã hết hạn hủy
+                            </div>
+                        <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

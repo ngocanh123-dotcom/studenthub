@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -127,11 +126,49 @@ try {
 
     /**
      * Chỉ hủy đăng ký của sinh viên đang đăng nhập.
-     * Không xóa bản ghi, chỉ đổi trạng thái thành da_huy.
      */
+    // [BUG-06 Hotfix] Kiểm tra trạng thái lớp và thời hạn hủy đăng ký
+    $stmtCheck = $pdo->prepare("
+        SELECT lhp.id, lhp.trang_thai, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
+               hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
+        FROM lop_hoc_phan lhp
+        INNER JOIN hoc_ky hk ON hk.id = lhp.hoc_ky_id
+        WHERE lhp.id = :lop_id
+        LIMIT 1
+    ");
+    $stmtCheck->execute(['lop_id' => $lopId]);
+    $lopCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+    if (!$lopCheck) {
+        quayLaiDanhSach('lop_khong_hop_le');
+    }
+
+    if (strtolower(trim((string)$lopCheck['trang_thai'])) !== 'mo') {
+        quayLaiDanhSach('da_het_thoi_han_huy');
+    }
+
+    $now = new DateTimeImmutable();
+    $coHanRieng = !empty($lopCheck['thoi_gian_mo_rieng']) || !empty($lopCheck['thoi_gian_dong_rieng']);
+    if ($coHanRieng) {
+        $dongRieng = !empty($lopCheck['thoi_gian_dong_rieng']) ? new DateTimeImmutable($lopCheck['thoi_gian_dong_rieng']) : null;
+        if ($dongRieng && $now > $dongRieng) {
+            quayLaiDanhSach('da_het_thoi_han_huy');
+        }
+    } else {
+        if ((int)($lopCheck['trang_thai_dang_ky'] ?? 0) !== 1) {
+            quayLaiDanhSach('da_het_thoi_han_huy');
+        }
+        $dongHK = !empty($lopCheck['thoi_gian_dong_dk']) ? new DateTimeImmutable($lopCheck['thoi_gian_dong_dk']) : null;
+        if ($dongHK && $now > $dongHK) {
+            quayLaiDanhSach('da_het_thoi_han_huy');
+        }
+    }
+
+    // Không xóa bản ghi, chỉ đổi trạng thái thành da_huy và cập nhật thời gian hủy.
     $stmt = $pdo->prepare("
         UPDATE dang_ky_hoc
-        SET trang_thai = 'da_huy'
+        SET trang_thai = 'da_huy',
+            ngay_huy = NOW()
         WHERE lop_hoc_phan_id = :lop_id
           AND sinh_vien_id = :sinh_vien_id
           AND trang_thai = 'dang_ky'

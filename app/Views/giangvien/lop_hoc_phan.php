@@ -20,24 +20,10 @@ $username = $_SESSION['username'];
 // ==========================================
 // 2. KẾT NỐI CƠ SỞ DỮ LIỆU
 // ==========================================
-$host = 'localhost';
-$dbname = 'studenthub';
-$dbUser = 'root';
-$dbPass = '03112006';
+// [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
+require_once __DIR__ . '/../../../config/database.php';
 
-try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $dbUser,
-        $dbPass,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]
-    );
-} catch (PDOException $e) {
-    error_log($e->getMessage());
+if (!isset($pdo) || !($pdo instanceof PDO)) {
     exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
 }
 

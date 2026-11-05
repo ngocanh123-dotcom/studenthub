@@ -1,5 +1,25 @@
 <?php
 // app/Views/sinhvien/index.php
+// Khởi tạo phòng thủ cho dữ liệu tổng quan (BUG-05 Hotfix)
+if (!isset($dashboardData) || !is_array($dashboardData)) {
+    $dashboardData = [
+        'summary' => [
+            'so_lop_dang_mo' => 0,
+            'so_lop_da_dang_ky' => 0,
+            'tong_tin_chi_da_dk' => 0,
+        ],
+        'semester' => [
+            'ten_hoc_ky' => 'Học kỳ 1 (2026 - 2027)',
+            'trang_thai_dang_ky' => 'mo'
+        ],
+        'registered_classes' => [],
+        'open_classes' => [],
+        'registration_open' => true,
+    ];
+}
+if (!isset($dashboardError) || $dashboardError === null) {
+    $dashboardError = '';
+}
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,9 +34,9 @@ $hoTen = $_SESSION['ho_ten'] ?? $_SESSION['username'] ?? 'Sinh viên';
 $maSinhVien = $_SESSION['username'] ?? '';
 $hocKyHienTai = $dashboardData['semester'] ?? null;
 $cacLopMo = $dashboardData['open_classes'] ?? [];
-$soLopDangMo = count($cacLopMo);
-$soLopDaDangKy = $dashboardData['registered_classes'] ?? null;
-$soTinChiDaDangKy = $dashboardData['registered_credits'] ?? null;
+$soLopDangMo = count($cacLopMo) ?: ($dashboardData['summary']['so_lop_dang_mo'] ?? 0);
+$soLopDaDangKy = is_array($dashboardData['registered_classes'] ?? null) ? count($dashboardData['registered_classes']) : ($dashboardData['registered_classes'] ?? ($dashboardData['summary']['so_lop_da_dang_ky'] ?? null));
+$soTinChiDaDangKy = $dashboardData['registered_credits'] ?? ($dashboardData['summary']['tong_tin_chi_da_dk'] ?? null);
 $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
 ?>
 <!DOCTYPE html>
@@ -83,19 +103,6 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                     <span>Đăng ký học phần</span>
-                </a>
-
-                <a href="/studenthub/public/index.php?route=chi_tiet_lop_hoc_phan.php&id=1"
-                   class="sh-nav-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                    <span>Chi tiết lớp học phần</span>
                 </a>
 
                 <a href="/studenthub/public/index.php?route=lich_su_dang_ky.php"

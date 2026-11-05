@@ -388,7 +388,7 @@
 
             <div class="sidebar-category-title">CỔNG SINH VIÊN</div>
             <nav class="sidebar-menu-list">
-                <a href="/studenthub/app/Views/sinhvien/index.php" class="sh-nav-item">
+                <a href="/studenthub/public/index.php?route=sinh_vien.php" class="sh-nav-item">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
@@ -535,7 +535,7 @@
 
             <!-- THANH TÌM KIẾM & BỘ LỌC -->
             <form method="GET" action="/studenthub/public/index.php" class="filter-bar">
-                <input type="hidden" name="route" value="danh_sach_lop_hoc_phan.php">
+
                 <input type="hidden" name="route" value="danh_sach_lop_hoc_phan">
                 <input type="text" name="tu_khoa" class="input-control"
                        placeholder="Tìm mã HP, tên môn học (có thể để trống để lọc theo học kỳ)..."
@@ -697,7 +697,7 @@
 
                                         <!-- Cột 4: Nút Chi tiết (Truyền đúng ID của từng lớp) -->
                                         <div class="class-col-actions">
-                                            <a href="/studenthub/app/Views/classes/detail.php?id=<?= (int)$lop['id'] ?>" class="btn-detail-main" title="Xem chi tiết lớp học phần">
+                                            <a href="/studenthub/public/index.php?route=chi_tiet_lop_hoc_phan.php&id=<?= (int)$lop['id'] ?>" class="btn-detail-main" title="Xem chi tiết lớp học phần">
                                                 <i class="fa-regular fa-eye" style="color:#2563eb;"></i> Chi tiết
                                             </a>
                                         </div>

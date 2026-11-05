@@ -4,6 +4,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// [L5 Hotfix] Điều hướng an toàn về trang đăng ký học phần chính thức
+header('Location: /studenthub/public/index.php?route=trang_dang_ky_hoc.php');
+exit;
+
 require_once __DIR__ . '/../app/Controllers/DangKyHocController.php';
 
 // Tạo mã bảo vệ biểu mẫu
