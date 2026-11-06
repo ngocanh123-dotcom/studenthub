@@ -13,10 +13,10 @@ return [
 
     // Tài khoản Gmail và Mật khẩu ứng dụng 16 ký tự của Google
     // Cách tạo App Password: myaccount.google.com/apppasswords
-    'username'   => 'huyennguyensocute.06@gmail.com', // Email dùng để gửi
-    'password'   => 'xdsi zpyn hfyd rrev', // Mật khẩu ứng dụng 16 ký tự của Google
+    'username'   => 'adminstudenthub738@gmail.com', // Email dùng để gửi
+    'password'   => 'moia sjpq unzk crsz', // Mật khẩu ứng dụng 16 ký tự của Google
 
     // Thông tin người gửi hiển thị
-    'from_email' => 'huyennguyensocute.06@gmail.com',
+    'from_email' => 'adminstudenthub738@gmail.com',
     'from_name'  => 'Cổng đào tạo StudentHub',
 ];
