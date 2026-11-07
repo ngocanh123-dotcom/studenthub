@@ -30,7 +30,7 @@ class AdminLopHocPhanModel {
                     lhp.thoi_gian_dong_rieng,
                     lhp.lich_hoc,
                     lhp.phong_hoc,
-                    lhp.ngay_tao,
+                    NULL AS ngay_tao,
                     hp.ma_hoc_phan,
                     hp.ten_hoc_phan,
                     hp.so_tin_chi,

@@ -111,7 +111,7 @@ $lichHoc            = (string)($lop['lich_hoc'] ?? 'Chưa có lịch học cố 
 $phongHoc           = (string)($lop['phong_hoc'] ?? 'Chưa cập nhật phòng học');
 $ngayBatDau         = $lop['ngay_bat_dau'] ?? null;
 $ngayKetThuc        = $lop['ngay_ket_thuc'] ?? null;
-$dieuKienTienQuyet  = (string)($lop['dieu_kien_tien_quyet'] ?? 'Không có');
+
 $moTaHocPhan        = (string)($lop['mo_ta_hoc_phan'] ?? ($lop['mo_ta'] ?? 'Chưa có đề cương chi tiết cho học phần này.'));
 $ngayDangKyCuaBan   = $lop['ngay_dang_ky_cua_ban'] ?? null;
 
@@ -277,10 +277,7 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                 <h3 class="box-title">Đề cương &amp; Yêu cầu học thuật</h3>
                 
                 <div class="syllabus-grid">
-                    <div class="syl-row">
-                        <span class="syl-label">Điều kiện tiên quyết:</span>
-                        <span class="syl-content"><?= htmlspecialchars($dieuKienTienQuyet, ENT_QUOTES, 'UTF-8') ?></span>
-                    </div>
+                    
                     <div class="syl-row">
                         <span class="syl-label">Mục tiêu học phần:</span>
                         <span class="syl-content"><?= nl2br(htmlspecialchars($moTaHocPhan, ENT_QUOTES, 'UTF-8')) ?></span>

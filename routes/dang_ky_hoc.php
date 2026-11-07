@@ -1,12 +1,95 @@
 <?php
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once __DIR__ . '/../app/Core/ClassSchedule.php';
 
 /**
- * [TC 4] Kiểm tra phiên đăng nhập ($_SESSION['user_id'] và $_SESSION['vai_tro'] === 'sinh_vien').
- * Nếu chưa đăng nhập hoặc không phải sinh viên, lập tức dừng xử lý và chuyển hướng về trang login.
+ * Phân tích lịch học theo thứ và tiết.
+ *
+ * Ví dụ:
+ * Thứ 3 và Thứ 5, tiết 1-3
+ *
+ * Quy ước:
+ * Thứ 2 = 1
+ * Thứ 3 = 2
+ * ...
+ * Thứ 7 = 6
+ * Chủ nhật = 7
+ */
+function phanTichLichHoc(string $lichHoc): ?array
+{
+    preg_match_all('/Thứ\s*([2-7])/iu', $lichHoc, $matches);
+
+    $cacThu = [];
+
+    foreach ($matches[1] as $thu) {
+        $cacThu[] = (int) $thu - 1;
+    }
+
+    if (preg_match('/Chủ\s*nhật/iu', $lichHoc)) {
+        $cacThu[] = 7;
+    }
+
+    if (empty($cacThu)) {
+        return null;
+    }
+
+    if (
+        !preg_match(
+            '/tiết\s*(\d+)\s*(?:-|–|đến)\s*(?:tiết\s*)?(\d+)/iu',
+            $lichHoc,
+            $tiet
+        )
+    ) {
+        return null;
+    }
+
+    $batDau = (int) $tiet[1];
+    $ketThuc = (int) $tiet[2];
+
+    if (
+        $batDau < 1
+        || $ketThuc < $batDau
+        || $ketThuc > 12
+    ) {
+        return null;
+    }
+
+    return [
+        'thu' => array_values(array_unique($cacThu)),
+        'bat_dau' => $batDau,
+        'ket_thuc' => $ketThuc
+    ];
+}
+
+/**
+ * Kiểm tra hai lịch học có trùng thứ và tiết hay không.
+ */
+function kiemTraTrungLich(string $lichA, string $lichB): bool
+{
+    $a = phanTichLichHoc($lichA);
+    $b = phanTichLichHoc($lichB);
+
+    if ($a === null || $b === null) {
+        return false;
+    }
+
+    $trungThu = count(array_intersect(
+        $a['thu'],
+        $b['thu']
+    )) > 0;
+
+    $trungTiet = (
+        $a['bat_dau'] <= $b['ket_thuc']
+        && $b['bat_dau'] <= $a['ket_thuc']
+    );
+
+    return $trungThu && $trungTiet;
+}
+
+/**
+ * Xác định sinh viên đăng nhập.
  */
 $sinhVienId = (int) (
     $_SESSION['user_id']
@@ -20,33 +103,46 @@ $vaiTro = strtolower(trim((string) (
     ?? ''
 )));
 
-if ($sinhVienId <= 0 || !in_array($vaiTro, ['sinh_vien', 'sinhvien'], true)) {
+if (
+    $sinhVienId <= 0
+    || !in_array($vaiTro, ['sinh_vien', 'sinhvien'], true)
+) {
     header('Location: /studenthub/public/index.php');
     exit;
 }
 
 /**
- * [TC 8] Bảo mật CSRF Token: Kiểm tra mã CSRF trên mọi form gửi phương thức POST.
+ * Chỉ cho phép gửi biểu mẫu bằng POST.
  */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     exit('Phương thức không hợp lệ. Hãy gửi biểu mẫu đăng ký.');
 }
 
+/**
+ * Kiểm tra CSRF.
+ */
+$csrfSession = (string) ($_SESSION['csrf_token'] ?? '');
+$csrfPost = (string) ($_POST['csrf_token'] ?? '');
+
 if (
-    !isset($_POST['csrf_token'])
-    || !hash_equals((string) ($_SESSION['csrf_token'] ?? ''), (string) $_POST['csrf_token'])
+    $csrfSession === ''
+    || $csrfPost === ''
+    || !hash_equals($csrfSession, $csrfPost)
 ) {
     http_response_code(403);
     exit('Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.');
 }
 
 /**
- * [TC 5] Kiểm soát dữ liệu: Sĩ số tối đa (si_so_toi_da) và số chỗ còn lại BẮT BUỘC phải được tính toán
- * trực tiếp từ CSDL. Tuyệt đối KHÔNG nhận bất kỳ tham số sĩ số nào từ $_GET hoặc $_POST.
- * Chỉ nhận duy nhất mã lớp học phần từ biểu mẫu POST.
+ * Chỉ nhận mã lớp học phần từ POST.
  */
-$lopId = filter_input(INPUT_POST, 'lop_hoc_phan_id', FILTER_VALIDATE_INT);
+$lopId = filter_input(
+    INPUT_POST,
+    'lop_hoc_phan_id',
+    FILTER_VALIDATE_INT
+);
+
 $thongBao = '';
 $loaiThongBao = 'error';
 
@@ -56,7 +152,9 @@ if (!$lopId || $lopId <= 0) {
     $pdo = null;
 
     try {
-        // Tìm file kết nối database của dự án.
+        /**
+         * Tìm file kết nối database.
+         */
         $duongDanKetNoi = [
             __DIR__ . '/../config/database.php',
             __DIR__ . '/../config/Database.php',
@@ -71,7 +169,9 @@ if (!$lopId || $lopId <= 0) {
             }
         }
 
-        // Lấy kết nối PDO hiện có.
+        /**
+         * Lấy kết nối PDO hiện có.
+         */
         $pdo = $pdo ?? $conn ?? $db ?? null;
 
         if (!$pdo instanceof PDO && class_exists('Database')) {
@@ -82,7 +182,9 @@ if (!$lopId || $lopId <= 0) {
             }
         }
 
-        // Dự phòng nếu dự án chưa tạo kết nối PDO.
+        /**
+         * Kết nối dự phòng nếu chưa có PDO.
+         */
         if (!$pdo instanceof PDO) {
             $pdo = new PDO(
                 'mysql:host=localhost;dbname=studenthub;charset=utf8mb4',
@@ -106,17 +208,37 @@ if (!$lopId || $lopId <= 0) {
             PDO::FETCH_ASSOC
         );
 
-        // Bắt đầu giao dịch bảo vệ toàn vẹn dữ liệu
+        /**
+         * Bắt đầu giao dịch.
+         */
         $pdo->beginTransaction();
 
-        // [TC 1 & TC 5]: Lấy thông tin lớp học phần trực tiếp từ CSDL (khóa dòng FOR UPDATE)
+        /**
+         * Lấy thông tin lớp học phần.
+         */
         $stmtLop = $pdo->prepare("
-            SELECT lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.trang_thai, 
-                   lhp.si_so_toi_da, lhp.lich_hoc, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
-                   hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
-            FROM lop_hoc_phan lhp
-            INNER JOIN hoc_ky hk ON hk.id = lhp.hoc_ky_id
+            SELECT
+                lhp.id,
+                lhp.ma_lop,
+                lhp.hoc_phan_id,
+                lhp.hoc_ky_id,
+                lhp.trang_thai,
+                lhp.si_so_toi_da,
+                lhp.lich_hoc,
+                lhp.thoi_gian_mo_rieng,
+                lhp.thoi_gian_dong_rieng,
+
+                hk.trang_thai_dang_ky,
+                hk.thoi_gian_mo_dk,
+                hk.thoi_gian_dong_dk
+
+            FROM lop_hoc_phan AS lhp
+
+            INNER JOIN hoc_ky AS hk
+                ON hk.id = lhp.hoc_ky_id
+
             WHERE lhp.id = :lop_id
+
             LIMIT 1
             FOR UPDATE
         ");
@@ -133,80 +255,128 @@ if (!$lopId || $lopId <= 0) {
             );
         }
 
-        // [TC 2]: Kiểm tra trùng lớp bằng câu truy vấn nghiệp vụ chuẩn:
-        // SELECT COUNT(*) FROM dang_ky_hoc WHERE sinh_vien_id = :sv_id AND lop_hoc_phan_id = :lhp_id AND trang_thai = 'dang_ky'
+        /**
+         * Kiểm tra sinh viên đã đăng ký lớp này chưa.
+         */
         $stmtCheckTrung = $pdo->prepare("
             SELECT COUNT(*)
+
             FROM dang_ky_hoc
+
             WHERE sinh_vien_id = :sv_id
               AND lop_hoc_phan_id = :lhp_id
               AND trang_thai = 'dang_ky'
         ");
 
         $stmtCheckTrung->execute([
-            'sv_id'  => $sinhVienId,
+            'sv_id' => $sinhVienId,
             'lhp_id' => $lopId
         ]);
 
         $daDangKyLopNay = (int) $stmtCheckTrung->fetchColumn();
 
-        // Kiểm tra sinh viên đã đăng ký mã học phần này ở một lớp khác hay chưa
+        /**
+         * Kiểm tra đăng ký trùng học phần
+         * trong cùng một học kỳ.
+         */
         $stmtTrungHocPhan = $pdo->prepare("
-            SELECT dk.id, lhp.ma_lop
+            SELECT
+                dk.id,
+                lhp.ma_lop
+
             FROM dang_ky_hoc AS dk
+
             INNER JOIN lop_hoc_phan AS lhp
                 ON lhp.id = dk.lop_hoc_phan_id
+
             WHERE dk.sinh_vien_id = :sv_id
               AND lhp.hoc_phan_id = :hoc_phan_id
+              AND lhp.hoc_ky_id = :hoc_ky_id
               AND dk.trang_thai = 'dang_ky'
               AND dk.lop_hoc_phan_id <> :lop_id
+
             LIMIT 1
         ");
 
         $stmtTrungHocPhan->execute([
-            'sv_id'       => $sinhVienId,
+            'sv_id' => $sinhVienId,
             'hoc_phan_id' => $lop['hoc_phan_id'],
-            'lop_id'      => $lopId
+            'hoc_ky_id' => $lop['hoc_ky_id'],
+            'lop_id' => $lopId
         ]);
 
         $lopTrungHocPhan = $stmtTrungHocPhan->fetch();
 
-        // Compare parsed weekdays and lesson periods, not raw schedule strings.
+        /**
+         * Kiểm tra lịch học của lớp mới.
+         */
+        $lichHocMoi = trim((string) ($lop['lich_hoc'] ?? ''));
+
+        $lichMoiHopLe = (
+            phanTichLichHoc($lichHocMoi) !== null
+        );
+
         $lopTrungLich = null;
         $lopLichChuaRo = null;
-        $lichHocMoi = (string)($lop['lich_hoc'] ?? '');
-        $lichHocMoiPhanTich = ClassSchedule::parse($lichHocMoi);
-        if ($lichHocMoiPhanTich !== null) {
-            $stmtTrungLich = $pdo->prepare("
-                SELECT lhp.ma_lop, lhp.lich_hoc
-                FROM dang_ky_hoc AS dk
-                INNER JOIN lop_hoc_phan AS lhp ON lhp.id = dk.lop_hoc_phan_id
-                WHERE dk.sinh_vien_id = :sv_id
-                  AND lhp.hoc_ky_id = :hoc_ky_id
-                  AND dk.trang_thai = 'dang_ky'
-                  AND dk.lop_hoc_phan_id <> :lop_id
-            ");
-            $stmtTrungLich->execute([
-                'sv_id' => $sinhVienId,
-                'hoc_ky_id' => $lop['hoc_ky_id'],
-                'lop_id' => $lopId
-            ]);
-            foreach ($stmtTrungLich->fetchAll(PDO::FETCH_ASSOC) as $lopDaDangKy) {
-                if (ClassSchedule::parse((string)($lopDaDangKy['lich_hoc'] ?? '')) === null) {
+
+        /**
+         * Lấy các lớp sinh viên đã đăng ký
+         * trong cùng học kỳ để kiểm tra trùng lịch.
+         */
+        $stmtTrungLich = $pdo->prepare("
+            SELECT
+                lhp.ma_lop,
+                lhp.lich_hoc
+
+            FROM dang_ky_hoc AS dk
+
+            INNER JOIN lop_hoc_phan AS lhp
+                ON lhp.id = dk.lop_hoc_phan_id
+
+            WHERE dk.sinh_vien_id = :sv_id
+              AND lhp.hoc_ky_id = :hoc_ky_id
+              AND dk.trang_thai = 'dang_ky'
+              AND dk.lop_hoc_phan_id <> :lop_id
+        ");
+
+        $stmtTrungLich->execute([
+            'sv_id' => $sinhVienId,
+            'hoc_ky_id' => $lop['hoc_ky_id'],
+            'lop_id' => $lopId
+        ]);
+
+        $cacLopDaDangKy = $stmtTrungLich->fetchAll();
+
+        if (!$lichMoiHopLe) {
+            $lopLichChuaRo = [
+                'ma_lop' => $lop['ma_lop']
+            ];
+        } else {
+            foreach ($cacLopDaDangKy as $lopDaDangKy) {
+                $lichCu = trim(
+                    (string) ($lopDaDangKy['lich_hoc'] ?? '')
+                );
+
+                if (phanTichLichHoc($lichCu) === null) {
                     $lopLichChuaRo = $lopDaDangKy;
                     break;
                 }
-                if (ClassSchedule::overlaps($lichHocMoi, (string)($lopDaDangKy['lich_hoc'] ?? ''))) {
+
+                if (kiemTraTrungLich($lichHocMoi, $lichCu)) {
                     $lopTrungLich = $lopDaDangKy;
                     break;
                 }
             }
         }
 
-        // [TC 3 & TC 5]: Đếm sĩ số hiện tại của lớp trực tiếp từ CSDL
+        /**
+         * Đếm sĩ số hiện tại từ database.
+         */
         $stmtSiSo = $pdo->prepare("
             SELECT COUNT(*)
+
             FROM dang_ky_hoc
+
             WHERE lop_hoc_phan_id = :lhp_id
               AND trang_thai = 'dang_ky'
         ");
@@ -218,43 +388,77 @@ if (!$lopId || $lopId <= 0) {
         $siSoHienTai = (int) $stmtSiSo->fetchColumn();
         $siSoToiDa = (int) $lop['si_so_toi_da'];
 
-        // [TC 1]: Kiểm tra khung thời gian mở đăng ký
+        /**
+         * Kiểm tra thời gian mở đăng ký.
+         *
+         * Nếu thời gian riêng của lớp là NULL,
+         * lấy mốc thời gian tương ứng từ học kỳ.
+         */
         $now = new DateTimeImmutable();
-        $coHanRieng = !empty($lop['thoi_gian_mo_rieng']) || !empty($lop['thoi_gian_dong_rieng']);
+
+        $moDangKy = !empty($lop['thoi_gian_mo_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_mo_rieng'])
+            : (
+                !empty($lop['thoi_gian_mo_dk'])
+                    ? new DateTimeImmutable($lop['thoi_gian_mo_dk'])
+                    : null
+            );
+
+        $dongDangKy = !empty($lop['thoi_gian_dong_rieng'])
+            ? new DateTimeImmutable($lop['thoi_gian_dong_rieng'])
+            : (
+                !empty($lop['thoi_gian_dong_dk'])
+                    ? new DateTimeImmutable($lop['thoi_gian_dong_dk'])
+                    : null
+            );
+
+        /**
+         * Nếu lớp không có bất kỳ mốc thời gian riêng nào,
+         * phải kiểm tra trạng thái mở đăng ký của học kỳ.
+         *
+         * Nếu có ít nhất một mốc riêng thì dùng thời gian
+         * riêng và mốc còn thiếu sẽ kế thừa từ học kỳ.
+         */
+        $coThoiGianRieng = (
+            !empty($lop['thoi_gian_mo_rieng'])
+            || !empty($lop['thoi_gian_dong_rieng'])
+        );
+
         $trongHanDangKy = true;
         $lyDoHetHan = '';
 
-        if ($coHanRieng) {
-            $moRieng = !empty($lop['thoi_gian_mo_rieng']) ? new DateTimeImmutable($lop['thoi_gian_mo_rieng']) : null;
-            $dongRieng = !empty($lop['thoi_gian_dong_rieng']) ? new DateTimeImmutable($lop['thoi_gian_dong_rieng']) : null;
-            if (($moRieng && $now < $moRieng) || ($dongRieng && $now > $dongRieng)) {
+        if (!$coThoiGianRieng) {
+            if ((int) $lop['trang_thai_dang_ky'] !== 1) {
                 $trongHanDangKy = false;
-                $lyDoHetHan = 'Hiện không nằm trong thời gian mở đăng ký riêng của lớp học phần này.';
-            }
-        } else {
-            if ((int)$lop['trang_thai_dang_ky'] !== 1) {
-                $trongHanDangKy = false;
+
                 $lyDoHetHan = 'Cổng đăng ký của học kỳ hiện đang đóng.';
-            } else {
-                $moHK = !empty($lop['thoi_gian_mo_dk']) ? new DateTimeImmutable($lop['thoi_gian_mo_dk']) : null;
-                $dongHK = !empty($lop['thoi_gian_dong_dk']) ? new DateTimeImmutable($lop['thoi_gian_dong_dk']) : null;
-                if (($moHK && $now < $moHK) || ($dongHK && $now > $dongHK)) {
-                    $trongHanDangKy = false;
-                    $lyDoHetHan = 'Hiện không nằm trong khung thời gian đăng ký của học kỳ.';
-                }
             }
         }
 
-        // [TC 2]: Kiểm tra nếu đã đăng ký lớp này rồi
+        if ($trongHanDangKy) {
+            if ($moDangKy && $now < $moDangKy) {
+                $trongHanDangKy = false;
+
+                $lyDoHetHan = 'Chưa đến thời gian mở đăng ký lớp học phần này.';
+            } elseif ($dongDangKy && $now > $dongDangKy) {
+                $trongHanDangKy = false;
+
+                $lyDoHetHan = 'Đã hết thời gian đăng ký lớp học phần này.';
+            }
+        }
+
+        /**
+         * Kiểm tra các điều kiện đăng ký.
+         */
         if ($daDangKyLopNay > 0) {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
 
         } elseif ($lopTrungHocPhan) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
                 . $lopTrungHocPhan['ma_lop']
-                . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần.';
+                . '. Bạn không thể đăng ký thêm lớp khác của cùng học phần trong học kỳ này.';
 
-        } elseif ($lichHocMoiPhanTich === null) {
+        } elseif (!$lichMoiHopLe) {
             $thongBao = 'Lớp học phần này chưa có lịch học hợp lệ nên chưa thể kiểm tra trùng lịch. Vui lòng liên hệ phòng đào tạo để cập nhật lịch.';
 
         } elseif ($lopLichChuaRo) {
@@ -269,62 +473,90 @@ if (!$lopId || $lopId <= 0) {
                 . $lopTrungLich['lich_hoc']
                 . '). Vui lòng chọn lớp có lịch khác.';
 
-        } elseif (strtolower(trim((string) $lop['trang_thai'])) !== 'mo') {
+        } elseif (
+            strtolower(trim((string) $lop['trang_thai'])) !== 'mo'
+        ) {
             $thongBao = 'Lớp học phần hiện không mở đăng ký.';
 
         } elseif (!$trongHanDangKy) {
             $thongBao = $lyDoHetHan;
 
-        // [TC 3]: Kiểm tra đầy sĩ số (si_so_hien_tai >= si_so_toi_da)
-        } elseif ($siSoToiDa > 0 && $siSoHienTai >= $siSoToiDa) {
+        } elseif (
+            $siSoToiDa > 0
+            && $siSoHienTai >= $siSoToiDa
+        ) {
             $thongBao = 'Lớp học phần đã đủ sĩ số.';
 
         } else {
-            // [TC 1]: Khi thỏa mãn toàn bộ điều kiện -> Đăng ký thành công!
+            /**
+             * Kiểm tra bản ghi đăng ký cũ.
+             */
             $stmtDangKyCu = $pdo->prepare("
                 SELECT id
+
                 FROM dang_ky_hoc
+
                 WHERE sinh_vien_id = :sv_id
                   AND lop_hoc_phan_id = :lhp_id
+
                 ORDER BY id DESC
+
                 LIMIT 1
             ");
+
             $stmtDangKyCu->execute([
-                'sv_id'  => $sinhVienId,
+                'sv_id' => $sinhVienId,
                 'lhp_id' => $lopId
             ]);
+
             $banGhiCu = $stmtDangKyCu->fetch();
 
             if ($banGhiCu) {
-                // Khôi phục bản ghi nếu sinh viên từng hủy lớp này
+                /**
+                 * Khôi phục bản ghi nếu từng hủy lớp.
+                 */
                 $stmt = $pdo->prepare("
                     UPDATE dang_ky_hoc
-                    SET trang_thai = 'dang_ky',
+
+                    SET
+                        trang_thai = 'dang_ky',
                         ngay_dang_ky = NOW(),
                         ngay_huy = NULL
+
                     WHERE id = :id
                       AND sinh_vien_id = :sv_id
                       AND lop_hoc_phan_id = :lop_id
                 ");
 
                 $stmt->execute([
-                    'id'     => $banGhiCu['id'],
-                    'sv_id'  => $sinhVienId,
+                    'id' => $banGhiCu['id'],
+                    'sv_id' => $sinhVienId,
                     'lop_id' => $lopId
                 ]);
 
             } else {
-                // Tạo đúng một bản ghi mới; bảng có unique (sinh_vien_id, lop_hoc_phan_id).
+                /**
+                 * Tạo bản ghi đăng ký mới.
+                 */
                 $stmt = $pdo->prepare("
-                    INSERT INTO dang_ky_hoc
-                        (lop_hoc_phan_id, sinh_vien_id, trang_thai, ngay_dang_ky)
-                    VALUES
-                        (:lop_id, :sv_id, 'dang_ky', NOW())
+                    INSERT INTO dang_ky_hoc (
+                        lop_hoc_phan_id,
+                        sinh_vien_id,
+                        trang_thai,
+                        ngay_dang_ky
+                    )
+
+                    VALUES (
+                        :lop_id,
+                        :sv_id,
+                        'dang_ky',
+                        NOW()
+                    )
                 ");
 
                 $stmt->execute([
                     'lop_id' => $lopId,
-                    'sv_id'  => $sinhVienId
+                    'sv_id' => $sinhVienId
                 ]);
             }
 
@@ -332,6 +564,9 @@ if (!$lopId || $lopId <= 0) {
             $loaiThongBao = 'success';
         }
 
+        /**
+         * Hoàn tất giao dịch.
+         */
         $pdo->commit();
 
     } catch (Throwable $e) {
@@ -348,15 +583,22 @@ if (!$lopId || $lopId <= 0) {
         );
 
         $thongBao = 'Không thể xử lý đăng ký. Hãy kiểm tra cấu hình và dữ liệu cơ sở dữ liệu.';
+        $loaiThongBao = 'error';
     }
 }
+
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Kết quả đăng ký | StudentHub</title>
 
@@ -434,11 +676,17 @@ if (!$lopId || $lopId <= 0) {
             background: #edf3fb;
             color: #1769d2;
         }
+
+        a:hover {
+            opacity: .9;
+        }
     </style>
 </head>
 
 <body>
+
     <main class="card">
+
         <div class="icon">
             <?= $loaiThongBao === 'success' ? '✓' : '!' ?>
         </div>
@@ -458,6 +706,7 @@ if (!$lopId || $lopId <= 0) {
         </p>
 
         <div class="actions">
+
             <a
                 class="primary"
                 href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php"
@@ -465,17 +714,16 @@ if (!$lopId || $lopId <= 0) {
                 Quay lại chọn lớp học phần
             </a>
 
-
-         
-
             <a
                 class="secondary"
                 href="/studenthub/public/index.php?route=lich_su_dang_ky.php"
             >
-
                 Xem lịch sử đăng ký
             </a>
+
         </div>
+
     </main>
+
 </body>
 </html>
