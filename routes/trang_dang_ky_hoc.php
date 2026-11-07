@@ -60,6 +60,7 @@ $cacLopDaDangKy = [];
 $cacHocPhanDaDangKy = [];
 $lopDaDangKyTheoHocPhan = [];
 $lichHocDaDangKy = [];
+$hocKy2DangMo = false;
 $loi = '';
 $thongBaoHuy = (string)($_GET['huy'] ?? '');
 if ($thongBaoHuy !== '') {
@@ -110,6 +111,18 @@ try {
 
     $danhSachLop = $pdo->query($sql)->fetchAll();
 
+    $dsHocKy = $pdo->query("
+        SELECT ten_hoc_ky, trang_thai_dang_ky
+        FROM hoc_ky
+        ORDER BY id DESC
+    ")->fetchAll();
+    foreach ($dsHocKy as $hocKy) {
+        if (preg_match('/(?:học\s*kỳ|học\s*kì|hk)\s*(?:2|ii)\b/iu', (string)$hocKy['ten_hoc_ky'])) {
+            $hocKy2DangMo = (int)$hocKy['trang_thai_dang_ky'] === 1;
+            break;
+        }
+    }
+
     if ($sinhVienId > 0) {
         $stmt = $pdo->prepare("
             SELECT dkh.lop_hoc_phan_id, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.ma_lop, lhp.lich_hoc
@@ -129,6 +142,28 @@ try {
 } catch (PDOException $e) {
     error_log('StudentHub: ' . $e->getMessage());
     $loi = 'Không thể tải danh sách lớp học phần. Hãy kiểm tra lại cơ sở dữ liệu.';
+}
+
+$danhSachLopHienThi = array_values(array_filter(
+    $danhSachLop,
+    static function (array $lop) use ($hocKy2DangMo): bool {
+        $tenHocKy = (string)($lop['ten_hoc_ky'] ?? '');
+        if (preg_match('/(?:học\s*kỳ|học\s*kì|hk)\s*1\b/iu', $tenHocKy)) {
+            return !$hocKy2DangMo;
+        }
+        if (preg_match('/(?:học\s*kỳ|học\s*kì|hk)\s*(?:2|ii)\b/iu', $tenHocKy)) {
+            return $hocKy2DangMo;
+        }
+        return true;
+    }
+));
+$soLopChuaDangKyHienThi = 0;
+$lopHienThiIds = [];
+foreach ($danhSachLopHienThi as $lop) {
+    $lopHienThiIds[(int)$lop['id']] = true;
+    if (!in_array((int)$lop['id'], $cacLopDaDangKy, true)) {
+        $soLopChuaDangKyHienThi++;
+    }
 }
 
 $soLopMo = 0;
@@ -169,6 +204,7 @@ foreach ($danhSachLop as $lop) {
         && $toiDa > 0
         && $siSo < $toiDa
         && $trongHanDangKy
+        && isset($lopHienThiIds[$id])
         && !in_array((int) $lop['hoc_phan_id'], $cacHocPhanDaDangKy, true)
     ) {
         $soLopMo++;
@@ -872,7 +908,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
         <div class="registration-section-title">
             <span class="registration-section-dot"></span>
             Lớp học phần có thể đăng ký
-            <span class="registration-count"><?= count($danhSachLop) - $soLopDaDangKy ?></span>
+            <span class="registration-count"><?= $soLopChuaDangKyHienThi ?></span>
         </div>
 
         <div class="registration-table-wrap">
@@ -892,7 +928,7 @@ require_once __DIR__ . '/../app/Views/layouts/header.php';
                 <tbody id="availableList">
                 <?php
                 $coLopChuaDangKy = false;
-                foreach ($danhSachLop as $lop):
+                foreach ($danhSachLopHienThi as $lop):
                     $idLop = (int)$lop['id'];
 
                     if (in_array($idLop, $cacLopDaDangKy, true)) {
