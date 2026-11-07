@@ -43,7 +43,6 @@ CREATE TABLE `hoc_phan` (
     `ma_hoc_phan` VARCHAR(20) NOT NULL,
     `ten_hoc_phan` VARCHAR(150) NOT NULL,
     `so_tin_chi` INT NOT NULL,
-    `loai_hoc_phan` ENUM('dai_cuong', 'co_so_nganh', 'chuyen_nganh') NOT NULL DEFAULT 'co_so_nganh',
     `hoc_phan_tien_quyet_id` INT NULL,
     `mo_ta` TEXT NULL,
     `dieu_kien_tien_quyet` VARCHAR(255) NOT NULL DEFAULT 'Không có',
