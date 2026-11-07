@@ -43,6 +43,18 @@
             font-size: 11.5px;
             font-weight: 700;
         }
+        .badge-status-pending {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
         .capacity-bar-wrap {
             width: 110px;
             height: 6px;
@@ -302,11 +314,11 @@
 
                 <div class="stat-card green">
                     <div class="stat-top">
-                        <span class="stat-label">LỚP ĐANG MỞ ĐĂNG KÝ</span>
+                        <span class="stat-label">LỚP ĐANG KHẢ DỤNG</span>
                         <div class="stat-icon">✓</div>
                     </div>
                     <h3><?= (int)($statistics['lop_dang_mo'] ?? 0) ?></h3>
-                    <p>Sinh viên có thể đăng ký bình thường</p>
+                    <p>Sẵn sàng ghi danh khi học kỳ mở cổng</p>
                 </div>
 
                 <div class="stat-card orange">
@@ -467,6 +479,7 @@
                                     $percent = ($siSoToiDa > 0) ? min(100, round(($siSoHienTai / $siSoToiDa) * 100)) : 0;
                                     $isFull = ($conLai === 0);
                                     $isLocked = ($c['trang_thai'] === 'khoa');
+                                    $isSemesterOpen = (int)($c['trang_thai_dang_ky'] ?? 0) === 1;
                                 ?>
                                 <tr>
                                     <!-- Mã lớp -->
@@ -531,10 +544,12 @@
 
                                     <!-- Huy hiệu Trạng thái -->
                                     <td style="text-align: center;">
-                                        <?php if (!$isLocked): ?>
-                                            <span class="badge-status-open">● Đang mở</span>
-                                        <?php else: ?>
+                                        <?php if ($isLocked): ?>
                                             <span class="badge-status-locked">● Đã khóa</span>
+                                        <?php elseif (!$isSemesterOpen): ?>
+                                            <span class="badge-status-pending">● Chờ mở kỳ</span>
+                                        <?php else: ?>
+                                            <span class="badge-status-open">● Đang mở</span>
                                         <?php endif; ?>
                                     </td>
 

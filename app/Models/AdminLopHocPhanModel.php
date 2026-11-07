@@ -35,6 +35,7 @@ class AdminLopHocPhanModel {
                     hp.ten_hoc_phan,
                     hp.so_tin_chi,
                     hk.ten_hoc_ky,
+                    hk.trang_thai_dang_ky,
                     hk.thoi_gian_mo_dk,
                     hk.thoi_gian_dong_dk,
                     gv.ho_ten AS ten_giang_vien,
