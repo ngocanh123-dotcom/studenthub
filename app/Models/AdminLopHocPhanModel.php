@@ -19,7 +19,8 @@ class AdminLopHocPhanModel {
      */
     public function getAllClasses(array $filters = []): array {
         $sql = "SELECT 
-                    lhp.id,
+                    lhp.id AS id,
+                    lhp.id AS lop_hoc_phan_id,
                     lhp.ma_lop,
                     lhp.hoc_phan_id,
                     lhp.hoc_ky_id,
@@ -106,6 +107,8 @@ class AdminLopHocPhanModel {
     public function getClassById(int $id): ?array {
         $sql = "SELECT 
                     lhp.*,
+                    lhp.id AS id,
+                    lhp.id AS lop_hoc_phan_id,
                     hp.ma_hoc_phan,
                     hp.ten_hoc_phan,
                     hp.so_tin_chi,

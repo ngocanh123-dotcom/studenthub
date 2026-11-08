@@ -294,9 +294,7 @@ Về các ràng buộc dữ liệu, bảng sử dụng khóa chính `id` để t
   * `ten_hoc_phan`: Tên môn học hiển thị (VARCHAR(150), NOT NULL).
   * `so_tin_chi`: Số lượng tín chỉ tích lũy (INT, NOT NULL).
   * `loai_hoc_phan`: Phân loại khối kiến thức (ENUM: `'dai_cuong'`, `'co_so_nganh'`, `'chuyen_nganh'`).
-  * `hoc_phan_tien_quyet_id`: Khóa ngoại tự tham chiếu (Self-referencing Foreign Key) trỏ về chính `hoc_phan(id)` để xác định điều kiện tiên quyết trước khi đăng ký.
 * **Hệ thống ràng buộc toàn vẹn (Constraints):**
   * `PRIMARY KEY`: Đảm bảo định danh duy nhất cho từng bản ghi học phần.
   * `UNIQUE KEY`: Ràng buộc `ma_hoc_phan` không được phép trùng lặp trong toàn trường.
   * `CHECK (so_tin_chi > 0)`: Ngăn chặn nhập liệu số tín chỉ âm hoặc bằng 0.
-  * `FOREIGN KEY (hoc_phan_tien_quyet_id)`: Thiết lập toàn vẹn tham chiếu nội bộ với cơ chế `ON DELETE SET NULL`.

@@ -111,7 +111,15 @@ $lichHoc            = (string)($lop['lich_hoc'] ?? 'Chưa có lịch học cố 
 $phongHoc           = (string)($lop['phong_hoc'] ?? 'Chưa cập nhật phòng học');
 $ngayBatDau         = $lop['ngay_bat_dau'] ?? null;
 $ngayKetThuc        = $lop['ngay_ket_thuc'] ?? null;
-
+$loaiHocPhan        = $class['loai_hoc_phan'] ?? $lop['loai_hoc_phan'] ?? ($classInfo['loai_hoc_phan'] ?? ($hocPhan['loai_hoc_phan'] ?? 'Chuyên ngành'));
+$loaiHocPhanMap     = [
+    'dai_cuong'    => 'Đại cương',
+    'co_so_nganh'  => 'Cơ sở ngành',
+    'chuyen_nganh' => 'Chuyên ngành'
+];
+if (isset($loaiHocPhanMap[$loaiHocPhan])) {
+    $loaiHocPhan = $loaiHocPhanMap[$loaiHocPhan];
+}
 $moTaHocPhan        = (string)($lop['mo_ta_hoc_phan'] ?? ($lop['mo_ta'] ?? 'Chưa có đề cương chi tiết cho học phần này.'));
 $ngayDangKyCuaBan   = $lop['ngay_dang_ky_cua_ban'] ?? null;
 
@@ -177,15 +185,25 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
             <!-- 1. Header Môn & Trạng thái -->
             <div class="overview-header-flex">
                 <div>
-                    <span class="code-pill-blue"><?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?></span>
+
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <span class="code-pill-blue" style="margin-bottom: 0;"><?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="badge-knowledge" style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
+                            <?= htmlspecialchars($loaiHocPhan) ?>
+                        </span>
+                    </div>
                     <h2 class="class-title"><?= htmlspecialchars($tenHocPhan, ENT_QUOTES, 'UTF-8') ?></h2>
                     <p class="meta-tag-sub">
                         Mã học phần: <strong><?= htmlspecialchars($maHocPhan, ENT_QUOTES, 'UTF-8') ?></strong> 
                         &nbsp;•&nbsp; Khối lượng: <strong><?= $soTinChi ?> Tín chỉ</strong>
+                        &nbsp;•&nbsp; Khối kiến thức: <strong><?= htmlspecialchars($loaiHocPhan) ?></strong>
                         &nbsp;•&nbsp; Học kỳ: <strong><?= htmlspecialchars($tenHocKy, ENT_QUOTES, 'UTF-8') ?></strong>
                     </p>
                 </div>
                 <div>
+
+
                     <?php if ($trangThaiLop === 'mo' && $conLai > 0): ?>
                         <span class="badge-status-open">● Đang mở đăng ký</span>
                     <?php elseif ($trangThaiLop === 'mo' && $conLai <= 0): ?>
@@ -257,6 +275,8 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                         <div class="enroll-badge-success">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <div>
+
+
                                 <strong style="display:block; margin-bottom:2px;">Bạn đã đăng ký lớp học phần này thành công!</strong>
                                 <span style="font-size:12.5px;">Thời gian ghi danh: <strong><?= date('d/m/Y \l\ú\c H:i:s', strtotime($ngayDangKyCuaBan)) ?></strong> (Suất học hợp lệ trên hệ thống).</span>
                             </div>
@@ -265,6 +285,8 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                         <div class="enroll-badge-neutral">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                             <div>
+
+
                                 <span>Bạn hiện chưa đăng ký lớp học phần này. Để ghi danh tín chỉ, vui lòng chuyển sang cổng <strong>Đăng ký học phần</strong>.</span>
                             </div>
                         </div>
@@ -277,7 +299,7 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                 <h3 class="box-title">Đề cương &amp; Yêu cầu học thuật</h3>
                 
                 <div class="syllabus-grid">
-                    
+
                     <div class="syl-row">
                         <span class="syl-label">Mục tiêu học phần:</span>
                         <span class="syl-content"><?= nl2br(htmlspecialchars($moTaHocPhan, ENT_QUOTES, 'UTF-8')) ?></span>

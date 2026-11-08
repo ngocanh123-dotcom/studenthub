@@ -384,7 +384,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="feature-content">
                         <strong>Thời khóa biểu &amp; Tiến độ học tập</strong>
-                        <p>Tích hợp đề cương học phần, kiểm soát điều kiện tiên quyết và cảnh báo học vụ chuẩn xác.</p>
+                        <p>Tích hợp đề cương học phần và cảnh báo học vụ chuẩn xác.</p>
                     </div>
                 </div>
             </div>
