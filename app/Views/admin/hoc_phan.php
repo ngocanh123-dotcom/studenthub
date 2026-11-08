@@ -1,394 +1,25 @@
-
 <?php
-session_start();
-
-// KIỂM TRA ĐĂNG NHẬP ADMIN
-if (empty($_SESSION['username'])) {
-    header('Location: ../../../public/index.php');
-    exit;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$vaiTroSession = strtolower(trim((string) ($_SESSION['role'] ?? '')));
-
-if (!in_array($vaiTroSession, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
-    header('Location: ../../../public/index.php');
+// Nếu view được gọi trực tiếp mà chưa qua Controller nạp dữ liệu, ủy quyền xử lý cho HocPhanController
+if (!isset($danhSach) || !isset($tongHocPhan)) {
+    require_once __DIR__ . '/../../../config/database.php';
+    require_once __DIR__ . '/../../Controllers/HocPhanController.php';
+    $controller = new HocPhanController($pdo ?? $conn);
+    $controller->index();
     exit;
 }
-
-require_once __DIR__ . '/../../../config/database.php';
 
 // Hàm hiển thị dữ liệu an toàn
-function e($value): string
-{
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-}
-
-// TẠO CSRF TOKEN
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-$thongBao = '';
-$loaiThongBao = 'success';
-$loi = '';
-
-$tuKhoa = trim($_GET['q'] ?? '');
-
-// CẤU HÌNH PHÂN TRANG
-$soDongMoiTrang = 8;
-$trangHienTai = max(1, (int) ($_GET['page'] ?? 1));
-
-$duLieuSua = [
-    'id' => '',
-    'ma_hoc_phan' => '',
-    'ten_hoc_phan' => '',
-    'so_tin_chi' => '',
-    'loai_hoc_phan' => 'dai_cuong',
-    'mo_ta' => ''
-];
-
-// =====================================================
-// XỬ LÝ THÊM, SỬA, XÓA
-// =====================================================
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfNhan = $_POST['csrf_token'] ?? '';
-
-    if (
-        !is_string($csrfNhan) ||
-        !hash_equals($_SESSION['csrf_token'], $csrfNhan)
-    ) {
-        $thongBao = 'Phiên làm việc không hợp lệ. Vui lòng tải lại trang.';
-        $loaiThongBao = 'error';
-    } else {
-        $hanhDong = $_POST['hanh_dong'] ?? '';
-
-        try {
-            // THÊM HOẶC SỬA HỌC PHẦN
-            if ($hanhDong === 'them' || $hanhDong === 'sua') {
-                $id = (int) ($_POST['id'] ?? 0);
-                $maHocPhan = strtoupper(trim($_POST['ma_hoc_phan'] ?? ''));
-                $tenHocPhan = trim($_POST['ten_hoc_phan'] ?? '');
-                $soTinChiNhap = trim((string) ($_POST['so_tin_chi'] ?? ''));
-                $loaiHocPhanNhap = trim((string)($_POST['loai_hoc_phan'] ?? 'dai_cuong'));
-                $loaiHocPhanMap = [
-                    'Đại cương' => 'dai_cuong',
-                    'Cơ sở ngành' => 'co_so_nganh',
-                    'Chuyên ngành' => 'chuyen_nganh',
-                    'dai_cuong' => 'dai_cuong',
-                    'co_so_nganh' => 'co_so_nganh',
-                    'chuyen_nganh' => 'chuyen_nganh'
-                ];
-                if (!isset($loaiHocPhanMap[$loaiHocPhanNhap])) {
-                    throw new RuntimeException('Loại học phần không hợp lệ.');
-                }
-                $loaiHocPhan = $loaiHocPhanMap[$loaiHocPhanNhap];
-
-                $moTa = trim($_POST['mo_ta'] ?? '');
-
-                $duLieuSua = [
-                    'id' => $id,
-                    'ma_hoc_phan' => $maHocPhan,
-                    'ten_hoc_phan' => $tenHocPhan,
-                    'so_tin_chi' => $soTinChiNhap,
-                    'loai_hoc_phan' => $loaiHocPhan,
-                    'mo_ta' => $moTa
-                ];
-
-                // Kiểm tra mã học phần
-                if (!preg_match('/^[A-Z0-9_-]{2,30}$/', $maHocPhan)) {
-                    throw new RuntimeException(
-                        'Mã học phần phải có 2–30 ký tự chữ, số, dấu gạch ngang hoặc gạch dưới.'
-                    );
-                }
-
-                // Kiểm tra tên học phần
-                if ($tenHocPhan === '') {
-                    throw new RuntimeException('Vui lòng nhập tên học phần.');
-                }
-
-                if (mb_strlen($tenHocPhan, 'UTF-8') > 150) {
-                    throw new RuntimeException('Tên học phần không được vượt quá 150 ký tự.');
-                }
-
-                if (
-                    $soTinChiNhap === '' ||
-                    !ctype_digit($soTinChiNhap) ||
-                    (int) $soTinChiNhap < 1 ||
-                    (int) $soTinChiNhap > 10
-                ) {
-                    throw new RuntimeException('Số tín chỉ phải là số nguyên từ 1 đến 10.');
-                }
-
-                $soTinChi = (int) $soTinChiNhap;
-
-                if ($hanhDong === 'sua' && $id <= 0) {
-                    throw new RuntimeException('Học phần cần sửa không hợp lệ.');
-                }
-
-                // KIỂM TRA MÃ HỌC PHẦN TRÙNG
-                $sqlTrung = "SELECT COUNT(*) FROM hoc_phan
-                             WHERE ma_hoc_phan = :ma";
-
-                $thamSoTrung = [':ma' => $maHocPhan];
-
-                if ($hanhDong === 'sua') {
-                    $sqlTrung .= " AND id <> :id";
-                    $thamSoTrung[':id'] = $id;
-                }
-
-                $stmt = $pdo->prepare($sqlTrung);
-                $stmt->execute($thamSoTrung);
-
-                if ((int) $stmt->fetchColumn() > 0) {
-                    throw new RuntimeException('Mã học phần đã tồn tại.');
-                }
-
-                // THÊM HỌC PHẦN
-                if ($hanhDong === 'them') {
-                    $stmt = $pdo->prepare(
-                        "INSERT INTO hoc_phan
-                            (
-                                ma_hoc_phan,
-                                ten_hoc_phan,
-                                so_tin_chi,
-                                loai_hoc_phan,
-                                mo_ta
-                            )
-                         VALUES
-                            (
-                                :ma,
-                                :ten,
-                                :so_tin_chi,
-                                :loai_hoc_phan,
-                                :mo_ta
-                            )"
-                    );
-
-                    $stmt->execute([
-                        ':ma' => $maHocPhan,
-                        ':ten' => $tenHocPhan,
-                        ':so_tin_chi' => $soTinChi,
-                        ':loai_hoc_phan' => $loaiHocPhan,
-                        ':mo_ta' => $moTa !== ''
-                            ? $moTa : null
-                    ]);
-
-                    $thongBao = 'Thêm học phần thành công.';
-                } else {
-                    // CẬP NHẬT HỌC PHẦN
-                    $stmt = $pdo->prepare(
-                        "UPDATE hoc_phan
-                         SET ma_hoc_phan = :ma,
-                             ten_hoc_phan = :ten,
-                             so_tin_chi = :so_tin_chi,
-                             loai_hoc_phan = :loai_hoc_phan,
-                             mo_ta = :mo_ta
-                         WHERE id = :id"
-                    );
-
-                    $stmt->execute([
-                        ':ma' => $maHocPhan,
-                        ':ten' => $tenHocPhan,
-                        ':so_tin_chi' => $soTinChi,
-                        ':loai_hoc_phan' => $loaiHocPhan,
-                        ':mo_ta' => $moTa !== ''
-                            ? $moTa : null,
-                        ':id' => $id
-                    ]);
-
-                    $thongBao = 'Cập nhật học phần thành công.';
-                }
-
-                $_SESSION['course_notice'] = $thongBao;
-                $_SESSION['course_notice_type'] = 'success';
-
-                header('Location: hoc_phan.php');
-                exit;
-            }
-
-            // XÓA HỌC PHẦN
-            if ($hanhDong === 'xoa') {
-                $idXoa = (int) ($_POST['id'] ?? 0);
-
-                if ($idXoa <= 0) {
-                    throw new RuntimeException('Mã học phần không hợp lệ.');
-                }
-
-                $stmt = $pdo->prepare(
-                    "SELECT id FROM hoc_phan
-                     WHERE id = :id
-                     LIMIT 1"
-                );
-
-                $stmt->execute([':id' => $idXoa]);
-
-                if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
-                    throw new RuntimeException('Không tìm thấy học phần cần xóa.');
-                }
-
-                // Không xóa nếu lớp học phần đang sử dụng học phần này
-                $stmt = $pdo->prepare(
-                    "SELECT COUNT(*) FROM lop_hoc_phan
-                     WHERE hoc_phan_id = :id"
-                );
-
-                $stmt->execute([':id' => $idXoa]);
-
-                if ((int) $stmt->fetchColumn() > 0) {
-                    throw new RuntimeException(
-                        'Không thể xóa học phần này vì đã có lớp học phần sử dụng. Hãy xử lý các lớp liên quan trước.'
-                    );
-                }
-
-                $stmt = $pdo->prepare(
-                    "DELETE FROM hoc_phan WHERE id = :id"
-                );
-
-                $stmt->execute([':id' => $idXoa]);
-
-                $_SESSION['course_notice'] = 'Xóa học phần thành công.';
-                $_SESSION['course_notice_type'] = 'success';
-
-                header('Location: hoc_phan.php');
-                exit;
-            }
-        } catch (RuntimeException $e) {
-            $thongBao = $e->getMessage();
-            $loaiThongBao = 'error';
-        } catch (PDOException $e) {
-            error_log('StudentHub Course: ' . $e->getMessage());
-
-            $thongBao = 'Không thể xử lý học phần. Hãy kiểm tra cấu trúc CSDL và các lớp học phần liên quan.';
-            $loaiThongBao = 'error';
-        }
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
-}
-
-// =====================================================
-// LẤY THÔNG BÁO SAU CHUYỂN HƯỚNG
-// =====================================================
-
-if (!empty($_SESSION['course_notice'])) {
-    $thongBao = $_SESSION['course_notice'];
-    $loaiThongBao = $_SESSION['course_notice_type'] ?? 'success';
-
-    unset($_SESSION['course_notice'], $_SESSION['course_notice_type']);
-}
-
-// =====================================================
-// LẤY DỮ LIỆU HỌC PHẦN CẦN SỬA
-// =====================================================
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
-    $idSua = (int) $_GET['sua'];
-
-    if ($idSua > 0) {
-        try {
-            $stmt = $pdo->prepare(
-                "SELECT
-                    id,
-                    ma_hoc_phan,
-                    ten_hoc_phan,
-                    so_tin_chi,
-                    loai_hoc_phan,
-                    mo_ta
-                 FROM hoc_phan
-                 WHERE id = :id
-                 LIMIT 1"
-            );
-
-            $stmt->execute([':id' => $idSua]);
-            $hocPhanSua = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($hocPhanSua) {
-                $duLieuSua = $hocPhanSua;
-            } else {
-                $thongBao = 'Không tìm thấy học phần cần sửa.';
-                $loaiThongBao = 'error';
-            }
-        } catch (PDOException $e) {
-            error_log('StudentHub Course Edit: ' . $e->getMessage());
-
-            $thongBao = 'Không thể tải thông tin học phần.';
-            $loaiThongBao = 'error';
-        }
-    }
-}
-
-// =====================================================
-// THỐNG KÊ VÀ LẤY DANH SÁCH HỌC PHẦN
-// =====================================================
-
-$danhSach = [];
-$tongHocPhan = 0;
-
-try {
-    $sql = "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi
-            FROM hoc_phan
-            WHERE 1 = 1";
-
-    $thamSo = [];
-    $where = '';
-
-    if ($tuKhoa !== '') {
-        $where = " WHERE (
-            ma_hoc_phan LIKE :q1
-            OR ten_hoc_phan LIKE :q2
-        )";
-
-        $tim = '%' . $tuKhoa . '%';
-
-        $thamSo[':q1'] = $tim;
-        $thamSo[':q2'] = $tim;
-    }
-
-    // ĐẾM KẾT QUẢ TÌM KIẾM
-    $sqlDem = "SELECT COUNT(*) FROM hoc_phan" . $where;
-
-    $stmtDem = $pdo->prepare($sqlDem);
-    $stmtDem->execute($thamSo);
-
-    $tongKetQua = (int) $stmtDem->fetchColumn();
-
-    // TÍNH SỐ TRANG
-    $tongTrang = max(1, (int) ceil($tongKetQua / $soDongMoiTrang));
-    $trangHienTai = min($trangHienTai, $tongTrang);
-
-    $viTriBatDau = ($trangHienTai - 1) * $soDongMoiTrang;
-
-    // LẤY DANH SÁCH
-    $sql = "SELECT
-                id,
-                ma_hoc_phan,
-                ten_hoc_phan,
-                so_tin_chi,
-                mo_ta
-            FROM hoc_phan
-            $where
-            ORDER BY id ASC
-            LIMIT :gioi_han OFFSET :vi_tri";
-
-    $stmt = $pdo->prepare($sql);
-
-    foreach ($thamSo as $key => $value) {
-        $stmt->bindValue($key, $value, PDO::PARAM_STR);
-    }
-
-    $stmt->bindValue(':gioi_han', $soDongMoiTrang, PDO::PARAM_INT);
-    $stmt->bindValue(':vi_tri', $viTriBatDau, PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    error_log('StudentHub Course List: ' . $e->getMessage());
-
-    $loi = 'Không thể tải danh sách học phần. Hãy kiểm tra bảng hoc_phan trong CSDL.';
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -397,7 +28,7 @@ try {
 
     <title>Quản lý học phần | StudentHub</title>
 
-    <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
+    <link rel="stylesheet" href="/studenthub/assets/css/quantrivien.css">
 
     <style>
         .course-summary {
@@ -821,7 +452,7 @@ try {
                     </div>
                 </div>
 
-                <form method="POST" action="hoc_phan.php" class="account-form">
+                <form method="POST" action="/studenthub/public/index.php?route=admin_hoc_phan" class="account-form">
 
                     <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
 
@@ -929,7 +560,7 @@ try {
                         </button>
 
                         <?php if (!empty($duLieuSua['id'])): ?>
-                            <a href="hoc_phan.php" class="btn-secondary">
+                            <a href="/studenthub/public/index.php?route=admin_hoc_phan" class="btn-secondary">
                                 Hủy sửa
                             </a>
                         <?php else: ?>
@@ -954,7 +585,8 @@ try {
                 </div>
 
                 <!-- TÌM KIẾM GIỐNG CODE CŨ -->
-                <form method="GET" action="hoc_phan.php" class="account-filters">
+                <form method="GET" action="/studenthub/public/index.php" class="account-filters">
+                    <input type="hidden" name="route" value="admin_hoc_phan">
 
                     <input
                         type="search"
@@ -968,7 +600,7 @@ try {
                         Tìm kiếm
                     </button>
 
-                    <a href="hoc_phan.php" class="btn-secondary">
+                    <a href="/studenthub/public/index.php?route=admin_hoc_phan" class="btn-secondary">
                         Làm mới
                     </a>
 
@@ -1043,7 +675,7 @@ try {
                                             <!-- SỬA -->
                                             <a
                                                 class="btn-edit"
-                                                href="hoc_phan.php?sua=<?= (int) $hp['id'] ?>"
+                                                href="/studenthub/public/index.php?route=admin_hoc_phan&sua=<?= (int) $hp['id'] ?>"
                                             >
                                                 Sửa
                                             </a>
@@ -1051,7 +683,7 @@ try {
                                             <!-- XÓA -->
                                             <form
                                                 method="POST"
-                                                action="hoc_phan.php"
+                                                action="/studenthub/public/index.php?route=admin_hoc_phan"
                                                 class="delete-form"
                                                 onsubmit="return confirm('Bạn có chắc muốn xóa học phần này?');"
                                             >
@@ -1109,7 +741,7 @@ try {
                         <div class="course-pagination-list">
 
                             <?php
-                            $queryTrang = [];
+                            $queryTrang = ['route' => 'admin_hoc_phan'];
 
                             if ($tuKhoa !== '') {
                                 $queryTrang['q'] = $tuKhoa;
@@ -1117,7 +749,7 @@ try {
                             ?>
 
                             <a
-                                href="?<?= e(http_build_query(array_merge(
+                                href="/studenthub/public/index.php?<?= e(http_build_query(array_merge(
                                     $queryTrang,
                                     ['page' => max(1, $trangHienTai - 1)]
                                 ))) ?>"
@@ -1129,7 +761,7 @@ try {
                             <?php for ($i = 1; $i <= $tongTrang; $i++): ?>
 
                                 <a
-                                    href="?<?= e(http_build_query(array_merge(
+                                    href="/studenthub/public/index.php?<?= e(http_build_query(array_merge(
                                         $queryTrang,
                                         ['page' => $i]
                                     ))) ?>"
@@ -1141,7 +773,7 @@ try {
                             <?php endfor; ?>
 
                             <a
-                                href="?<?= e(http_build_query(array_merge(
+                                href="/studenthub/public/index.php?<?= e(http_build_query(array_merge(
                                     $queryTrang,
                                     ['page' => min($tongTrang, $trangHienTai + 1)]
                                 ))) ?>"

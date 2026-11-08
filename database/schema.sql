@@ -1,9 +1,3 @@
--- =============================================================================
--- CSDL HỆ THỐNG QUẢN LÝ KHÓA HỌC VÀ ĐĂNG KÝ HỌC PHẦN (STUDENTHUB)
--- File: schema.sql (Thư mục database/)
--- Chuẩn kỹ thuật: MySQL 8.x / MariaDB, Bộ mã: utf8mb4 / utf8mb4_unicode_ci
--- =============================================================================
-
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. BẢNG NGƯỜI DÙNG (Tài khoản truy cập hệ thống)
@@ -44,6 +38,7 @@ CREATE TABLE `hoc_phan` (
     `ten_hoc_phan` VARCHAR(150) NOT NULL,
     `so_tin_chi` INT NOT NULL,
     `mo_ta` TEXT NULL,
+    `loai_hoc_phan` ENUM('dai_cuong', 'co_so_nganh', 'chuyen_nganh') NOT NULL DEFAULT 'dai_cuong',
     `ngay_tao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `uc_hoc_phan_ma` UNIQUE (`ma_hoc_phan`),
     CONSTRAINT `chk_hoc_phan_tin_chi` CHECK (`so_tin_chi` > 0)

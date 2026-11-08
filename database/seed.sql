@@ -73,36 +73,16 @@ INSERT INTO `hoc_ky` (`id`, `ten_hoc_ky`, `ngay_bat_dau`, `ngay_ket_thuc`, `thoi
 -- 3. BẢNG HỌC PHẦN (hoc_phan) - 10 HỌC PHẦN CHUẨN ĐẠI HỌC
 -- =============================================================================
 INSERT INTO `hoc_phan` (`id`, `ma_hoc_phan`, `ten_hoc_phan`, `so_tin_chi`, `loai_hoc_phan`, `mo_ta`) VALUES
-(1, 'MAT101', 'Toán Cao Cấp', 3, 'dai_cuong',
- 'Trang bị kiến thức nền tảng về phép tính vi tích phân, chuỗi số, ma trận định thức và hệ phương trình tuyến tính.'),
-
-(2, 'MAT205', 'Giải Tích Số', 3, 'co_so_nganh',
- 'Nghiên cứu các phương pháp giải gần đúng bài toán toán học: giải phương trình phi tuyến, hệ đại số tuyến tính, nội suy và xấp xỉ hàm số.'),
-
-(3, 'WEB102', 'Lập Trình Web Cơ Bản', 3, 'co_so_nganh',
- 'Nhập môn thiết kế giao diện web với HTML5, CSS3, JavaScript tương tác, kiến trúc phân tán client-server và giao thức HTTP cơ bản.'),
-
-(4, 'WEB201', 'Phát Triển Web Nâng Cao', 3, 'chuyen_nganh',
- 'Xây dựng ứng dụng web hiện đại theo mô hình MVC sử dụng PHP 8.x, MySQL, PDO Prepared Statements, RESTful API, tối ưu bảo mật CSRF/XSS.'),
-
-(5, 'DB101', 'Cơ Sở Dữ Liệu Quan Hệ', 3, 'co_so_nganh',
- 'Nắm vững mô hình quan hệ ERD, đại số quan hệ, ngôn ngữ truy vấn SQL từ cơ bản đến nâng cao, chuẩn hóa dữ liệu 1NF đến BCNF.'),
-
-(6, 'DSA102', 'Cấu Trúc Dữ Liệu & Giải Thuật', 4, 'co_so_nganh',
- 'Nghiên cứu các cấu trúc dữ liệu kinh điển: danh sách liên kết, ngăn xếp, hàng đợi, cây nhị phân, đồ thị và các giải thuật tìm kiếm, sắp xếp nâng cao.'),
-
-(7, 'NET101', 'Mạng Máy Tính Căn Bản', 3, 'co_so_nganh',
- 'Khái niệm mô hình OSI 7 tầng, bộ giao thức TCP/IP, định tuyến IP, phân mạng con subnet, cấu hình chuyển mạch Switch và Router.'),
-
-(8, 'SE201', 'Công Nghệ Phần Mềm', 3, 'chuyen_nganh',
- 'Quy trình phát triển phần mềm Agile/Scrum, phân tích yêu cầu SRS, mô hình hóa UML, thiết kế kiến trúc hệ thống và kiểm thử phần mềm.'),
-
-(9, 'AI301', 'Trí Tuệ Nhân Tạo & Học Máy', 3, 'chuyen_nganh',
- 'Phương pháp tìm kiếm không gian trạng thái, giải bài toán tối ưu, cây quyết định, mạng nơ-ron nhân tạo và ứng dụng xử lý dữ liệu học máy.'),
-
-(10, 'SEC201', 'An Toàn & Bảo Mật Thông Tin', 3, 'chuyen_nganh',
- 'Các kỹ thuật tấn công và phòng thủ mạng, mật mã học đối xứng và bất đối xứng, chứng thực số, chữ ký điện tử và tường lửa bảo mật.');
-
+(1, 'MAT101', 'Toán Cao Cấp', 3, 'dai_cuong', 'Trang bị kiến thức nền tảng về phép tính vi tích phân, chuỗi số, ma trận định thức và hệ phương trình tuyến tính.'),
+(2, 'MAT205', 'Giải Tích Số', 3, 'co_so_nganh', 'Nghiên cứu các phương pháp giải gần đúng bài toán toán học: giải phương trình phi tuyến, hệ đại số tuyến tính, nội suy và xấp xỉ hàm số.'),
+(3, 'WEB102', 'Lập Trình Web Cơ Bản', 3, 'co_so_nganh', 'Nhập môn thiết kế giao diện web với HTML5, CSS3, JavaScript tương tác, kiến trúc phân tán client-server và giao thức HTTP cơ bản.'),
+(4, 'WEB201', 'Phát Triển Web Nâng Cao', 3, 'chuyen_nganh', 'Xây dựng ứng dụng web hiện đại theo mô hình MVC sử dụng PHP 8.x, MySQL, PDO Prepared Statements, RESTful API, tối ưu bảo mật CSRF/XSS.'),
+(5, 'DB101', 'Cơ Sở Dữ Liệu Quan Hệ', 3, 'co_so_nganh', 'Nắm vững mô hình quan hệ ERD, đại số quan hệ, ngôn ngữ truy vấn SQL từ cơ bản đến nâng cao, chuẩn hóa dữ liệu 1NF đến BCNF.'),
+(6, 'DSA102', 'Cấu Trúc Dữ Liệu & Giải Thuật', 4, 'co_so_nganh', 'Nghiên cứu các cấu trúc dữ liệu kinh điển: danh sách liên kết, ngăn xếp, hàng đợi, cây nhị phân, đồ thị và các giải thuật tìm kiếm, sắp xếp nâng cao.'),
+(7, 'NET101', 'Mạng Máy Tính Căn Bản', 3, 'co_so_nganh', 'Khái niệm mô hình OSI 7 tầng, bộ giao thức TCP/IP, định tuyến IP, phân mạng con subnet, cấu hình chuyển mạch Switch và Router.'),
+(8, 'SE201', 'Công Nghệ Phần Mềm', 3, 'chuyen_nganh', 'Quy trình phát triển phần mềm Agile/Scrum, phân tích yêu cầu SRS, mô hình hóa UML, thiết kế kiến trúc hệ thống và kiểm thử phần mềm.'),
+(9, 'AI301', 'Trí Tuệ Nhân Tạo & Học Máy', 3, 'chuyen_nganh', 'Phương pháp tìm kiếm không gian trạng thái, giải bài toán tối ưu, cây quyết định, mạng nơ-ron nhân tạo và ứng dụng xử lý dữ liệu học máy.'),
+(10, 'SEC201', 'An Toàn & Bảo Mật Thông Tin', 3, 'chuyen_nganh', 'Các kỹ thuật tấn công và phòng thủ mạng, mật mã học đối xứng và bất đối xứng, chứng thực số, chữ ký điện tử và tường lửa bảo mật.');
 -- =============================================================================
 -- 4. BẢNG LỚP HỌC PHẦN (lop_hoc_phan) - 14 LỚP PHỤC VỤ TRỌN VẸN CÁC TEST CASES
 -- =============================================================================
@@ -219,4 +199,3 @@ INSERT INTO `dang_ky_hoc` (`id`, `sinh_vien_id`, `lop_hoc_phan_id`, `trang_thai`
 (37, 11, 12, 'da_huy', '2026-10-09 14:00:00', '2026-10-11 11:15:30');
 
 SET FOREIGN_KEY_CHECKS = 1;
->>>>>>> ecf41f69be407f3cf84945b67f61f8da7f50cd82

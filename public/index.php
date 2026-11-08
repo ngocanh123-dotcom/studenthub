@@ -47,12 +47,20 @@ switch ($route) {
     case 'sinh_vien.php':
         require_once __DIR__ . '/../routes/sinh_vien.php';
         exit;
+
     case 'quen_mat_khau':
     case 'quen_mat_khau.php':
         require_once __DIR__ . '/../app/Controllers/AuthController.php';
         $authController = new AuthController($pdo ?? null);
         $authController->quenMatKhau();
         exit;
+    case 'admin_hoc_phan':
+    case 'admin_hoc_phan.php':
+    case 'hoc_phan':
+    case 'hoc_phan.php':
+        require_once __DIR__ . '/../routes/admin_hoc_phan.php';
+        exit;
+
 }
 
 $publicRoutes = [
@@ -61,6 +69,10 @@ $publicRoutes = [
     'quen_mat_khau' => __DIR__ . '/../app/Views/auth/quen_mat_khau.php',
     'quen_mat_khau.php' => __DIR__ . '/../app/Views/auth/quen_mat_khau.php',
     'admin_hoc_ky.php' => __DIR__ . '/../routes/admin_hoc_ky.php',
+    'admin_hoc_phan' => __DIR__ . '/../routes/admin_hoc_phan.php',
+    'admin_hoc_phan.php' => __DIR__ . '/../routes/admin_hoc_phan.php',
+    'hoc_phan' => __DIR__ . '/../routes/admin_hoc_phan.php',
+    'hoc_phan.php' => __DIR__ . '/../routes/admin_hoc_phan.php',
     'admin_in_danh_sach_lop.php' => __DIR__ . '/../routes/admin_in_danh_sach_lop.php',
     'admin_lop_hoc_phan.php' => __DIR__ . '/../routes/admin_lop_hoc_phan.php',
     'api_huy_dang_ky.php' => __DIR__ . '/../routes/api_huy_dang_ky.php',
