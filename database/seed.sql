@@ -1,7 +1,7 @@
 
 -- DỮ LIỆU MẪU BỔ SUNG (Do Kim Anh thêm)
 -- ==========================================
-
+SET FOREIGN_KEY_CHECKS = 0;
 -- 1. Thêm 2 học kỳ mới
 INSERT INTO hoc_ky (ten_hoc_ky, ngay_bat_dau, ngay_ket_thuc, thoi_gian_mo_dk, thoi_gian_dong_dk, trang_thai_dang_ky) VALUES 
 ('Học kỳ Hè năm 2027', '2027-06-01', '2027-08-15', '2027-05-01 08:00:00', '2027-05-30 23:59:59', 0),
@@ -72,44 +72,44 @@ INSERT INTO `hoc_ky` (`id`, `ten_hoc_ky`, `ngay_bat_dau`, `ngay_ket_thuc`, `thoi
 -- =============================================================================
 -- 3. BẢNG HỌC PHẦN (hoc_phan) - 10 HỌC PHẦN CHUẨN ĐẠI HỌC CÓ TIÊN QUYẾT
 -- =============================================================================
-INSERT INTO `hoc_phan` (`id`, `ma_hoc_phan`, `ten_hoc_phan`, `so_tin_chi`, `hoc_phan_tien_quyet_id`, `mo_ta`, `dieu_kien_tien_quyet`) VALUES
-(1, 'MAT101', 'Toán Cao Cấp', 3, NULL, 
+INSERT INTO `hoc_phan` (`id`, `ma_hoc_phan`, `ten_hoc_phan`, `so_tin_chi`, `loai_hoc_phan`, `hoc_phan_tien_quyet_id`, `mo_ta`, `dieu_kien_tien_quyet`) VALUES
+(1, 'MAT101', 'Toán Cao Cấp', 3, 'dai_cuong', NULL, 
  'Trang bị kiến thức nền tảng về phép tính vi tích phân, chuỗi số, ma trận định thức và hệ phương trình tuyến tính.', 
  'Không có'),
 
-(2, 'MAT205', 'Giải Tích Số', 3, 1, 
+(2, 'MAT205', 'Giải Tích Số', 3, 'co_so_nganh', 1, 
  'Nghiên cứu các phương pháp giải gần đúng bài toán toán học: giải phương trình phi tuyến, hệ đại số tuyến tính, nội suy và xấp xỉ hàm số.', 
  'Toán Cao Cấp (MAT101)'),
 
-(3, 'WEB102', 'Lập Trình Web Cơ Bản', 3, NULL, 
+(3, 'WEB102', 'Lập Trình Web Cơ Bản', 3, 'co_so_nganh', NULL, 
  'Nhập môn thiết kế giao diện web với HTML5, CSS3, JavaScript tương tác, kiến trúc phân tán client-server và giao thức HTTP cơ bản.', 
  'Không có'),
 
-(4, 'WEB201', 'Phát Triển Web Nâng Cao', 3, 3, 
+(4, 'WEB201', 'Phát Triển Web Nâng Cao', 3, 'chuyen_nganh', 3, 
  'Xây dựng ứng dụng web hiện đại theo mô hình MVC sử dụng PHP 8.x, MySQL, PDO Prepared Statements, RESTful API, tối ưu bảo mật CSRF/XSS.', 
  'Lập Trình Web Cơ Bản (WEB102)'),
 
-(5, 'DB101', 'Cơ Sở Dữ Liệu Quan Hệ', 3, NULL, 
+(5, 'DB101', 'Cơ Sở Dữ Liệu Quan Hệ', 3, 'co_so_nganh', NULL, 
  'Nắm vững mô hình quan hệ ERD, đại số quan hệ, ngôn ngữ truy vấn SQL từ cơ bản đến nâng cao, chuẩn hóa dữ liệu 1NF đến BCNF.', 
  'Không có'),
 
-(6, 'DSA102', 'Cấu Trúc Dữ Liệu & Giải Thuật', 4, NULL, 
+(6, 'DSA102', 'Cấu Trúc Dữ Liệu & Giải Thuật', 4, 'co_so_nganh', NULL, 
  'Nghiên cứu các cấu trúc dữ liệu kinh điển: danh sách liên kết, ngăn xếp, hàng đợi, cây nhị phân, đồ thị và các giải thuật tìm kiếm, sắp xếp nâng cao.', 
  'Không có'),
 
-(7, 'NET101', 'Mạng Máy Tính Căn Bản', 3, NULL, 
+(7, 'NET101', 'Mạng Máy Tính Căn Bản', 3, 'co_so_nganh', NULL, 
  'Khái niệm mô hình OSI 7 tầng, bộ giao thức TCP/IP, định tuyến IP, phân mạng con subnet, cấu hình chuyển mạch Switch và Router.', 
  'Không có'),
 
-(8, 'SE201', 'Công Nghệ Phần Mềm', 3, 6, 
+(8, 'SE201', 'Công Nghệ Phần Mềm', 3, 'chuyen_nganh', 6, 
  'Quy trình phát triển phần mềm Agile/Scrum, phân tích yêu cầu SRS, mô hình hóa UML, thiết kế kiến trúc hệ thống và kiểm thử phần mềm.', 
  'Cấu Trúc Dữ Liệu & Giải Thuật (DSA102)'),
 
-(9, 'AI301', 'Trí Tuệ Nhân Tạo & Học Máy', 3, 6, 
+(9, 'AI301', 'Trí Tuệ Nhân Tạo & Học Máy', 3, 'chuyen_nganh', 6, 
  'Phương pháp tìm kiếm không gian trạng thái, giải bài toán tối ưu, cây quyết định, mạng nơ-ron nhân tạo và ứng dụng xử lý dữ liệu học máy.', 
  'Cấu Trúc Dữ Liệu & Giải Thuật (DSA102)'),
 
-(10, 'SEC201', 'An Toàn & Bảo Mật Thông Tin', 3, 7, 
+(10, 'SEC201', 'An Toàn & Bảo Mật Thông Tin', 3, 'chuyen_nganh', 7, 
  'Các kỹ thuật tấn công và phòng thủ mạng, mật mã học đối xứng và bất đối xứng, chứng thực số, chữ ký điện tử và tường lửa bảo mật.', 
  'Mạng Máy Tính Căn Bản (NET101)');
 

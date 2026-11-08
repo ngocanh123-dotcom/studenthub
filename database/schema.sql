@@ -45,7 +45,6 @@ CREATE TABLE `hoc_phan` (
     `so_tin_chi` INT NOT NULL,
     `hoc_phan_tien_quyet_id` INT NULL,
     `mo_ta` TEXT NULL,
-    `dieu_kien_tien_quyet` VARCHAR(255) NOT NULL DEFAULT 'Không có',
     `ngay_tao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `uc_hoc_phan_ma` UNIQUE (`ma_hoc_phan`),
     CONSTRAINT `chk_hoc_phan_tin_chi` CHECK (`so_tin_chi` > 0),

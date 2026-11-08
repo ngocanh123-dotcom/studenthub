@@ -33,7 +33,8 @@ $duLieuSua = [
     'ma_hoc_phan' => '',
     'ten_hoc_phan' => '',
     'so_tin_chi' => '',
-    'dieu_kien_tien_quyet' => '',
+    'loai_hoc_phan' => 'dai_cuong',
+    'hoc_phan_tien_quyet_id' => '',
     'mo_ta' => ''
 ];
 
@@ -53,9 +54,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $maHocPhan = strtoupper(trim($_POST['ma_hoc_phan'] ?? ''));
                 $tenHocPhan = trim($_POST['ten_hoc_phan'] ?? '');
                 $soTinChiNhap = trim((string) ($_POST['so_tin_chi'] ?? ''));
+                $loaiHocPhanNhap = trim((string)($_POST['loai_hoc_phan'] ?? 'dai_cuong'));
+                $loaiHocPhanMap = [
+                    'Đại cương' => 'dai_cuong',
+                    'Cơ sở ngành' => 'co_so_nganh',
+                    'Chuyên ngành' => 'chuyen_nganh',
+                    'dai_cuong' => 'dai_cuong',
+                    'co_so_nganh' => 'co_so_nganh',
+                    'chuyen_nganh' => 'chuyen_nganh'
+                ];
+                if (!isset($loaiHocPhanMap[$loaiHocPhanNhap])) {
+                    throw new RuntimeException('Loại học phần không hợp lệ.');
+                }
+                $loaiHocPhan = $loaiHocPhanMap[$loaiHocPhanNhap];
 
-                // Lấy thêm điều kiện tiên quyết và mô tả
-                $dieuKienTienQuyet = trim($_POST['dieu_kien_tien_quyet'] ?? '');
+                $hocPhanTienQuyetIdNhap = trim((string)($_POST['hoc_phan_tien_quyet_id'] ?? ''));
                 $moTa = trim($_POST['mo_ta'] ?? '');
 
                 $duLieuSua = [
@@ -63,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'ma_hoc_phan' => $maHocPhan,
                     'ten_hoc_phan' => $tenHocPhan,
                     'so_tin_chi' => $soTinChiNhap,
-                    'dieu_kien_tien_quyet' => $dieuKienTienQuyet,
+                    'loai_hoc_phan' => $loaiHocPhan,
+                    'hoc_phan_tien_quyet_id' => $hocPhanTienQuyetIdNhap,
                     'mo_ta' => $moTa
                 ];
 
@@ -81,13 +95,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Tên học phần không được vượt quá 150 ký tự.');
                 }
 
-                // Kiểm tra điều kiện tiên quyết
-                if (mb_strlen($dieuKienTienQuyet, 'UTF-8') > 255) {
-                    throw new RuntimeException(
-                        'Điều kiện tiên quyết không được vượt quá 255 ký tự.'
-                    );
-                }
+                $hocPhanTienQuyet = null;
+                if ($hocPhanTienQuyetIdNhap !== '') {
+                    if (!ctype_digit($hocPhanTienQuyetIdNhap) || (int)$hocPhanTienQuyetIdNhap <= 0) {
+                        throw new RuntimeException('Học phần tiên quyết không hợp lệ.');
+                    }
 
+                    $hocPhanTienQuyetId = (int)$hocPhanTienQuyetIdNhap;
+                    if ($hocPhanTienQuyetId === $id && $hanhDong === 'sua') {
+                        throw new RuntimeException('Học phần không thể là điều kiện tiên quyết của chính nó.');
+                    }
+
+                    $stmtTienQuyet = $pdo->prepare(
+                        "SELECT id, ma_hoc_phan, ten_hoc_phan
+                         FROM hoc_phan
+                         WHERE id = :id
+                         LIMIT 1"
+                    );
+                    $stmtTienQuyet->execute([':id' => $hocPhanTienQuyetId]);
+                    $hocPhanTienQuyet = $stmtTienQuyet->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$hocPhanTienQuyet) {
+                        throw new RuntimeException('Không tìm thấy học phần tiên quyết đã chọn.');
+                    }
+                }
                 if (
                     $soTinChiNhap === '' ||
                     !ctype_digit($soTinChiNhap) ||
@@ -131,7 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 ma_hoc_phan,
                                 ten_hoc_phan,
                                 so_tin_chi,
-                                dieu_kien_tien_quyet,
+                                loai_hoc_phan,
+                                hoc_phan_tien_quyet_id,
                                 mo_ta
                             )
                          VALUES
@@ -139,7 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 :ma,
                                 :ten,
                                 :so_tin_chi,
-                                :dieu_kien_tien_quyet,
+                                :loai_hoc_phan,
+                                :hoc_phan_tien_quyet_id,
                                 :mo_ta
                             )"
                     );
@@ -148,8 +181,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
-                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
-                            ? $dieuKienTienQuyet : null,
+                        ':loai_hoc_phan' => $loaiHocPhan,
+                        ':hoc_phan_tien_quyet_id' => $hocPhanTienQuyet
+                            ? (int)$hocPhanTienQuyet['id'] : null,
                         ':mo_ta' => $moTa !== ''
                             ? $moTa : null
                     ]);
@@ -162,7 +196,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                          SET ma_hoc_phan = :ma,
                              ten_hoc_phan = :ten,
                              so_tin_chi = :so_tin_chi,
-                             dieu_kien_tien_quyet = :dieu_kien_tien_quyet,
+                             loai_hoc_phan = :loai_hoc_phan,
+                             hoc_phan_tien_quyet_id = :hoc_phan_tien_quyet_id,
                              mo_ta = :mo_ta
                          WHERE id = :id"
                     );
@@ -171,8 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ma' => $maHocPhan,
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
-                        ':dieu_kien_tien_quyet' => $dieuKienTienQuyet !== ''
-                            ? $dieuKienTienQuyet : null,
+                        ':loai_hoc_phan' => $loaiHocPhan,
+                        ':hoc_phan_tien_quyet_id' => $hocPhanTienQuyet
+                            ? (int)$hocPhanTienQuyet['id'] : null,
                         ':mo_ta' => $moTa !== ''
                             ? $moTa : null,
                         ':id' => $id
@@ -262,7 +298,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
                     ma_hoc_phan,
                     ten_hoc_phan,
                     so_tin_chi,
-                    dieu_kien_tien_quyet,
+                    loai_hoc_phan,
+                    hoc_phan_tien_quyet_id,
                     mo_ta
                  FROM hoc_phan
                  WHERE id = :id
@@ -289,10 +326,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
 
 // Lấy danh sách học phần
 $danhSach = [];
+$danhSachHocPhanTienQuyet = [];
 $tongHocPhan = 0;
 
 try {
-    $sql = "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi
+    $stmtTienQuyet = $pdo->query(
+        "SELECT id, ma_hoc_phan, ten_hoc_phan
+         FROM hoc_phan
+         ORDER BY ma_hoc_phan ASC"
+    );
+    $danhSachHocPhanTienQuyet = $stmtTienQuyet->fetchAll(PDO::FETCH_ASSOC);
+
+    $sql = "SELECT id, ma_hoc_phan, ten_hoc_phan, so_tin_chi, loai_hoc_phan
             FROM hoc_phan
             WHERE 1 = 1";
 
@@ -438,17 +483,33 @@ function e($value)
                             >
                         </div>
 
-                        <!-- BỔ SUNG: ĐIỀU KIỆN TIÊN QUYẾT -->
+                        <div class="form-field">
+                            <label for="loai_hoc_phan">Khối kiến thức (Loại học phần) <span>*</span></label>
+                            <select id="loai_hoc_phan" name="loai_hoc_phan" required>
+                                <?php
+                                $valLoai = (string)($duLieuSua['loai_hoc_phan'] ?? 'dai_cuong');
+                                ?>
+                                <option value="dai_cuong" <?= ($valLoai === 'Đại cương' || $valLoai === 'dai_cuong' || empty($valLoai)) ? 'selected' : '' ?>>Đại cương</option>
+                                <option value="co_so_nganh" <?= ($valLoai === 'Cơ sở ngành' || $valLoai === 'co_so_nganh') ? 'selected' : '' ?>>Cơ sở ngành</option>
+                                <option value="chuyen_nganh" <?= ($valLoai === 'Chuyên ngành' || $valLoai === 'chuyen_nganh') ? 'selected' : '' ?>>Chuyên ngành</option>
+                            </select>
+                        </div>
+
+                        <!-- Điều kiện tiên quyết -->
                         <div class="form-field" style="grid-column: 1 / -1;">
-                            <label for="dieu_kien_tien_quyet">Điều kiện tiên quyết</label>
-                            <input
-                                type="text"
-                                id="dieu_kien_tien_quyet"
-                                name="dieu_kien_tien_quyet"
-                                maxlength="255"
-                                value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>"
-                                placeholder="Ví dụ: WEB102 - Lập trình Web cơ bản"
-                            >
+                            <label for="hoc_phan_tien_quyet_id">Điều kiện tiên quyết</label>
+                            <select id="hoc_phan_tien_quyet_id" name="hoc_phan_tien_quyet_id">
+                                <option value="">Không có điều kiện tiên quyết</option>
+                                <?php foreach ($danhSachHocPhanTienQuyet as $hocPhanTienQuyetOption): ?>
+                                    <?php if ((int)$hocPhanTienQuyetOption['id'] === (int)($duLieuSua['id'] ?? 0)) continue; ?>
+                                    <option
+                                        value="<?= (int)$hocPhanTienQuyetOption['id'] ?>"
+                                        <?= (int)($duLieuSua['hoc_phan_tien_quyet_id'] ?? 0) === (int)$hocPhanTienQuyetOption['id'] ? 'selected' : '' ?>
+                                    >
+                                        <?= e($hocPhanTienQuyetOption['ma_hoc_phan'] . ' - ' . $hocPhanTienQuyetOption['ten_hoc_phan']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                             <small class="text-slate-400">
                                 Để trống nếu học phần không có môn tiên quyết bắt buộc.
                             </small>
@@ -520,6 +581,7 @@ function e($value)
                                 <th>ID</th>
                                 <th>Mã học phần</th>
                                 <th>Tên học phần</th>
+                                <th>Khối kiến thức</th>
                                 <th>Số tín chỉ</th>
                                 <th>Thao tác</th>
                             </tr>
@@ -527,7 +589,7 @@ function e($value)
                         <tbody>
                         <?php if (empty($danhSach)): ?>
                             <tr>
-                                <td colspan="5" class="empty">
+                                <td colspan="6" class="empty">
                                     Chưa có học phần hoặc không tìm thấy kết quả.
                                 </td>
                             </tr>
@@ -537,6 +599,20 @@ function e($value)
                                     <td><?= (int) $hp['id'] ?></td>
                                     <td><strong><?= e($hp['ma_hoc_phan']) ?></strong></td>
                                     <td><?= e($hp['ten_hoc_phan']) ?></td>
+                                    <td>
+                                        <?php
+                                        $loaiHpRaw = (string)($hp['loai_hoc_phan'] ?? '');
+                                        $loaiHpMap = [
+                                            'dai_cuong'    => 'Đại cương',
+                                            'co_so_nganh'  => 'Cơ sở ngành',
+                                            'chuyen_nganh' => 'Chuyên ngành'
+                                        ];
+                                        $loaiHpText = $loaiHpMap[$loaiHpRaw] ?? ($loaiHpRaw !== '' ? $loaiHpRaw : 'Đại cương');
+                                        ?>
+                                        <span class="badge-knowledge" style="display:inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">
+                                            <?= e($loaiHpText) ?>
+                                        </span>
+                                    </td>
                                     <td><?= (int) $hp['so_tin_chi'] ?></td>
                                     <td>
                                         <div class="action-buttons">

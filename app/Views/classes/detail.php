@@ -111,7 +111,20 @@ $lichHoc            = (string)($lop['lich_hoc'] ?? 'Chưa có lịch học cố 
 $phongHoc           = (string)($lop['phong_hoc'] ?? 'Chưa cập nhật phòng học');
 $ngayBatDau         = $lop['ngay_bat_dau'] ?? null;
 $ngayKetThuc        = $lop['ngay_ket_thuc'] ?? null;
-$dieuKienTienQuyet  = (string)($lop['dieu_kien_tien_quyet'] ?? 'Không có');
+
+// Khối kiến thức (loại học phần)
+$loaiHocPhanRaw     = (string)($lop['loai_hoc_phan'] ?? '');
+$loaiHocPhanMap     = [
+    'dai_cuong'    => 'Đại cương',
+    'co_so_nganh'  => 'Cơ sở ngành',
+    'chuyen_nganh' => 'Chuyên ngành'
+];
+$loaiHocPhan        = $loaiHocPhanMap[$loaiHocPhanRaw] ?? ($loaiHocPhanRaw !== '' ? $loaiHocPhanRaw : 'Đại cương');
+
+// Môn học tiên quyết được lấy từ học phần liên kết qua hoc_phan_tien_quyet_id.
+$monTienQuyet       = !empty($lop['ten_mon_tien_quyet'])
+                        ? (string)$lop['ten_mon_tien_quyet']
+                        : 'Không có';
 $moTaHocPhan        = (string)($lop['mo_ta_hoc_phan'] ?? ($lop['mo_ta'] ?? 'Chưa có đề cương chi tiết cho học phần này.'));
 $ngayDangKyCuaBan   = $lop['ngay_dang_ky_cua_ban'] ?? null;
 
@@ -177,11 +190,17 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
             <!-- 1. Header Môn & Trạng thái -->
             <div class="overview-header-flex">
                 <div>
-                    <span class="code-pill-blue"><?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?></span>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <span class="code-pill-blue" style="margin-bottom: 0;"><?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="badge-knowledge" style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
+                            <?= htmlspecialchars($loaiHocPhan, ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                    </div>
                     <h2 class="class-title"><?= htmlspecialchars($tenHocPhan, ENT_QUOTES, 'UTF-8') ?></h2>
                     <p class="meta-tag-sub">
                         Mã học phần: <strong><?= htmlspecialchars($maHocPhan, ENT_QUOTES, 'UTF-8') ?></strong> 
                         &nbsp;•&nbsp; Khối lượng: <strong><?= $soTinChi ?> Tín chỉ</strong>
+                        &nbsp;•&nbsp; Khối kiến thức: <strong><?= htmlspecialchars($loaiHocPhan, ENT_QUOTES, 'UTF-8') ?></strong>
                         &nbsp;•&nbsp; Học kỳ: <strong><?= htmlspecialchars($tenHocKy, ENT_QUOTES, 'UTF-8') ?></strong>
                     </p>
                 </div>
@@ -278,8 +297,17 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                 
                 <div class="syllabus-grid">
                     <div class="syl-row">
-                        <span class="syl-label">Điều kiện tiên quyết:</span>
-                        <span class="syl-content"><?= htmlspecialchars($dieuKienTienQuyet, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="syl-label">Học phần tiên quyết:</span>
+                        <span class="syl-content">
+                            <?php if ($monTienQuyet !== 'Không có'): ?>
+                                <strong><?= htmlspecialchars($monTienQuyet, ENT_QUOTES, 'UTF-8') ?></strong>
+                                <?php if (!empty($lop['ma_mon_tien_quyet'])): ?>
+                                    <span style="color: #64748b; font-size: 13px;">(<?= htmlspecialchars($lop['ma_mon_tien_quyet'], ENT_QUOTES, 'UTF-8') ?>)</span>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <span style="color: #64748b;">Không có</span>
+                            <?php endif; ?>
+                        </span>
                     </div>
                     <div class="syl-row">
                         <span class="syl-label">Mục tiêu học phần:</span>

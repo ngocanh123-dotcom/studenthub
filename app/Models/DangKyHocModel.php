@@ -292,7 +292,6 @@ class DangKyHocModel
         }
     }
 
-
     public function check_dieu_kien_tien_quyet(int $sinhVienId, int $lopId): bool
     {
         if ($sinhVienId <= 0 || $lopId <= 0) {

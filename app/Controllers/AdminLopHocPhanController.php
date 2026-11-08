@@ -264,7 +264,7 @@ class AdminLopHocPhanController {
      * Hiển thị form chỉnh sửa lớp học phần
      */
     public function edit(): void {
-        $id = (int)($_GET['id'] ?? 0);
+        $id = (int)($_GET['lop_hoc_phan_id'] ?? ($_GET['id'] ?? 0));
         if ($id <= 0) {
             $_SESSION['admin_notice'] = 'ID lớp học phần không hợp lệ.';
             $_SESSION['admin_notice_type'] = 'error';
@@ -307,7 +307,7 @@ class AdminLopHocPhanController {
             die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
-        $id = (int)($_POST['id'] ?? 0);
+        $id = (int)($_POST['lop_hoc_phan_id'] ?? ($_POST['id'] ?? 0));
         if ($id <= 0) {
             header('Location: /studenthub/public/index.php?route=admin_lop_hoc_phan.php');
             exit;
@@ -460,7 +460,7 @@ class AdminLopHocPhanController {
             die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
-        $id = (int)($_POST['id'] ?? 0);
+        $id = (int)($_POST['lop_hoc_phan_id'] ?? ($_POST['id'] ?? 0));
         $class = $this->model->getClassById($id);
         $redirectUrl = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/studenthub/public/index.php?route=admin_lop_hoc_phan.php';
 
@@ -504,7 +504,7 @@ class AdminLopHocPhanController {
             die("Yêu cầu không hợp lệ do mã bảo mật CSRF không chính xác.");
         }
 
-        $id = (int)($_POST['id'] ?? 0);
+        $id = (int)($_POST['lop_hoc_phan_id'] ?? ($_POST['id'] ?? 0));
         $class = $this->model->getClassById($id);
 
         if (!$class) {

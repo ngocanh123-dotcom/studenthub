@@ -557,7 +557,8 @@
                                     <td style="text-align: center;">
                                         <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=toggle" style="display: inline;">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                            <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
+                                            <input type="hidden" name="id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
+                                            <input type="hidden" name="lop_hoc_phan_id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
 
                                             <?php if (!$isLocked): ?>
                                                 <button type="submit" class="btn-toggle-switch to-lock"
@@ -577,7 +578,7 @@
 
                                     <!-- Hành động (Sửa, Xóa) -->
                                     <td style="text-align: center;">
-                                        <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=edit&id=<?= (int)$c['id'] ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
+                                        <a href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=edit&id=<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>" class="btn-edit" title="Chỉnh sửa thông tin lớp">
                                             Sửa
                                         </a>
 
@@ -585,7 +586,8 @@
                                         <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=delete" style="display: inline;"
                                               onsubmit="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>? Hệ thống sẽ chặn xóa nếu đã có sinh viên ghi danh.');">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                            <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
+                                            <input type="hidden" name="id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
+                                            <input type="hidden" name="lop_hoc_phan_id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
                                             <button type="submit" class="btn-delete" title="Xóa lớp học phần">
                                                 Xóa
                                             </button>

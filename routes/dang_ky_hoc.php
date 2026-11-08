@@ -111,11 +111,14 @@ if (!$lopId || $lopId <= 0) {
 
         // [TC 1 & TC 5]: Lấy thông tin lớp học phần trực tiếp từ CSDL (khóa dòng FOR UPDATE)
         $stmtLop = $pdo->prepare("
-            SELECT lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.trang_thai, 
+            SELECT lhp.id, lhp.ma_lop, lhp.hoc_phan_id, lhp.hoc_ky_id, lhp.trang_thai,
                    lhp.si_so_toi_da, lhp.lich_hoc, lhp.thoi_gian_mo_rieng, lhp.thoi_gian_dong_rieng,
-                   hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk
+                   hk.trang_thai_dang_ky, hk.thoi_gian_mo_dk, hk.thoi_gian_dong_dk,
+                   hp.hoc_phan_tien_quyet_id, hp_tq.ten_hoc_phan AS ten_hoc_phan_tien_quyet
             FROM lop_hoc_phan lhp
             INNER JOIN hoc_ky hk ON hk.id = lhp.hoc_ky_id
+            INNER JOIN hoc_phan hp ON hp.id = lhp.hoc_phan_id
+            LEFT JOIN hoc_phan hp_tq ON hp_tq.id = hp.hoc_phan_tien_quyet_id
             WHERE lhp.id = :lop_id
             LIMIT 1
             FOR UPDATE
@@ -131,6 +134,24 @@ if (!$lopId || $lopId <= 0) {
             throw new RuntimeException(
                 'Không tìm thấy lớp học phần này.'
             );
+        }
+
+        $chuaDatTienQuyet = false;
+        if (!empty($lop['hoc_phan_tien_quyet_id'])) {
+            $stmtTienQuyet = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM dang_ky_hoc dkh
+                INNER JOIN lop_hoc_phan lhp_tq
+                    ON lhp_tq.id = dkh.lop_hoc_phan_id
+                WHERE dkh.sinh_vien_id = :sv_id
+                  AND lhp_tq.hoc_phan_id = :hoc_phan_tien_quyet_id
+                  AND dkh.trang_thai = 'dang_ky'
+            ");
+            $stmtTienQuyet->execute([
+                'sv_id' => $sinhVienId,
+                'hoc_phan_tien_quyet_id' => (int)$lop['hoc_phan_tien_quyet_id']
+            ]);
+            $chuaDatTienQuyet = (int)$stmtTienQuyet->fetchColumn() === 0;
         }
 
         // [TC 2]: Kiểm tra trùng lớp bằng câu truy vấn nghiệp vụ chuẩn:
@@ -248,6 +269,11 @@ if (!$lopId || $lopId <= 0) {
         // [TC 2]: Kiểm tra nếu đã đăng ký lớp này rồi
         if ($daDangKyLopNay > 0) {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
+
+        } elseif ($chuaDatTienQuyet) {
+            $thongBao = 'Bạn cần đăng ký môn học tiên quyết '
+                . ($lop['ten_hoc_phan_tien_quyet'] ?? '')
+                . ' trước khi đăng ký học phần này.';
 
         } elseif ($lopTrungHocPhan) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
