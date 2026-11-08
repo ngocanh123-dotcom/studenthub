@@ -60,8 +60,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Quản lý tài khoản</span>
             </a>
 
-            <!-- 3. Quản lý học phần (Trỏ về app/Views vì chưa chuyển MVC) -->
-            <a href="/studenthub/app/Views/admin/hoc_phan.php" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_phan' ? 'active' : '' ?>">
+            <!-- 3. Quản lý học phần (ĐÃ CHUYỂN MVC -> Trỏ về public) -->
+            <a href="/studenthub/public/index.php?route=admin_hoc_phan" class="menu-link sh-nav-item <?= $activeMenu === 'hoc_phan' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
