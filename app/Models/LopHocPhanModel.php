@@ -38,9 +38,6 @@ class LopHocPhanModel {
                     hp.ten_hoc_phan,
                     hp.so_tin_chi,
                     hp.loai_hoc_phan,
-                    hp.hoc_phan_tien_quyet_id,
-                    hp_tq.ten_hoc_phan AS ten_mon_tien_quyet,
-                    hp_tq.ma_hoc_phan AS ma_mon_tien_quyet,
                     hp.mo_ta AS mo_ta_hoc_phan,
                     hk.ten_hoc_ky,
                     hk.ngay_bat_dau,
@@ -63,7 +60,6 @@ class LopHocPhanModel {
                      LIMIT 1) AS ngay_dang_ky_cua_ban
                 FROM lop_hoc_phan lhp
                 INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
-                LEFT JOIN hoc_phan hp_tq ON hp.hoc_phan_tien_quyet_id = hp_tq.id
                 INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
                 LEFT JOIN nguoi_dung gv ON lhp.giang_vien_id = gv.id
                 WHERE (lhp.id = :class_id_numeric OR lhp.ma_lop = :class_code)

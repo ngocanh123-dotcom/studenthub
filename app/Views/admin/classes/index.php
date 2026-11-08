@@ -224,6 +224,44 @@
             gap: 4px;
             transition: all 0.2s;
         }
+        /* Toggle Switch Styling */
+        .switch-toggle {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 26px;
+        }
+        .switch-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider-toggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #dc3545; /* Đỏ khi khóa */
+            transition: .3s;
+            border-radius: 26px;
+        }
+        .slider-toggle:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider-toggle {
+            background-color: #28a745; /* Xanh lá khi mở */
+        }
+        input:checked + .slider-toggle:before {
+            transform: translateX(26px);
+        }
+
         .btn-toggle-switch.to-lock {
             background: #fee2e2;
             color: #b91c1c;
@@ -555,24 +593,15 @@
 
                                     <!-- CẦU DAO MỞ / KHÓA ĐĂNG KÝ (MỤC H DEMO) -->
                                     <td style="text-align: center;">
-                                        <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=toggle" style="display: inline;">
+                                        <form method="POST" action="/studenthub/public/index.php?route=admin_lop_hoc_phan.php&amp;action=toggle" style="display: inline-block; margin: 0; vertical-align: middle;">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
                                             <input type="hidden" name="lop_hoc_phan_id" value="<?= (int)($c['lop_hoc_phan_id'] ?? $c['id']) ?>">
-
-                                            <?php if (!$isLocked): ?>
-                                                <button type="submit" class="btn-toggle-switch to-lock"
-                                                        title="Bấm để khóa lớp: sinh viên sẽ bị chặn ngay lập tức!"
-                                                        onclick="return confirm('Bạn có chắc chắn muốn KHÓA đăng ký lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>? Sinh viên sẽ không thể đăng ký hoặc xem mở lớp này.');">
-                                                    🔒 Khóa lớp
-                                                </button>
-                                            <?php else: ?>
-                                                <button type="submit" class="btn-toggle-switch to-open"
-                                                        title="Bấm để mở cổng đăng ký cho sinh viên"
-                                                        onclick="return confirm('Bạn có chắc chắn muốn MỞ lại đăng ký cho lớp <?= htmlspecialchars($c['ma_lop'], ENT_QUOTES, 'UTF-8') ?>?');">
-                                                    🔓 Mở lại
-                                                </button>
-                                            <?php endif; ?>
+                                            <input type="hidden" name="trang_thai" value="<?= $isLocked ? 'mo' : 'khoa' ?>">
+                                            <label class="switch-toggle" title="<?= $isLocked ? 'Lớp đang KHÓA - Gạt để MỞ' : 'Lớp đang MỞ - Gạt để KHÓA' ?>">
+                                                <input type="checkbox" onchange="this.form.submit()" <?= !$isLocked ? 'checked' : '' ?>>
+                                                <span class="slider-toggle"></span>
+                                            </label>
                                         </form>
                                     </td>
 

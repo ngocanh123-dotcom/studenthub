@@ -44,7 +44,6 @@ $duLieuSua = [
     'ten_hoc_phan' => '',
     'so_tin_chi' => '',
     'loai_hoc_phan' => 'dai_cuong',
-    'hoc_phan_tien_quyet_id' => '',
     'mo_ta' => ''
 ];
 
@@ -85,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $loaiHocPhan = $loaiHocPhanMap[$loaiHocPhanNhap];
 
-                $hocPhanTienQuyetIdNhap = trim((string)($_POST['hoc_phan_tien_quyet_id'] ?? ''));
                 $moTa = trim($_POST['mo_ta'] ?? '');
 
                 $duLieuSua = [
@@ -94,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'ten_hoc_phan' => $tenHocPhan,
                     'so_tin_chi' => $soTinChiNhap,
                     'loai_hoc_phan' => $loaiHocPhan,
-                    'hoc_phan_tien_quyet_id' => $hocPhanTienQuyetIdNhap,
                     'mo_ta' => $moTa
                 ];
 
@@ -114,30 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('Tên học phần không được vượt quá 150 ký tự.');
                 }
 
-                $hocPhanTienQuyet = null;
-                if ($hocPhanTienQuyetIdNhap !== '') {
-                    if (!ctype_digit($hocPhanTienQuyetIdNhap) || (int)$hocPhanTienQuyetIdNhap <= 0) {
-                        throw new RuntimeException('Học phần tiên quyết không hợp lệ.');
-                    }
-
-                    $hocPhanTienQuyetId = (int)$hocPhanTienQuyetIdNhap;
-                    if ($hocPhanTienQuyetId === $id && $hanhDong === 'sua') {
-                        throw new RuntimeException('Học phần không thể là điều kiện tiên quyết của chính nó.');
-                    }
-
-                    $stmtTienQuyet = $pdo->prepare(
-                        "SELECT id, ma_hoc_phan, ten_hoc_phan
-                         FROM hoc_phan
-                         WHERE id = :id
-                         LIMIT 1"
-                    );
-                    $stmtTienQuyet->execute([':id' => $hocPhanTienQuyetId]);
-                    $hocPhanTienQuyet = $stmtTienQuyet->fetch(PDO::FETCH_ASSOC);
-
-                    if (!$hocPhanTienQuyet) {
-                        throw new RuntimeException('Không tìm thấy học phần tiên quyết đã chọn.');
-                    }
-                }
                 if (
                     $soTinChiNhap === '' ||
                     !ctype_digit($soTinChiNhap) ||
@@ -180,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 ten_hoc_phan,
                                 so_tin_chi,
                                 loai_hoc_phan,
-                                hoc_phan_tien_quyet_id,
                                 mo_ta
                             )
                          VALUES
@@ -189,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 :ten,
                                 :so_tin_chi,
                                 :loai_hoc_phan,
-                                :hoc_phan_tien_quyet_id,
                                 :mo_ta
                             )"
                     );
@@ -199,8 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
                         ':loai_hoc_phan' => $loaiHocPhan,
-                        ':hoc_phan_tien_quyet_id' => $hocPhanTienQuyet
-                            ? (int)$hocPhanTienQuyet['id'] : null,
                         ':mo_ta' => $moTa !== ''
                             ? $moTa : null
                     ]);
@@ -213,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                          SET ma_hoc_phan = :ma,
                              ten_hoc_phan = :ten,
                              so_tin_chi = :so_tin_chi,
-                             dieu_kien_tien_quyet = :dieu_kien_tien_quyet,
+                             loai_hoc_phan = :loai_hoc_phan,
                              mo_ta = :mo_ta
                          WHERE id = :id"
                     );
@@ -223,8 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':ten' => $tenHocPhan,
                         ':so_tin_chi' => $soTinChi,
                         ':loai_hoc_phan' => $loaiHocPhan,
-                        ':hoc_phan_tien_quyet_id' => $hocPhanTienQuyet
-                            ? (int)$hocPhanTienQuyet['id'] : null,
                         ':mo_ta' => $moTa !== ''
                             ? $moTa : null,
                         ':id' => $id
@@ -324,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
                     ma_hoc_phan,
                     ten_hoc_phan,
                     so_tin_chi,
-                    dieu_kien_tien_quyet,
+                    loai_hoc_phan,
                     mo_ta
                  FROM hoc_phan
                  WHERE id = :id
@@ -354,7 +321,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
 // =====================================================
 
 $danhSach = [];
-$danhSachHocPhanTienQuyet = [];
 $tongHocPhan = 0;
 
 try {
@@ -363,6 +329,7 @@ try {
             WHERE 1 = 1";
 
     $thamSo = [];
+    $where = '';
 
     if ($tuKhoa !== '') {
         $where = " WHERE (
@@ -927,22 +894,6 @@ try {
                                 <option value="co_so_nganh" <?= ($valLoai === 'Cơ sở ngành' || $valLoai === 'co_so_nganh') ? 'selected' : '' ?>>Cơ sở ngành</option>
                                 <option value="chuyen_nganh" <?= ($valLoai === 'Chuyên ngành' || $valLoai === 'chuyen_nganh') ? 'selected' : '' ?>>Chuyên ngành</option>
                             </select>
-                        </div>
-
-                        <!-- Điều kiện tiên quyết -->
-                        <div class="form-field" style="grid-column: 1 / -1;">
-                            <label for="dieu_kien_tien_quyet">Điều kiện tiên quyết</label>
-                            <input
-                                type="text"
-                                id="dieu_kien_tien_quyet"
-                                name="dieu_kien_tien_quyet"
-                                maxlength="255"
-                                value="<?= e($duLieuSua['dieu_kien_tien_quyet'] ?? '') ?>"
-                                placeholder="Ví dụ: WEB102 - Lập trình Web cơ bản"
-                            >
-                            <small class="text-slate-400">
-                                Để trống nếu học phần không có môn tiên quyết bắt buộc.
-                            </small>
                         </div>
 
                         <!-- BỔ SUNG: MÔ TẢ HỌC PHẦN -->

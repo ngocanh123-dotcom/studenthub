@@ -117,12 +117,6 @@ class DangKyHocModel
                 );
             }
 
-            if (!$this->check_dieu_kien_tien_quyet($sinhVienId, $lopId)) {
-                throw new RuntimeException(
-                    'Bạn chưa đăng ký môn học tiên quyết của học phần này.'
-                );
-            }
-
             if ($lop['trang_thai'] !== 'mo') {
                 throw new RuntimeException(
                     'Lớp học phần hiện không mở đăng ký.'
@@ -292,49 +286,4 @@ class DangKyHocModel
         }
     }
 
-    public function check_dieu_kien_tien_quyet(int $sinhVienId, int $lopId): bool
-    {
-        if ($sinhVienId <= 0 || $lopId <= 0) {
-            return false;
-        }
-
-        $sql = "
-            SELECT hp.hoc_phan_tien_quyet_id
-            FROM lop_hoc_phan lhp
-            INNER JOIN hoc_phan hp
-                ON hp.id = lhp.hoc_phan_id
-            WHERE lhp.id = :lop_id
-            LIMIT 1
-        ";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute(['lop_id' => $lopId]);
-        $hocPhanTienQuyetId = $stmt->fetchColumn();
-
-        if ($hocPhanTienQuyetId === false) {
-            return false;
-        }
-
-        if ($hocPhanTienQuyetId === null) {
-            return true;
-        }
-
-        $sql = "
-            SELECT COUNT(*)
-            FROM dang_ky_hoc dkh
-            INNER JOIN lop_hoc_phan lhp
-                ON lhp.id = dkh.lop_hoc_phan_id
-            WHERE dkh.sinh_vien_id = :sinh_vien_id
-              AND lhp.hoc_phan_id = :hoc_phan_tien_quyet_id
-              AND dkh.trang_thai = 'dang_ky'
-        ";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            'sinh_vien_id' => $sinhVienId,
-            'hoc_phan_tien_quyet_id' => (int)$hocPhanTienQuyetId
-        ]);
-
-        return (int)$stmt->fetchColumn() > 0;
-    }
 }

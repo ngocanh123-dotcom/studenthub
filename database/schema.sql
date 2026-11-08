@@ -43,13 +43,10 @@ CREATE TABLE `hoc_phan` (
     `ma_hoc_phan` VARCHAR(20) NOT NULL,
     `ten_hoc_phan` VARCHAR(150) NOT NULL,
     `so_tin_chi` INT NOT NULL,
-    `hoc_phan_tien_quyet_id` INT NULL,
     `mo_ta` TEXT NULL,
     `ngay_tao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `uc_hoc_phan_ma` UNIQUE (`ma_hoc_phan`),
-    CONSTRAINT `chk_hoc_phan_tin_chi` CHECK (`so_tin_chi` > 0),
-    CONSTRAINT `fk_hoc_phan_tien_quyet` FOREIGN KEY (`hoc_phan_tien_quyet_id`)
-        REFERENCES `hoc_phan` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT `chk_hoc_phan_tin_chi` CHECK (`so_tin_chi` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. BẢNG LỚP HỌC PHẦN (Các lớp mở thực tế theo học kỳ)

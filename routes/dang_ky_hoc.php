@@ -453,11 +453,6 @@ if (!$lopId || $lopId <= 0) {
         if ($daDangKyLopNay > 0) {
             $thongBao = 'Bạn đã đăng ký lớp học phần này rồi.';
 
-        } elseif ($chuaDatTienQuyet) {
-            $thongBao = 'Bạn cần đăng ký môn học tiên quyết '
-                . ($lop['ten_hoc_phan_tien_quyet'] ?? '')
-                . ' trước khi đăng ký học phần này.';
-
         } elseif ($lopTrungHocPhan) {
             $thongBao = 'Bạn đã đăng ký học phần này ở lớp '
                 . $lopTrungHocPhan['ma_lop']
