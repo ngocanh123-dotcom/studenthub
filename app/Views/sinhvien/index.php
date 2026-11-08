@@ -135,12 +135,25 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
         </div>
 
         <div class="sidebar-semester-pill">
-            <div class="semester-status-line">
-                <span class="green-dot"></span>
-                <span>Học kỳ 1 (2026 - 2027)</span>
-            </div>
-            <p>Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.</p>
-        </div>
+    <div class="semester-status-line">
+        <span class="green-dot"></span>
+        <span>
+            <?= htmlspecialchars(
+                $hocKyHienTai['ten_hoc_ky'] ?? 'Chưa có học kỳ',
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
+        </span>
+    </div>
+
+    <p>
+        <?php if (!empty($dashboardData['registration_open'])): ?>
+            Cổng đăng ký tín chỉ đang mở cho sinh viên toàn trường.
+        <?php else: ?>
+            Hiện tại cổng đăng ký tín chỉ đang đóng.
+        <?php endif; ?>
+    </p>
+</div>
     </aside>
 
     <!-- 2. NỘI DUNG CHÍNH BÊN PHẢI -->

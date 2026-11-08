@@ -111,20 +111,7 @@ $lichHoc            = (string)($lop['lich_hoc'] ?? 'Chưa có lịch học cố 
 $phongHoc           = (string)($lop['phong_hoc'] ?? 'Chưa cập nhật phòng học');
 $ngayBatDau         = $lop['ngay_bat_dau'] ?? null;
 $ngayKetThuc        = $lop['ngay_ket_thuc'] ?? null;
-
-// Khối kiến thức (loại học phần)
-$loaiHocPhanRaw     = (string)($lop['loai_hoc_phan'] ?? '');
-$loaiHocPhanMap     = [
-    'dai_cuong'    => 'Đại cương',
-    'co_so_nganh'  => 'Cơ sở ngành',
-    'chuyen_nganh' => 'Chuyên ngành'
-];
-$loaiHocPhan        = $loaiHocPhanMap[$loaiHocPhanRaw] ?? ($loaiHocPhanRaw !== '' ? $loaiHocPhanRaw : 'Đại cương');
-
-// Môn học tiên quyết được lấy từ học phần liên kết qua hoc_phan_tien_quyet_id.
-$monTienQuyet       = !empty($lop['ten_mon_tien_quyet'])
-                        ? (string)$lop['ten_mon_tien_quyet']
-                        : 'Không có';
+$dieuKienTienQuyet  = (string)($lop['dieu_kien_tien_quyet'] ?? 'Không có');
 $moTaHocPhan        = (string)($lop['mo_ta_hoc_phan'] ?? ($lop['mo_ta'] ?? 'Chưa có đề cương chi tiết cho học phần này.'));
 $ngayDangKyCuaBan   = $lop['ngay_dang_ky_cua_ban'] ?? null;
 
@@ -297,17 +284,8 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                 
                 <div class="syllabus-grid">
                     <div class="syl-row">
-                        <span class="syl-label">Học phần tiên quyết:</span>
-                        <span class="syl-content">
-                            <?php if ($monTienQuyet !== 'Không có'): ?>
-                                <strong><?= htmlspecialchars($monTienQuyet, ENT_QUOTES, 'UTF-8') ?></strong>
-                                <?php if (!empty($lop['ma_mon_tien_quyet'])): ?>
-                                    <span style="color: #64748b; font-size: 13px;">(<?= htmlspecialchars($lop['ma_mon_tien_quyet'], ENT_QUOTES, 'UTF-8') ?>)</span>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <span style="color: #64748b;">Không có</span>
-                            <?php endif; ?>
-                        </span>
+                        <span class="syl-label">Điều kiện tiên quyết:</span>
+                        <span class="syl-content"><?= htmlspecialchars($dieuKienTienQuyet, ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
                     <div class="syl-row">
                         <span class="syl-label">Mục tiêu học phần:</span>
