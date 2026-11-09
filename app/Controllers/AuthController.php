@@ -1,17 +1,21 @@
 <?php
 /**
  * app/Controllers/AuthController.php
- * Controller xử lý xác thực và phân hệ Quên mật khẩu - StudentHub
- * Kiến trúc: MVC Chuẩn công nghiệp
+ * Controller xử lý đăng nhập, đăng xuất, đổi mật khẩu và khôi phục mật khẩu - StudentHub
+ * Kiến trúc: MVC Chuẩn công nghiệp - PHP 8.x - PDO Prepared Statements
  */
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../Models/UserModel.php';
+require_once __DIR__ . '/../Core/Auth.php';
+
 class AuthController
 {
     private PDO $pdo;
+    private UserModel $userModel;
 
     public function __construct(?PDO $pdo = null)
     {
@@ -52,6 +56,410 @@ class AuthController
 
             $this->pdo = $conn;
         }
+
+        $this->userModel = new UserModel($this->pdo);
+    }
+
+    /**
+     * Điều hướng người dùng đã đăng nhập về trang chủ tương ứng theo vai trò
+     */
+    private function redirectByRole(string $role): void
+    {
+        $normalized = strtolower(trim($role));
+
+        if (in_array($normalized, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
+            header('Location: index.php?route=admin_dashboard');
+            exit;
+        }
+
+        if (in_array($normalized, ['giang_vien', 'giangvien'], true)) {
+            header('Location: index.php?route=giang_vien');
+            exit;
+        }
+
+        header('Location: index.php?route=dashboard');
+        exit;
+    }
+
+    /**
+     * Hiển thị giao diện Đăng nhập hệ thống (GET)
+     * Nếu đã có Session đăng nhập hợp lệ thì tự động chuyển hướng theo vai trò
+     */
+    public function showLoginForm(): void
+    {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+
+        // Nếu gọi POST trực tiếp vào showLoginForm thì chuyển sang xử lý login()
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->login();
+            return;
+        }
+
+        // 1. Kiểm tra nếu người dùng đã đăng nhập thì tự động điều hướng
+        $userId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
+        $sessionRole = strtolower(trim((string)($_SESSION['vai_tro'] ?? $_SESSION['role'] ?? '')));
+        if ($userId > 0 && $sessionRole !== '') {
+            $this->redirectByRole($sessionRole);
+        }
+
+        // 2. Lấy thông báo Flash message hoặc tham số GET error
+        $thongBao = '';
+        $loaiThongBao = '';
+        $username = (string)($_SESSION['login_old_username'] ?? '');
+        $role = 'sinhvien';
+
+        if (!empty($_SESSION['login_error'])) {
+            $thongBao = (string)$_SESSION['login_error'];
+            $loaiThongBao = 'error';
+            unset($_SESSION['login_error']);
+        } elseif (!empty($_SESSION['login_success'])) {
+            $thongBao = (string)$_SESSION['login_success'];
+            $loaiThongBao = 'success';
+            unset($_SESSION['login_success']);
+        }
+        unset($_SESSION['login_old_username']);
+
+        $loiGet = (string)($_GET['error'] ?? '');
+        if ($thongBao === '' && $loiGet !== '') {
+            $thongBaoGet = [
+                'login_required' => 'Vui lòng đăng nhập để sử dụng chức năng này.',
+                'forbidden'      => 'Bạn không có quyền truy cập khu vực này.'
+            ];
+            if (isset($thongBaoGet[$loiGet])) {
+                $thongBao = $thongBaoGet[$loiGet];
+                $loaiThongBao = 'error';
+            }
+        }
+
+        // 3. Nạp View đăng nhập
+        require __DIR__ . '/../Views/auth/login.php';
+    }
+
+    /**
+     * Xử lý xác thực đăng nhập người dùng (POST)
+     */
+    public function login(): void
+    {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->showLoginForm();
+            return;
+        }
+
+        $username = trim((string)($_POST['username'] ?? $_POST['ten_dang_nhap'] ?? ''));
+        $password = trim((string)($_POST['password'] ?? $_POST['mat_khau'] ?? ''));
+
+        if ($username === '' || $password === '') {
+            $_SESSION['login_error'] = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
+            $_SESSION['login_old_username'] = $username;
+            header('Location: index.php?route=login');
+            exit;
+        }
+
+        try {
+            $taiKhoan = $this->userModel->authenticate($username, $password);
+        } catch (PDOException $e) {
+            error_log('Lỗi truy vấn đăng nhập: ' . $e->getMessage());
+            $_SESSION['login_error'] = 'Có lỗi xảy ra khi xử lý đăng nhập. Vui lòng thử lại sau.';
+            $_SESSION['login_old_username'] = $username;
+            header('Location: index.php?route=login');
+            exit;
+        }
+
+        if (!$taiKhoan) {
+            $_SESSION['login_error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác.';
+            $_SESSION['login_old_username'] = $username;
+            header('Location: index.php?route=login');
+            exit;
+        }
+
+        // Đăng nhập thành công: Khởi tạo và đồng bộ Session
+        session_regenerate_id(true);
+
+        // Kiểm tra mật khẩu mặc định ('123456') để bật cờ yêu cầu đổi mật khẩu
+        $isDefaultPass = ($password === '123456');
+        if (!$isDefaultPass && !empty($taiKhoan['mat_khau_hash'])) {
+            $isDefaultPass = password_verify('123456', (string)$taiKhoan['mat_khau_hash']);
+        }
+
+        if ($isDefaultPass) {
+            $_SESSION['must_change_password'] = true;
+            $_SESSION['first_login_alert'] = 'Cảnh báo bảo mật quan trọng: Mật khẩu của bạn là mật khẩu mặc định (123456). Vui lòng đổi mật khẩu để bảo vệ thông tin cá nhân và đảm bảo không ai (kể cả Admin) biết mật khẩu của bạn!';
+            if (!headers_sent()) {
+                setcookie('sh_must_change_password', '1', [
+                    'expires'  => 0,
+                    'path'     => '/',
+                    'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+                    'httponly' => false,
+                    'samesite' => 'Lax'
+                ]);
+            }
+        } else {
+            unset($_SESSION['must_change_password'], $_SESSION['first_login_alert']);
+            if (!headers_sent()) {
+                setcookie('sh_must_change_password', '', [
+                    'expires'  => time() - 3600,
+                    'path'     => '/',
+                    'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+                    'httponly' => false,
+                    'samesite' => 'Lax'
+                ]);
+            }
+        }
+
+        // Ánh xạ chuẩn hóa các key phân quyền ('sinh_vien', 'giang_vien', 'admin')
+        $dbRole = strtolower(trim((string)($taiKhoan['vai_tro'] ?? 'sinh_vien')));
+        $roleMap = [
+            'sinh_vien'  => 'sinhvien',
+            'sinhvien'   => 'sinhvien',
+            'giang_vien' => 'giangvien',
+            'giangvien'  => 'giangvien',
+            'admin'      => 'quantri',
+            'quantri'    => 'quantri'
+        ];
+        $role = $roleMap[$dbRole] ?? 'sinhvien';
+
+        $vaiTroDatabaseVal = [
+            'sinhvien'  => 'sinh_vien',
+            'giangvien' => 'giang_vien',
+            'quantri'   => 'admin'
+        ];
+        $vaiTroChuan = $vaiTroDatabaseVal[$role] ?? 'sinh_vien';
+
+        $tenVaiTroMap = [
+            'sinhvien'  => 'Sinh viên',
+            'giangvien' => 'Giảng viên',
+            'quantri'   => 'Quản trị viên'
+        ];
+
+        $_SESSION['user_id']       = (int)$taiKhoan['id'];
+        $_SESSION['ten_dang_nhap'] = (string)$taiKhoan['ten_dang_nhap'];
+        $_SESSION['ho_ten']        = (string)$taiKhoan['ho_ten'];
+        $_SESSION['vai_tro']       = (string)$vaiTroChuan; // 'sinh_vien', 'giang_vien', 'admin'
+        $_SESSION['nguoi_dung_id'] = (int)$taiKhoan['id'];
+        $_SESSION['username']      = (string)$taiKhoan['ten_dang_nhap'];
+        $_SESSION['role']          = (string)$role;        // 'sinhvien', 'giangvien', 'quantri'
+        $_SESSION['tenVaiTro']     = $tenVaiTroMap[$role] ?? 'Thành viên';
+        $_SESSION['csrf_token']    = bin2hex(random_bytes(32));
+        $_SESSION['nguoi_dung']    = [
+            'id'            => (int)$taiKhoan['id'],
+            'ten_dang_nhap' => (string)$taiKhoan['ten_dang_nhap'],
+            'ho_ten'        => (string)$taiKhoan['ho_ten'],
+            'vai_tro'       => (string)$vaiTroChuan,
+            'email'         => (string)($taiKhoan['email'] ?? '')
+        ];
+
+        session_write_close();
+        $this->redirectByRole($vaiTroChuan);
+    }
+
+    /**
+     * Đăng xuất khỏi hệ thống: Xóa sạch Session và chuyển hướng về trang login
+     */
+    public function logout(): void
+    {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+
+        $_SESSION = [];
+
+        if (ini_get('session.use_cookies') && !headers_sent()) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+
+        header('Location: index.php?route=login');
+        exit;
+    }
+
+    /**
+     * Chức năng đổi mật khẩu cá nhân cho Sinh viên, Giảng viên & Quản trị viên
+     * Hỗ trợ cả AJAX Fetch (từ Modal Sidebar) và Giao diện Web độc lập
+     * Chuẩn bảo mật: Bcrypt password_hash, Session ownership & CSRF Protection
+     */
+    public function changePassword(): void
+    {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+
+        Auth::startSession();
+
+        // 1. Kiểm tra trạng thái đăng nhập
+        $userId   = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id'] ?? 0);
+        $username = (string)($_SESSION['username'] ?? $_SESSION['ten_dang_nhap'] ?? '');
+        $hoTen    = (string)($_SESSION['ho_ten'] ?? $username);
+        $role     = (string)($_SESSION['role'] ?? $_SESSION['vai_tro'] ?? 'sinhvien');
+
+        $isAjax = (
+            isset($_POST['ajax']) ||
+            (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+            (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
+        );
+
+        if ($userId <= 0 && $username === '') {
+            if ($isAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'ok'      => false,
+                    'status'  => 'error',
+                    'message' => 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!'
+                ]);
+                exit;
+            }
+            header('Location: /studenthub/public/index.php?error=login_required');
+            exit;
+        }
+
+        // Tự động tìm user_id nếu session chỉ lưu username
+        if ($userId <= 0 && $username !== '') {
+            $userRecord = $this->userModel->findByUsername($username);
+            if ($userRecord) {
+                $userId = (int)$userRecord['id'];
+                $_SESSION['user_id'] = $userId;
+                if (empty($hoTen)) {
+                    $hoTen = $userRecord['ho_ten'] ?? $username;
+                    $_SESSION['ho_ten'] = $hoTen;
+                }
+            }
+        }
+
+        // 2. Khởi tạo và đồng bộ CSRF Token
+        $csrfToken = Auth::csrfToken();
+        if (!headers_sent()) {
+            setcookie('sh_csrf_token', $csrfToken, [
+                'expires'  => 0,
+                'path'     => '/',
+                'secure'   => isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on',
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
+        }
+
+        $errorMsg   = '';
+        $successMsg = '';
+
+        // 3. Xử lý đổi mật khẩu khi có yêu cầu POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $submittedCsrf = (string)(
+                $_POST['csrf_token']
+                ?? $_POST['csrf']
+                ?? $_SERVER['HTTP_X_CSRF_TOKEN']
+                ?? ''
+            );
+
+            if ($submittedCsrf === '' && $isAjax) {
+                $rawInput = @file_get_contents('php://input');
+                if ($rawInput) {
+                    $jsonData = @json_decode($rawInput, true);
+                    if (is_array($jsonData)) {
+                        $submittedCsrf = (string)($jsonData['csrf_token'] ?? $jsonData['csrf'] ?? '');
+                    }
+                }
+            }
+
+            $isCsrfValid = !empty($submittedCsrf) && hash_equals($csrfToken, $submittedCsrf);
+
+            if (!$isCsrfValid && $isAjax) {
+                $cookieCsrf = (string)($_COOKIE['sh_csrf_token'] ?? '');
+                if (!empty($cookieCsrf) && hash_equals($csrfToken, $cookieCsrf)) {
+                    $isCsrfValid = true;
+                }
+            }
+
+            if (!$isCsrfValid) {
+                $errorMsg = 'Lỗi bảo mật: CSRF Token không hợp lệ hoặc phiên làm việc đã hết hạn!';
+            } else {
+                $oldPass     = (string)($_POST['old_password'] ?? '');
+                $newPass     = (string)($_POST['new_password'] ?? '');
+                $confirmPass = (string)($_POST['confirm_password'] ?? '');
+
+                $policyRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
+
+                if ($oldPass === '' || $newPass === '' || $confirmPass === '') {
+                    $errorMsg = 'Vui lòng nhập đầy đủ các trường thông tin!';
+                } elseif (strlen($newPass) < 8) {
+                    $errorMsg = 'Mật khẩu mới phải có tối thiểu 8 ký tự!';
+                } elseif (!preg_match($policyRegex, $newPass)) {
+                    $errorMsg = 'Mật khẩu mới phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt (!@#$%^&*...)!';
+                } elseif ($newPass === '123456' || strtolower($newPass) === 'password') {
+                    $errorMsg = 'Mật khẩu mới không được là mật khẩu mặc định (123456)!';
+                } elseif ($newPass !== $confirmPass) {
+                    $errorMsg = 'Xác nhận mật khẩu mới không khớp!';
+                } elseif ($newPass === $oldPass) {
+                    $errorMsg = 'Mật khẩu mới không được trùng với mật khẩu hiện tại!';
+                } else {
+                    // Kiểm tra mật khẩu hiện tại qua Model
+                    if (!$this->userModel->verifyCurrentPassword($userId, $oldPass)) {
+                        $errorMsg = 'Mật khẩu hiện tại không chính xác!';
+                    } else {
+                        // Cập nhật mật khẩu mới băm Bcrypt qua Model
+                        $hashMoi = password_hash($newPass, PASSWORD_DEFAULT);
+                        $updated = $this->userModel->updatePassword($userId, $hashMoi);
+
+                        if ($updated) {
+                            unset($_SESSION['must_change_password'], $_SESSION['first_login_alert']);
+                            setcookie('sh_must_change_password', '', ['expires' => time() - 3600, 'path' => '/']);
+
+                            if ($isAjax) {
+                                header('Content-Type: application/json; charset=utf-8');
+                                echo json_encode([
+                                    'ok'      => true,
+                                    'status'  => 'success',
+                                    'message' => 'Đổi mật khẩu thành công! Hãy đăng nhập lại bằng mật khẩu mới.'
+                                ]);
+                                exit;
+                            }
+                            $successMsg = 'Đổi mật khẩu thành công! Hãy đăng nhập lại bằng mật khẩu mới.';
+                        } else {
+                            $errorMsg = 'Lỗi hệ thống khi cập nhật mật khẩu mới!';
+                        }
+                    }
+                }
+            }
+
+            if ($isAjax && $errorMsg !== '') {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'ok'      => false,
+                    'status'  => 'error',
+                    'message' => $errorMsg
+                ]);
+                exit;
+            }
+        }
+
+        // 4. Xác định URL quay lại theo vai trò người dùng
+        $backUrl = '/studenthub/public/index.php';
+        $roleClean = strtolower(trim((string)$role));
+        if (in_array($roleClean, ['sinhvien', 'sinh_vien'])) {
+            $backUrl = '/studenthub/public/index.php?route=dashboard';
+        } elseif (in_array($roleClean, ['giangvien', 'giang_vien'])) {
+            $backUrl = '/studenthub/public/index.php?route=giang_vien';
+        } elseif (in_array($roleClean, ['admin', 'quantri', 'quan_tri'])) {
+            $backUrl = '/studenthub/public/index.php?route=admin_dashboard';
+        }
+
+        // 5. Nạp giao diện View sạch
+        require __DIR__ . '/../Views/auth/doi_mat_khau.php';
     }
 
     /**
@@ -188,15 +596,7 @@ class AuthController
                                     $mail->send();
 
                                     // Cập nhật CSDL
-                                    $updateSql = "UPDATE nguoi_dung SET mat_khau_hash = :hash";
-                                    $updateParams = [':hash' => $newHash, ':id' => (int)$user['id']];
-                                    if (array_key_exists('mat_khau', $user)) {
-                                        $updateSql .= ", mat_khau = :hash_plain";
-                                        $updateParams[':hash_plain'] = $newHash;
-                                    }
-                                    $updateSql .= " WHERE id = :id";
-                                    $stmtUpdate = $this->pdo->prepare($updateSql);
-                                    $stmtUpdate->execute($updateParams);
+                                    $this->userModel->updatePassword((int)$user['id'], $newHash);
 
                                     $userEmail = !empty($user['email']) ? $user['email'] : $targetEmail;
                                     $thongBaoThanhCong = "✓ Yêu cầu khôi phục thành công! Mật khẩu mới đã được cấp và gửi đến email: <strong>" . htmlspecialchars($userEmail) . "</strong>.<br>Vui lòng kiểm tra Hộp thư đến (hoặc mục Thư rác/Spam) để lấy mật khẩu đăng nhập vào hệ thống.";

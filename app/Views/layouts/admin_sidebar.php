@@ -29,7 +29,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
 <aside class="sidebar sh-sidebar">
     <div class="sidebar-top-group">
         <!-- Logo -->
-       <a href="/studenthub/app/Views/admin/index.php" class="brand sidebar-brand-box">
+       <a href="/studenthub/public/index.php?route=admin_dashboard" class="brand sidebar-brand-box">
             <div class="brand-icon brand-icon-s">S</div>
             <div class="brand-info">
                 <strong>StudentHub</strong>
@@ -41,7 +41,7 @@ if (!isset($activeMenu) || empty($activeMenu)) {
 
         <nav class="menu sidebar-menu-list">
             <!-- 1. Tổng quan -->
-            <a href="/studenthub/app/Views/admin/index.php" class="menu-link sh-nav-item <?= $activeMenu === 'index' ? 'active' : '' ?>">
+            <a href="/studenthub/public/index.php?route=admin_dashboard" class="menu-link sh-nav-item <?= $activeMenu === 'index' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -49,8 +49,8 @@ if (!isset($activeMenu) || empty($activeMenu)) {
                 <span>Tổng quan</span>
             </a>
 
-            <!-- 2. Quản lý tài khoản (Trỏ về app/Views vì chưa chuyển MVC) -->
-            <a href="/studenthub/app/Views/admin/tai_khoan.php" class="menu-link sh-nav-item <?= $activeMenu === 'tai_khoan' ? 'active' : '' ?>">
+            <!-- 2. Quản lý tài khoản (ĐÃ CHUYỂN MVC -> Trỏ về public) -->
+            <a href="/studenthub/public/index.php?route=admin_tai_khoan.php" class="menu-link sh-nav-item <?= $activeMenu === 'tai_khoan' ? 'active' : '' ?>">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>

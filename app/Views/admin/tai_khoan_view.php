@@ -1,331 +1,29 @@
 <?php
+/**
+ * app/Views/admin/tai_khoan_view.php
+ * Giao diện Quản lý tài khoản (Admin) - StudentHub
+ * Kiến trúc: MVC Chuẩn công nghiệp - View sạch
+ */
 
-
-// Chỉ cho phép Admin truy cập.
-if (empty($_SESSION['username'])) {
-    header('Location: ../../../public/index.php');
-    exit;
+if (!function_exists('e')) {
+    function e($value)
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
 }
 
-$vaiTroSession = strtolower(trim((string) ($_SESSION['role'] ?? '')));
-
-if (!in_array($vaiTroSession, ['admin', 'quantri', 'quan_tri', 'quan_tri_vien'], true)) {
-    header('Location: ../../../public/index.php');
-    exit;
-}
-
-require_once __DIR__ . '/../../../config/database.php';
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-$thongBao = '';
-$loaiThongBao = 'success';
-$loi = '';
-
-$tuKhoa = trim($_GET['q'] ?? '');
-$locVaiTro = trim($_GET['vai_tro'] ?? '');
-$hanhDong = $_POST['hanh_dong'] ?? '';
-
-$duLieuSua = [
-    'id' => '',
-    'ten_dang_nhap' => '',
-    'ho_ten' => '',
-    'email' => '',
-    'so_dien_thoai' => '',
-    'vai_tro' => 'sinh_vien'
-];
-
-// XỬ LÝ THÊM, SỬA, XÓA
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfNhan = $_POST['csrf_token'] ?? '';
-
-    if (!hash_equals($_SESSION['csrf_token'], $csrfNhan)) {
-        $thongBao = 'Phiên làm việc không hợp lệ. Hãy tải lại trang.';
-        $loaiThongBao = 'error';
-    } else {
-        try {
-            if ($hanhDong === 'them' || $hanhDong === 'sua') {
-                $id = (int) ($_POST['id'] ?? 0);
-                $tenDangNhap = trim($_POST['ten_dang_nhap'] ?? '');
-                $hoTen = trim($_POST['ho_ten'] ?? '');
-                $email = trim($_POST['email'] ?? '');
-                $soDienThoai = trim($_POST['so_dien_thoai'] ?? '');
-                $vaiTro = trim($_POST['vai_tro'] ?? '');
-                // Chuẩn hóa khoảng trắng trong họ tên.
-                $hoTen = preg_replace('/\s+/u', ' ', $hoTen);
-
-                $duLieuSua = [
-                    'id' => $id,
-                    'ten_dang_nhap' => $tenDangNhap,
-                    'ho_ten' => $hoTen,
-                    'email' => $email,
-                    'so_dien_thoai' => $soDienThoai,
-                    'vai_tro' => $vaiTro
-                ];
-
-                if (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $tenDangNhap)) {
-                    throw new RuntimeException('Tên đăng nhập phải gồm 3–30 ký tự chữ, số hoặc dấu gạch dưới.');
-                }
-
-                // Kiểm tra họ tên phải có ít nhất 2 từ.
-                if ($hoTen === '') {
-                    throw new RuntimeException('Vui lòng nhập họ và tên.');
-                }
-
-                if (!preg_match('/^\p{L}+(?:\s+\p{L}+)+$/u', $hoTen)) {
-                    throw new RuntimeException('Họ và tên phải có ít nhất 2 từ và chỉ chứa chữ cái.');
-                }
-
-                if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    throw new RuntimeException('Địa chỉ email không hợp lệ.');
-                }
-
-                if ($soDienThoai !== '' && !preg_match('/^[0-9+\s().-]{8,20}$/', $soDienThoai)) {
-                    throw new RuntimeException('Số điện thoại không hợp lệ.');
-                }
-
-                if (!in_array($vaiTro, ['sinh_vien', 'giang_vien', 'admin'], true)) {
-                    throw new RuntimeException('Vui lòng chọn vai trò hợp lệ.');
-                }
-
-                if ($hanhDong === 'sua' && $id <= 0) {
-                    throw new RuntimeException('Tài khoản cần sửa không hợp lệ.');
-                }
-
-                // Không cho phép đổi vai trò của tài khoản Admin đang đăng nhập.
-                if (
-                    $hanhDong === 'sua'
-                    && $tenDangNhap === ($_SESSION['username'] ?? '')
-                    && $vaiTro !== 'admin'
-                ) {
-                    throw new RuntimeException('Không thể đổi vai trò của tài khoản Admin đang đăng nhập.');
-                }
-
-                // Kiểm tra tên đăng nhập đã được sử dụng chưa.
-                $sqlTrung = "SELECT COUNT(*) FROM nguoi_dung
-                             WHERE ten_dang_nhap = :username";
-                $thamSoTrung = [':username' => $tenDangNhap];
-
-                if ($hanhDong === 'sua') {
-                    $sqlTrung .= " AND id <> :id";
-                    $thamSoTrung[':id'] = $id;
-                }
-
-                $stmtTrung = $pdo->prepare($sqlTrung);
-                $stmtTrung->execute($thamSoTrung);
-
-                if ((int) $stmtTrung->fetchColumn() > 0) {
-                    throw new RuntimeException('Tên đăng nhập này đã tồn tại.');
-                }
-
-                if ($hanhDong === 'them') {
-                    $sql = "INSERT INTO nguoi_dung
-                            (ten_dang_nhap, mat_khau_hash, ho_ten, email,
-                             so_dien_thoai, vai_tro)
-                            VALUES
-                            (:username, :password, :fullname, :email,
-                             :phone, :role)";
-
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([
-                        ':username' => $tenDangNhap,
-                        ':password' => password_hash('123456', PASSWORD_DEFAULT),
-                        ':fullname' => $hoTen,
-                        ':email' => $email !== '' ? $email : null,
-                        ':phone' => $soDienThoai !== '' ? $soDienThoai : null,
-                        ':role' => $vaiTro
-                    ]);
-
-                    $thongBao = 'Thêm tài khoản thành công.';
-                } else {
-                    $sql = "UPDATE nguoi_dung
-                            SET ten_dang_nhap = :username,
-                                ho_ten = :fullname,
-                                email = :email,
-                                so_dien_thoai = :phone,
-                                vai_tro = :role";
-
-                    $thamSo = [
-                        ':username' => $tenDangNhap,
-                        ':fullname' => $hoTen,
-                        ':email' => $email !== '' ? $email : null,
-                        ':phone' => $soDienThoai !== '' ? $soDienThoai : null,
-                        ':role' => $vaiTro,
-                        ':id' => $id
-                    ];
-
-                    $sql .= " WHERE id = :id";
-
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute($thamSo);
-
-                    // Cập nhật session nếu sửa tài khoản đang đăng nhập.
-                    if ($tenDangNhap === ($_SESSION['username'] ?? '')) {
-                        $_SESSION['username'] = $tenDangNhap;
-                        $_SESSION['ho_ten'] = $hoTen;
-                        $_SESSION['role'] = 'admin';
-                        $_SESSION['tenVaiTro'] = 'Quản trị viên';
-                    }
-
-                    $thongBao = 'Cập nhật tài khoản thành công.';
-                }
-
-                // Chuyển hướng để tránh gửi lại biểu mẫu khi tải lại trang.
-                $_SESSION['account_notice'] = $thongBao;
-                $_SESSION['account_notice_type'] = 'success';
-
-                header('Location: tai_khoan.php');
-                exit;
-            }
-
-            if ($hanhDong === 'xoa') {
-                $idXoa = (int) ($_POST['id'] ?? 0);
-
-                if ($idXoa <= 0) {
-                    throw new RuntimeException('Mã tài khoản không hợp lệ.');
-                }
-
-                // Không cho tự xóa tài khoản đang đăng nhập.
-                $stmt = $pdo->prepare(
-                    "SELECT id, ten_dang_nhap, vai_tro
-                     FROM nguoi_dung WHERE id = :id LIMIT 1"
-                );
-                $stmt->execute([':id' => $idXoa]);
-                $taiKhoanXoa = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if (!$taiKhoanXoa) {
-                    throw new RuntimeException('Không tìm thấy tài khoản cần xóa.');
-                }
-
-                if ($taiKhoanXoa['ten_dang_nhap'] === ($_SESSION['username'] ?? '')) {
-                    throw new RuntimeException('Bạn không thể xóa tài khoản đang đăng nhập.');
-                }
-
-                if (($taiKhoanXoa['vai_tro'] ?? '') === 'admin') {
-                    $stmtDem = $pdo->query(
-                        "SELECT COUNT(*) FROM nguoi_dung WHERE vai_tro = 'admin'"
-                    );
-
-                    if ((int) $stmtDem->fetchColumn() <= 1) {
-                        throw new RuntimeException('Không thể xóa Admin cuối cùng của hệ thống.');
-                    }
-                }
-
-                $stmt = $pdo->prepare(
-                    "DELETE FROM nguoi_dung WHERE id = :id"
-                );
-                $stmt->execute([':id' => $idXoa]);
-
-                $_SESSION['account_notice'] = 'Xóa tài khoản thành công.';
-                $_SESSION['account_notice_type'] = 'success';
-
-                header('Location: tai_khoan.php');
-                exit;
-            }
-
-        } catch (RuntimeException $e) {
-            $thongBao = $e->getMessage();
-            $loaiThongBao = 'error';
-        } catch (PDOException $e) {
-            error_log('StudentHub Account: ' . $e->getMessage());
-
-            $thongBao = 'Không thể xử lý tài khoản. Hãy kiểm tra dữ liệu và các ràng buộc trong CSDL.';
-            $loaiThongBao = 'error';
+if (!function_exists('tenVaiTro')) {
+    function tenVaiTro($role)
+    {
+        switch ($role) {
+            case 'sinh_vien': return 'Sinh viên';
+            case 'giang_vien': return 'Giảng viên';
+            case 'admin': return 'Quản trị viên';
+            default: return 'Chưa xác định';
         }
-    }
-}
-
-// Lấy thông báo sau chuyển hướng.
-if (!empty($_SESSION['account_notice'])) {
-    $thongBao = $_SESSION['account_notice'];
-    $loaiThongBao = $_SESSION['account_notice_type'] ?? 'success';
-
-    unset($_SESSION['account_notice'], $_SESSION['account_notice_type']);
-}
-
-// Lấy tài khoản để sửa.
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['sua'])) {
-    $idSua = (int) $_GET['sua'];
-
-    if ($idSua > 0) {
-        try {
-            $stmt = $pdo->prepare(
-                "SELECT id, ten_dang_nhap, ho_ten, email,
-                        so_dien_thoai, vai_tro
-                 FROM nguoi_dung WHERE id = :id LIMIT 1"
-            );
-            $stmt->execute([':id' => $idSua]);
-            $taiKhoanSua = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($taiKhoanSua) {
-                $duLieuSua = $taiKhoanSua;
-            } else {
-                $thongBao = 'Không tìm thấy tài khoản cần sửa.';
-                $loaiThongBao = 'error';
-            }
-        } catch (PDOException $e) {
-            error_log('StudentHub Account Edit: ' . $e->getMessage());
-            $thongBao = 'Không thể tải thông tin tài khoản.';
-            $loaiThongBao = 'error';
-        }
-    }
-}
-
-// Danh sách tài khoản, tìm kiếm và lọc vai trò.
-$danhSach = [];
-$tongTaiKhoan = 0;
-
-try {
-    $sql = "SELECT id, ten_dang_nhap, ho_ten, email, so_dien_thoai, vai_tro
-            FROM nguoi_dung WHERE 1 = 1";
-    $thamSoTim = [];
-
-    if ($tuKhoa !== '') {
-        $sql .= " AND (ten_dang_nhap LIKE :q1
-                   OR ho_ten LIKE :q2 OR email LIKE :q3)";
-        $tim = '%' . $tuKhoa . '%';
-        $thamSoTim[':q1'] = $tim;
-        $thamSoTim[':q2'] = $tim;
-        $thamSoTim[':q3'] = $tim;
-    }
-
-    if (in_array($locVaiTro, ['sinh_vien', 'giang_vien', 'admin'], true)) {
-        $sql .= " AND vai_tro = :role";
-        $thamSoTim[':role'] = $locVaiTro;
-    }
-
-    $sql .= " ORDER BY id ASC";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($thamSoTim);
-    $danhSach = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $stmtTong = $pdo->query("SELECT COUNT(*) FROM nguoi_dung");
-    $tongTaiKhoan = (int) $stmtTong->fetchColumn();
-
-} catch (PDOException $e) {
-    error_log('StudentHub Account List: ' . $e->getMessage());
-    $loi = 'Không thể tải danh sách tài khoản. Hãy kiểm tra cấu trúc bảng nguoi_dung.';
-}
-
-function e($value)
-{
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-}
-
-function tenVaiTro($role)
-{
-    switch ($role) {
-        case 'sinh_vien': return 'Sinh viên';
-        case 'giang_vien': return 'Giảng viên';
-        case 'admin': return 'Quản trị viên';
-        default: return 'Chưa xác định';
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -333,8 +31,8 @@ function tenVaiTro($role)
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý tài khoản | StudentHub</title>
 
-    <!-- CSS nằm trong app/assets/css -->
-    <link rel="stylesheet" href="../../../assets/css/quantrivien.css">
+    <!-- CSS nằm trong /assets/css -->
+    <link rel="stylesheet" href="/studenthub/assets/css/quantrivien.css">
 </head>
 <body>
 <div class="layout">
@@ -363,20 +61,20 @@ function tenVaiTro($role)
         </header>
 
         <div class="content">
-            <?php if ($thongBao !== ''): ?>
-                <div class="<?= $loaiThongBao === 'error' ? 'error-message' : 'account-notice' ?>">
+            <?php if (!empty($thongBao)): ?>
+                <div class="<?= ($loaiThongBao ?? 'success') === 'error' ? 'error-message' : 'account-notice' ?>">
                     <?= e($thongBao) ?>
                 </div>
             <?php endif; ?>
 
-            <?php if ($loi !== ''): ?>
+            <?php if (!empty($loi)): ?>
                 <div class="error-message"><?= e($loi) ?></div>
             <?php endif; ?>
 
             <section class="account-summary">
                 <div>
                     <span class="summary-label">Tổng tài khoản trong hệ thống</span>
-                    <strong><?= $tongTaiKhoan ?></strong>
+                    <strong><?= (int)($tongTaiKhoan ?? 0) ?></strong>
                     <p>Danh sách tài khoản được lưu trong StudentHub.</p>
                 </div>
                 <div class="summary-icon">♙</div>
@@ -390,10 +88,10 @@ function tenVaiTro($role)
                     </div>
                 </div>
 
-                <form method="POST" action="tai_khoan.php" class="account-form" autocomplete="off">
-                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                <form method="POST" action="/studenthub/public/index.php?route=admin_tai_khoan.php" class="account-form" autocomplete="off">
+                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token'] ?? '') ?>">
                     <input type="hidden" name="hanh_dong" value="<?= !empty($duLieuSua['id']) ? 'sua' : 'them' ?>">
-                    <input type="hidden" name="id" value="<?= e($duLieuSua['id']) ?>">
+                    <input type="hidden" name="id" value="<?= e($duLieuSua['id'] ?? '') ?>">
 
                     <div class="form-grid">
                         <div class="form-field">
@@ -404,7 +102,7 @@ function tenVaiTro($role)
                                 required
                                 maxlength="30"
                                 pattern="[A-Za-z0-9_]{3,30}"
-                                value="<?= e($duLieuSua['ten_dang_nhap']) ?>"
+                                value="<?= e($duLieuSua['ten_dang_nhap'] ?? '') ?>"
                                 placeholder="Ví dụ: sv001"
                             >
                         </div>
@@ -418,7 +116,7 @@ function tenVaiTro($role)
                                 required
                                 maxlength="150"
                                 minlength="5"
-                                value="<?= e($duLieuSua['ho_ten']) ?>"
+                                value="<?= e($duLieuSua['ho_ten'] ?? '') ?>"
                                 placeholder="Ví dụ: Nguyễn Thu Trang"
                                 title="Vui lòng nhập đầy đủ họ và tên, tối thiểu 2 từ."
                             >
@@ -460,9 +158,9 @@ function tenVaiTro($role)
                         <div class="form-field">
                             <label for="vai_tro">Vai trò <span>*</span></label>
                             <select id="vai_tro" name="vai_tro" required>
-                                <option value="sinh_vien" <?= $duLieuSua['vai_tro'] === 'sinh_vien' ? 'selected' : '' ?>>Sinh viên</option>
-                                <option value="giang_vien" <?= $duLieuSua['vai_tro'] === 'giang_vien' ? 'selected' : '' ?>>Giảng viên</option>
-                                <option value="admin" <?= $duLieuSua['vai_tro'] === 'admin' ? 'selected' : '' ?>>Quản trị viên</option>
+                                <option value="sinh_vien" <?= ($duLieuSua['vai_tro'] ?? '') === 'sinh_vien' ? 'selected' : '' ?>>Sinh viên</option>
+                                <option value="giang_vien" <?= ($duLieuSua['vai_tro'] ?? '') === 'giang_vien' ? 'selected' : '' ?>>Giảng viên</option>
+                                <option value="admin" <?= ($duLieuSua['vai_tro'] ?? '') === 'admin' ? 'selected' : '' ?>>Quản trị viên</option>
                             </select>
                         </div>
 
@@ -478,7 +176,7 @@ function tenVaiTro($role)
                         </button>
 
                         <?php if (!empty($duLieuSua['id'])): ?>
-                            <a href="tai_khoan.php" class="btn-secondary">Hủy sửa</a>
+                            <a href="/studenthub/public/index.php?route=admin_tai_khoan.php" class="btn-secondary">Hủy sửa</a>
                         <?php else: ?>
                             <button type="reset" class="btn-secondary">Nhập lại</button>
                         <?php endif; ?>
@@ -494,23 +192,24 @@ function tenVaiTro($role)
                     </div>
                 </div>
 
-                <form method="GET" action="tai_khoan.php" class="account-filters">
+                <form method="GET" action="/studenthub/public/index.php" class="account-filters">
+                    <input type="hidden" name="route" value="admin_tai_khoan.php">
                     <input
                         type="search"
                         name="q"
-                        value="<?= e($tuKhoa) ?>"
+                        value="<?= e($tuKhoa ?? '') ?>"
                         placeholder="Tìm tên đăng nhập, họ tên, email..."
                     >
 
                     <select name="vai_tro" aria-label="Lọc theo vai trò">
                         <option value="">Tất cả vai trò</option>
-                        <option value="sinh_vien" <?= $locVaiTro === 'sinh_vien' ? 'selected' : '' ?>>Sinh viên</option>
-                        <option value="giang_vien" <?= $locVaiTro === 'giang_vien' ? 'selected' : '' ?>>Giảng viên</option>
-                        <option value="admin" <?= $locVaiTro === 'admin' ? 'selected' : '' ?>>Quản trị viên</option>
+                        <option value="sinh_vien" <?= ($locVaiTro ?? '') === 'sinh_vien' ? 'selected' : '' ?>>Sinh viên</option>
+                        <option value="giang_vien" <?= ($locVaiTro ?? '') === 'giang_vien' ? 'selected' : '' ?>>Giảng viên</option>
+                        <option value="admin" <?= ($locVaiTro ?? '') === 'admin' ? 'selected' : '' ?>>Quản trị viên</option>
                     </select>
 
                     <button type="submit" class="btn-primary">Tìm kiếm</button>
-                    <a href="tai_khoan.php" class="btn-secondary">Làm mới</a>
+                    <a href="/studenthub/public/index.php?route=admin_tai_khoan.php" class="btn-secondary">Làm mới</a>
                 </form>
 
                 <div class="table-wrap">
@@ -549,14 +248,14 @@ function tenVaiTro($role)
                                         <div class="action-buttons">
                                             <a
                                                 class="btn-edit"
-                                                href="tai_khoan.php?sua=<?= (int) $tk['id'] ?>"
+                                                href="/studenthub/public/index.php?route=admin_tai_khoan.php&sua=<?= (int) $tk['id'] ?>"
                                             >
                                                 Sửa
                                             </a>
 
                                             <?php if ($tk['ten_dang_nhap'] !== ($_SESSION['username'] ?? '')): ?>
-                                                <form method="POST" action="tai_khoan.php" class="delete-form">
-                                                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                                <form method="POST" action="/studenthub/public/index.php?route=admin_tai_khoan.php" class="delete-form">
+                                                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token'] ?? '') ?>">
                                                     <input type="hidden" name="hanh_dong" value="xoa">
                                                     <input type="hidden" name="id" value="<?= (int) $tk['id'] ?>">
                                                     <button type="submit" class="btn-delete">Xóa</button>
@@ -581,6 +280,6 @@ function tenVaiTro($role)
     </main>
 </div>
 
-<script src="../../../assets/js/quantrivien.js"></script>
+<script src="/studenthub/assets/js/quantrivien.js"></script>
 </body>
 </html>

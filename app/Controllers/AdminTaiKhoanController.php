@@ -1,7 +1,11 @@
-
 <?php
+/**
+ * app/Controllers/AdminTaiKhoanController.php
+ * Controller xử lý Quản lý tài khoản (Admin) - StudentHub
+ * Kiến trúc: MVC Chuẩn công nghiệp - PHP 8.x
+ */
 
-require_once __DIR__ . '/../models/AdminTaiKhoanModel.php';
+require_once __DIR__ . '/../Models/AdminTaiKhoanModel.php';
 
 class AdminTaiKhoanController
 {
@@ -22,15 +26,15 @@ class AdminTaiKhoanController
 
         if (!$pdo instanceof PDO) {
             require __DIR__ . '/../../config/database.php';
+            $pdo = $pdo ?? $conn ?? null;
         }
 
         if (!$pdo instanceof PDO) {
             throw new RuntimeException('Không thể kết nối cơ sở dữ liệu StudentHub.');
         }
 
-        // Lưu kết nối PDO để sử dụng trong Controller và View.
+        // Lưu kết nối PDO để sử dụng trong Controller và Model
         $this->pdo = $pdo;
-
         $this->model = new AdminTaiKhoanModel($this->pdo);
     }
 
@@ -94,10 +98,9 @@ class AdminTaiKhoanController
             $loi = 'Không thể tải danh sách tài khoản. Hãy kiểm tra cấu trúc bảng nguoi_dung.';
         }
 
-        // Truyền kết nối PDO sang View.
         $pdo = $this->pdo;
 
-        require __DIR__ . '/../views/admin/tai_khoan_view.php';
+        require __DIR__ . '/../Views/admin/tai_khoan_view.php';
     }
 
     private function handlePost(
@@ -122,7 +125,7 @@ class AdminTaiKhoanController
                 $_SESSION['account_notice'] = $thongBao;
                 $_SESSION['account_notice_type'] = 'success';
 
-                header('Location: tai_khoan.php');
+                header('Location: /studenthub/public/index.php?route=admin_tai_khoan.php');
                 exit;
             }
 
@@ -132,7 +135,7 @@ class AdminTaiKhoanController
                 $_SESSION['account_notice'] = 'Xóa tài khoản thành công.';
                 $_SESSION['account_notice_type'] = 'success';
 
-                header('Location: tai_khoan.php');
+                header('Location: /studenthub/public/index.php?route=admin_tai_khoan.php');
                 exit;
             }
         } catch (RuntimeException $e) {
@@ -160,6 +163,7 @@ class AdminTaiKhoanController
             'so_dien_thoai' => trim((string) ($_POST['so_dien_thoai'] ?? '')),
             'vai_tro' => trim((string) ($_POST['vai_tro'] ?? '')),
         ];
+
         if (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $account['ten_dang_nhap'])) {
             throw new RuntimeException('Tên đăng nhập phải gồm 3–30 ký tự chữ, số hoặc dấu gạch dưới.');
         }

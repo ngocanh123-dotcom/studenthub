@@ -1,135 +1,19 @@
-
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+/**
+ * app/Views/giangvien/sinh_vien.php
+ * View Danh sách sinh viên theo lớp học phần
+ * Dữ liệu ($lop, $sinhVienList, $tongSinhVien, $tenGiangVien, $username) do GiangVienController truyền sang
+ */
 
-// 1. Kiểm tra quyền giảng viên
-if (
-    empty($_SESSION['username']) ||
-    ($_SESSION['role'] ?? '') !== 'giangvien'
-) {
-    header('Location: /studenthub/public/index.php');
-    exit;
-}
-
-// 2. Kết nối cơ sở dữ liệu
-// [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
-require_once __DIR__ . '/../../../config/database.php';
-$username = $_SESSION['username'];
-
-if (!isset($pdo) || !($pdo instanceof PDO)) {
-    exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
-}
-
-// 3. Kiểm tra lớp học phần được chọn
-$lopId = filter_input(INPUT_GET, 'lop_id', FILTER_VALIDATE_INT);
-
-if (!$lopId || $lopId < 1) {
-    header('Location: /studenthub/public/index.php?route=giang_vien.php');
-    exit;
-}
-
-// 4. Lấy thông tin giảng viên và kiểm tra quyền
-try {
-    $stmtGiangVien = $pdo->prepare("
-        SELECT id, ho_ten, ten_dang_nhap
-        FROM nguoi_dung
-        WHERE ten_dang_nhap = :username
-          AND vai_tro = 'giang_vien'
-        LIMIT 1
-    ");
-
-    $stmtGiangVien->execute([
-        'username' => $username
-    ]);
-
-    $giangVien = $stmtGiangVien->fetch();
-
-    if (!$giangVien) {
-        http_response_code(403);
-        exit('Không tìm thấy tài khoản giảng viên.');
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return htmlspecialchars(
+            (string)($value ?? ''),
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
-
-    $currentLecturerId = (int)$giangVien['id'];
-    $tenGiangVien = $giangVien['ho_ten'] ?: 'Giảng viên';
-
-    $_SESSION['user_id'] = $currentLecturerId;
-    $_SESSION['tenVaiTro'] = $tenGiangVien;
-
-    // Kiểm tra lớp có thuộc giảng viên hiện tại không
-    $sqlLop = "
-        SELECT
-            lhp.id,
-            lhp.ma_lop,
-            hp.id AS hoc_phan_id,
-            hp.ma_hoc_phan,
-            hp.ten_hoc_phan,
-            hk.ten_hoc_ky
-        FROM lop_hoc_phan lhp
-        INNER JOIN hoc_phan hp
-            ON hp.id = lhp.hoc_phan_id
-        INNER JOIN hoc_ky hk
-            ON hk.id = lhp.hoc_ky_id
-        WHERE lhp.id = :lop_id
-          AND lhp.giang_vien_id = :giang_vien_id
-        LIMIT 1
-    ";
-
-    $stmtLop = $pdo->prepare($sqlLop);
-
-    $stmtLop->execute([
-        'lop_id' => $lopId,
-        'giang_vien_id' => $currentLecturerId
-    ]);
-
-    $lop = $stmtLop->fetch();
-
-    if (!$lop) {
-        http_response_code(404);
-        exit('Không tìm thấy lớp học phần hoặc bạn không có quyền xem lớp này.');
-    }
-
-    // 5. Lấy danh sách sinh viên đã đăng ký lớp
-    $sqlSinhVien = "
-        SELECT
-            sv.id,
-            sv.ten_dang_nhap,
-            sv.ho_ten,
-            sv.email,
-            sv.so_dien_thoai
-        FROM dang_ky_hoc dk
-        INNER JOIN nguoi_dung sv
-            ON sv.id = dk.sinh_vien_id
-        WHERE dk.lop_hoc_phan_id = :lop_id
-          AND dk.trang_thai = 'dang_ky'
-          AND sv.vai_tro = 'sinh_vien'
-        ORDER BY sv.ten_dang_nhap ASC
-    ";
-
-    $stmtSinhVien = $pdo->prepare($sqlSinhVien);
-
-    $stmtSinhVien->execute([
-        'lop_id' => $lopId
-    ]);
-
-    $sinhVienList = $stmtSinhVien->fetchAll();
-
-    $tongSinhVien = count($sinhVienList);
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Không thể tải danh sách sinh viên. Vui lòng kiểm tra cấu trúc database.');
-}
-
-// 6. Hàm bảo vệ dữ liệu khi hiển thị
-function e($value): string
-{
-    return htmlspecialchars(
-        (string)($value ?? ''),
-        ENT_QUOTES,
-        'UTF-8'
-    );
 }
 ?>
 

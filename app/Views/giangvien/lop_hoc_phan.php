@@ -1,202 +1,30 @@
-
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+/**
+ * app/Views/giangvien/lop_hoc_phan.php
+ * View Danh sách lớp học phần theo môn của Giảng viên
+ * Dữ liệu ($hocPhan, $classes, $tenGiangVien, $username) do GiangVienController truyền sang
+ */
 
-// ==========================================
-// 1. KIỂM TRA QUYỀN GIẢNG VIÊN
-// ==========================================
-if (
-    empty($_SESSION['username']) ||
-    ($_SESSION['role'] ?? '') !== 'giangvien'
-) {
-    header('Location: /studenthub/public/index.php');
-    exit;
-}
-
-// ==========================================
-// 2. KẾT NỐI CƠ SỞ DỮ LIỆU
-// ==========================================
-// [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
-require_once __DIR__ . '/../../../config/database.php';
-$username = $_SESSION['username'];
-
-if (!isset($pdo) || !($pdo instanceof PDO)) {
-    exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
-}
-
-// ==========================================
-// 3. LẤY THÔNG TIN GIẢNG VIÊN
-// ==========================================
-try {
-    $currentLecturerId = (int)(
-        $_SESSION['user_id']
-        ?? $_SESSION['nguoi_dung_id']
-        ?? 0
-    );
-
-    if ($currentLecturerId <= 0) {
-        $stmtGvId = $pdo->prepare("
-            SELECT id
-            FROM nguoi_dung
-            WHERE ten_dang_nhap = :username
-              AND vai_tro = 'giang_vien'
-            LIMIT 1
-        ");
-
-        $stmtGvId->execute([
-            ':username' => $username
-        ]);
-
-        $currentLecturerId = (int)$stmtGvId->fetchColumn();
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return htmlspecialchars(
+            (string)($value ?? ''),
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
+}
 
-    $stmtInfo = $pdo->prepare("
-        SELECT id, ho_ten, ten_dang_nhap
-        FROM nguoi_dung
-        WHERE id = :id
-          AND ten_dang_nhap = :username
-          AND vai_tro = 'giang_vien'
-        LIMIT 1
-    ");
-
-    $stmtInfo->execute([
-        ':id' => $currentLecturerId,
-        ':username' => $username
-    ]);
-
-    $lecturerInfo = $stmtInfo->fetch();
-
-    if (!$lecturerInfo) {
-        exit('Không tìm thấy thông tin tài khoản giảng viên.');
+if (!function_exists('trangThaiLop')) {
+    function trangThaiLop($status): string
+    {
+        return match ($status) {
+            'mo' => 'Đang mở',
+            'khoa' => 'Đã khóa',
+            default => (string)$status
+        };
     }
-
-    $currentLecturerId = (int)$lecturerInfo['id'];
-
-    $tenGiangVien = $lecturerInfo['ho_ten']
-        ?: ($_SESSION['tenVaiTro'] ?? 'Giảng viên');
-
-    $_SESSION['ho_ten'] = $tenGiangVien;
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Không thể tải thông tin giảng viên.');
-}
-
-// ==========================================
-// 4. KIỂM TRA HỌC PHẦN ĐƯỢC CHỌN
-// ==========================================
-$hocPhanId = filter_input(
-    INPUT_GET,
-    'hoc_phan_id',
-    FILTER_VALIDATE_INT
-);
-
-if (!$hocPhanId || $hocPhanId < 1) {
-    header('Location: /studenthub/public/index.php?route=giang_vien.php');
-    exit;
-}
-
-// ==========================================
-// 5. LẤY THÔNG TIN HỌC PHẦN VÀ DANH SÁCH LỚP
-// ==========================================
-try {
-    // Kiểm tra học phần có thuộc giảng viên hiện tại không
-    $sqlHocPhan = "
-        SELECT DISTINCT
-            hp.id,
-            hp.ma_hoc_phan,
-            hp.ten_hoc_phan
-        FROM hoc_phan hp
-        INNER JOIN lop_hoc_phan lhp
-            ON lhp.hoc_phan_id = hp.id
-        WHERE hp.id = :hoc_phan_id
-          AND lhp.giang_vien_id = :current_lecturer_id
-        LIMIT 1
-    ";
-
-    $stmtHocPhan = $pdo->prepare($sqlHocPhan);
-
-    $stmtHocPhan->execute([
-        ':hoc_phan_id' => $hocPhanId,
-        ':current_lecturer_id' => $currentLecturerId
-    ]);
-
-    $hocPhan = $stmtHocPhan->fetch();
-
-    if (!$hocPhan) {
-        http_response_code(404);
-        exit('Không tìm thấy học phần hoặc bạn không có quyền xem học phần này.');
-    }
-
-    // Lấy danh sách lớp thuộc học phần
-    $sqlLop = "
-        SELECT
-            lhp.id,
-            lhp.ma_lop,
-            lhp.lich_hoc,
-            lhp.phong_hoc,
-            hk.ten_hoc_ky,
-            lhp.si_so_toi_da,
-            lhp.trang_thai,
-            COUNT(
-                DISTINCT CASE
-                    WHEN dk.trang_thai = 'dang_ky'
-                    THEN dk.sinh_vien_id
-                END
-            ) AS si_so_hien_tai
-        FROM lop_hoc_phan lhp
-        INNER JOIN hoc_ky hk
-            ON hk.id = lhp.hoc_ky_id
-        LEFT JOIN dang_ky_hoc dk
-            ON dk.lop_hoc_phan_id = lhp.id
-        WHERE lhp.hoc_phan_id = :hoc_phan_id
-          AND lhp.giang_vien_id = :current_lecturer_id
-        GROUP BY
-            lhp.id,
-            lhp.ma_lop,
-            lhp.lich_hoc,
-            lhp.phong_hoc,
-            hk.ten_hoc_ky,
-            lhp.si_so_toi_da,
-            lhp.trang_thai
-        ORDER BY lhp.ma_lop
-    ";
-
-    $stmtLop = $pdo->prepare($sqlLop);
-
-    $stmtLop->execute([
-        ':hoc_phan_id' => $hocPhanId,
-        ':current_lecturer_id' => $currentLecturerId
-    ]);
-
-    $classes = $stmtLop->fetchAll();
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Không thể tải danh sách lớp học phần. Vui lòng kiểm tra cấu trúc database.');
-}
-
-// ==========================================
-// 6. HÀM HỖ TRỢ
-// ==========================================
-function e($value): string
-{
-    return htmlspecialchars(
-        (string)($value ?? ''),
-        ENT_QUOTES,
-        'UTF-8'
-    );
-}
-
-function trangThaiLop($status): string
-{
-    return match ($status) {
-        'mo' => 'Đang mở',
-        'khoa' => 'Đã khóa',
-        default => (string)$status
-    };
 }
 ?>
 
@@ -305,7 +133,6 @@ function trangThaiLop($status): string
                             <th>Lịch học</th>
                             <th>Phòng học</th>
                             <th>Sĩ số</th>
-                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -315,7 +142,7 @@ function trangThaiLop($status): string
                     <?php if (empty($classes)): ?>
 
                         <tr>
-                            <td colspan="8" class="empty">
+                            <td colspan="7" class="empty">
                                 Học phần này chưa có lớp học phần được phân công.
                             </td>
                         </tr>
@@ -352,12 +179,6 @@ function trangThaiLop($status): string
                                     <?= (int)$class['si_so_hien_tai'] ?>
                                     /
                                     <?= (int)$class['si_so_toi_da'] ?>
-                                </td>
-
-                                <td>
-                                    <span class="status">
-                                        <?= e(trangThaiLop($class['trang_thai'])) ?>
-                                    </span>
                                 </td>
 
                                 <td>

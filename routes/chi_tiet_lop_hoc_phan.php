@@ -3,4 +3,8 @@
 require_once __DIR__ . '/_require_role.php';
 studenthubRequireRole(['sinhvien']);
 
-require __DIR__ . '/../app/Views/classes/detail.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../app/Controllers/ClassController.php';
+
+$controller = new ClassController($pdo ?? $conn ?? null);
+$controller->detail();

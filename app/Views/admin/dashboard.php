@@ -8,7 +8,7 @@
     <title>Tổng quan quản trị | StudentHub</title>
 
     <link rel="stylesheet"
-          href="../../../assets/css/quantrivien.css">
+          href="/studenthub/assets/css/quantrivien.css">
 </head>
 
 <body>
@@ -133,7 +133,7 @@
 
                 <div class="quick-links">
 
-                    <a class="quick-link" href="tai_khoan.php">
+                    <a class="quick-link" href="/studenthub/public/index.php?route=admin_tai_khoan.php">
                         <div class="quick-icon blue-bg">♙</div>
                         <div class="quick-content">
                             <h3>Quản lý tài khoản</h3>
@@ -145,7 +145,7 @@
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/public/index.php?route=admin_hoc_phan">
                         <div class="quick-icon purple-bg">▤</div>
                         <div class="quick-content">
                             <h3>Quản lý học phần</h3>
@@ -169,7 +169,7 @@
                         <span class="quick-arrow">→</span>
                     </a>
 
-                    <a class="quick-link" href="lop_hoc_phan.php">
+                    <a class="quick-link" href="/studenthub/public/index.php?route=admin_lop_hoc_phan.php">
                         <div class="quick-icon orange-bg">▣</div>
                         <div class="quick-content">
                             <h3>Quản lý lớp học phần</h3>
@@ -191,6 +191,6 @@
     </main>
 </div>
 
-<script src="../../../assets/js/quantrivien.js"></script>
+<script src="/studenthub/assets/js/quantrivien.js"></script>
 </body>
 </html>

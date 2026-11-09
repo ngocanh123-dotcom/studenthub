@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../../controllers/AdminDashboardController.php';
-
-$controller = new AdminDashboardController();
-$controller->index();
+/**
+ * app/Views/admin/index.php
+ * Chuyển hướng tương thích ngược về Route chuẩn MVC (admin_dashboard)
+ */
+header('Location: /studenthub/public/index.php?route=admin_dashboard');
+exit;

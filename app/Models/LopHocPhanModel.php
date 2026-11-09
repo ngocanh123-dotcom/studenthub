@@ -13,31 +13,28 @@ class LopHocPhanModel {
     }
 
     /**
-     * Lấy chi tiết 1 lớp học phần theo ID (hoặc Mã lớp) và thời gian sinh viên đăng nhập đã ghi danh (nếu có)
-     * Đảm bảo SELECT đầy đủ các trường thời gian của học kỳ và thời gian riêng của lớp
-     * 
-     * @param int|string $classId ID hoặc Mã lớp học phần
-     * @param int|null $studentId ID sinh viên đang đăng nhập
+     * Lấy đầy đủ thông tin chi tiết một lớp học phần theo ID hoặc Mã lớp
+     * Thực hiện SELECT đầy đủ thông tin: thông tin lớp (lhp.*), thông tin môn (hp.ten_hoc_phan,
+     * hp.ma_hoc_phan, hp.so_tin_chi, hp.loai_hoc_phan, hp.mo_ta), giảng viên (gv.ho_ten, gv.email), học kỳ (hk.ten_hoc_ky).
+     *
+     * @param int|string $id ID hoặc Mã lớp học phần
+     * @param int|null $studentId ID sinh viên đang đăng nhập (để tra cứu thời gian đăng ký riêng)
      * @return array|null Mảng dữ liệu chi tiết lớp hoặc null nếu không tìm thấy
      */
-    public function getChiTietLop(int|string $classId, ?int $studentId = 0): ?array {
+    public function getDetailById(int|string $id, ?int $studentId = 0): ?array {
         if (!$this->conn instanceof PDO) {
             return null;
         }
 
         $sql = "SELECT 
+                    lhp.*,
                     lhp.id AS lop_id,
-                    lhp.ma_lop,
-                    lhp.lich_hoc,
-                    lhp.phong_hoc,
-                    lhp.si_so_toi_da,
                     lhp.trang_thai AS trang_thai_lop,
-                    lhp.thoi_gian_mo_rieng,
-                    lhp.thoi_gian_dong_rieng,
                     hp.ma_hoc_phan,
                     hp.ten_hoc_phan,
                     hp.so_tin_chi,
                     hp.loai_hoc_phan,
+                    hp.mo_ta,
                     hp.mo_ta AS mo_ta_hoc_phan,
                     hk.ten_hoc_ky,
                     hk.ngay_bat_dau,
@@ -45,7 +42,9 @@ class LopHocPhanModel {
                     hk.thoi_gian_mo_dk,
                     hk.thoi_gian_dong_dk,
                     hk.trang_thai_dang_ky,
+                    gv.ho_ten,
                     gv.ho_ten AS ten_giang_vien,
+                    gv.email,
                     gv.email AS email_giang_vien,
                     -- Đếm tổng sĩ số thực tế đã đăng ký hợp lệ
                     (SELECT COUNT(*) 
@@ -62,26 +61,33 @@ class LopHocPhanModel {
                 INNER JOIN hoc_phan hp ON lhp.hoc_phan_id = hp.id
                 INNER JOIN hoc_ky hk ON lhp.hoc_ky_id = hk.id
                 LEFT JOIN nguoi_dung gv ON lhp.giang_vien_id = gv.id
-                WHERE (lhp.id = :class_id_numeric OR lhp.ma_lop = :class_code)
+                WHERE (lhp.id = :id_numeric OR lhp.ma_lop = :id_code)
                 LIMIT 1";
 
         try {
             $stmt = $this->conn->prepare($sql);
-            $numericId = is_numeric($classId) ? (int)$classId : 0;
-            $classCode = (string)$classId;
+            $numericId = is_numeric($id) ? (int)$id : 0;
+            $idCode = (string)$id;
 
             $stmt->execute([
-                ':class_id_numeric' => $numericId,
-                ':class_code'       => $classCode,
-                ':student_id'       => (int)($studentId ?? 0)
+                ':id_numeric' => $numericId,
+                ':id_code'    => $idCode,
+                ':student_id' => (int)($studentId ?? 0)
             ]);
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (PDOException $e) {
-            error_log("Lỗi truy vấn LopHocPhanModel::getChiTietLop: " . $e->getMessage());
+            error_log("Lỗi truy vấn LopHocPhanModel::getDetailById: " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Lấy chi tiết 1 lớp học phần theo ID (hoặc Mã lớp) - tương thích ngược
+     */
+    public function getChiTietLop(int|string $classId, ?int $studentId = 0): ?array {
+        return $this->getDetailById($classId, $studentId);
     }
 
     /**
@@ -89,7 +95,7 @@ class LopHocPhanModel {
      */
     public function getClassDetail(int|string $classId): ?array {
         $studentId = $_SESSION['user_id'] ?? ($_SESSION['nguoi_dung_id'] ?? 0);
-        return $this->getChiTietLop($classId, (int)$studentId);
+        return $this->getDetailById($classId, (int)$studentId);
     }
 
     /**

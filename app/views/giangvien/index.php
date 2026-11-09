@@ -1,166 +1,19 @@
-
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+/**
+ * app/Views/giangvien/index.php
+ * View Tổng quan dành cho Giảng viên (Lecturer Dashboard)
+ * Dữ liệu ($tenGiangVien, $username, $tongHocPhan, $tongLop, $tongSinhVien, $classes) do GiangVienController truyền sang
+ */
 
-// ==========================================
-// 1. KIỂM TRA QUYỀN GIẢNG VIÊN
-// ==========================================
-if (
-    empty($_SESSION['username']) ||
-    ($_SESSION['role'] ?? '') !== 'giangvien'
-) {
-    header('Location: /studenthub/public/index.php');
-    exit;
-}
-
-// ==========================================
-// 2. KẾT NỐI CƠ SỞ DỮ LIỆU
-// ==========================================
-// [BUG-01 Hotfix] Nạp kết nối cơ sở dữ liệu dùng chung từ config/database.php
-require_once __DIR__ . '/../../../config/database.php';
-$username = $_SESSION['username'];
-
-if (!isset($pdo) || !($pdo instanceof PDO)) {
-    exit('Không thể kết nối cơ sở dữ liệu StudentHub.');
-}
-
-// ==========================================
-// 3. LẤY THÔNG TIN GIẢNG VIÊN ĐANG ĐĂNG NHẬP
-// ==========================================
-try {
-    $currentLecturerId = (int)(
-        $_SESSION['user_id']
-        ?? $_SESSION['nguoi_dung_id']
-        ?? 0
-    );
-
-    // Nếu Session chưa có ID thì tìm theo tên đăng nhập
-    if ($currentLecturerId <= 0) {
-        $stmtGv = $pdo->prepare("
-            SELECT id
-            FROM nguoi_dung
-            WHERE ten_dang_nhap = :username
-              AND vai_tro = 'giang_vien'
-            LIMIT 1
-        ");
-
-        $stmtGv->execute([
-            ':username' => $username
-        ]);
-
-        $currentLecturerId = (int)$stmtGv->fetchColumn();
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return htmlspecialchars(
+            (string)($value ?? ''),
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
-
-    // Lấy họ tên chính xác từ cơ sở dữ liệu
-    $stmtInfo = $pdo->prepare("
-        SELECT id, ho_ten, ten_dang_nhap
-        FROM nguoi_dung
-        WHERE id = :id
-          AND ten_dang_nhap = :username
-          AND vai_tro = 'giang_vien'
-        LIMIT 1
-    ");
-
-    $stmtInfo->execute([
-        ':id' => $currentLecturerId,
-        ':username' => $username
-    ]);
-
-    $lecturerInfo = $stmtInfo->fetch();
-
-    if (!$lecturerInfo) {
-        exit('Không tìm thấy thông tin tài khoản giảng viên.');
-    }
-
-    $currentLecturerId = (int)$lecturerInfo['id'];
-
-    $tenGiangVien = $lecturerInfo['ho_ten']
-        ?: ($_SESSION['tenVaiTro'] ?? 'Giảng viên');
-
-    // Cập nhật họ tên vào Session nếu cần
-    $_SESSION['ho_ten'] = $tenGiangVien;
-
-    // ==========================================
-    // 4. LẤY DANH SÁCH HỌC PHẦN ĐƯỢC PHÂN CÔNG
-    // ==========================================
-    $sql = "
-        SELECT
-            hp.id AS hoc_phan_id,
-            hp.ma_hoc_phan,
-            hp.ten_hoc_phan,
-            COUNT(DISTINCT lhp.id) AS tong_lop
-        FROM hoc_phan hp
-        INNER JOIN lop_hoc_phan lhp
-            ON lhp.hoc_phan_id = hp.id
-        WHERE lhp.giang_vien_id = :current_lecturer_id
-        GROUP BY
-            hp.id,
-            hp.ma_hoc_phan,
-            hp.ten_hoc_phan
-        ORDER BY hp.ma_hoc_phan
-    ";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
-        ':current_lecturer_id' => $currentLecturerId
-    ]);
-
-    $classes = $stmt->fetchAll();
-
-    // ==========================================
-    // 5. THỐNG KÊ TỔNG QUAN
-    // ==========================================
-    $tongLop = 0;
-    $tongSinhVien = 0;
-
-    foreach ($classes as $class) {
-        $tongLop += (int)$class['tong_lop'];
-    }
-
-    $tongHocPhan = count($classes);
-
-    // Tổng lượt sinh viên đăng ký các lớp của giảng viên
-    $sqlSinhVien = "
-        SELECT COUNT(
-            DISTINCT CONCAT(
-                dk.lop_hoc_phan_id,
-                '-',
-                dk.sinh_vien_id
-            )
-        )
-        FROM dang_ky_hoc dk
-        INNER JOIN lop_hoc_phan lhp
-            ON lhp.id = dk.lop_hoc_phan_id
-        WHERE lhp.giang_vien_id = :current_lecturer_id
-          AND dk.trang_thai = 'dang_ky'
-    ";
-
-    $stmtSinhVien = $pdo->prepare($sqlSinhVien);
-
-    $stmtSinhVien->execute([
-        ':current_lecturer_id' => $currentLecturerId
-    ]);
-
-    $tongSinhVien = (int)$stmtSinhVien->fetchColumn();
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Không thể tải dữ liệu giảng viên. Vui lòng kiểm tra cơ sở dữ liệu.');
-}
-
-// ==========================================
-// 6. HÀM HỖ TRỢ
-// ==========================================
-function e($value): string
-{
-    return htmlspecialchars(
-        (string)($value ?? ''),
-        ENT_QUOTES,
-        'UTF-8'
-    );
 }
 ?>
 

@@ -49,6 +49,24 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
     <!-- Ép trình duyệt luôn cập nhật CSS mới bằng chuỗi time() chống cache -->
     <link rel="stylesheet" href="/studenthub/assets/css/sinhvien.css?v=<?= time() ?>">
     <style>
+        .btn-outline-primary {
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2563eb;
+            background: transparent;
+            border: 1.5px solid #2563eb;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-outline-primary:hover {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
         /* Đảm bảo thẻ <a> khi dùng class .btn-enroll-action hiển thị chuẩn nút bấm */
         a.btn-enroll-action {
             display: inline-block;
@@ -314,7 +332,7 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
                             <th>TÊN HỌC PHẦN</th>
                             <th>GIẢNG VIÊN</th>
                             <th>SĨ SỐ</th>
-                            <th>THAO TÁC</th>
+                            <th>CHI TIẾT</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -352,19 +370,9 @@ $hanDangKy = $hocKyHienTai['thoi_gian_dong_dk'] ?? null;
                                         <span style="color:#059669; font-weight:700;">(còn <?= $conCho ?>)</span>
                                     </td>
                                     <td>
-                                        <form
-                                            method="POST"
-                                            action="/studenthub/public/index.php?route=dang_ky_hoc.php"
-                                            style="margin:0;"
-                                        >
-                                            <input type="hidden" name="lop_hoc_phan_id" value="<?= (int) $lop['id'] ?>">
-                                            <input
-                                                type="hidden"
-                                                name="csrf_token"
-                                                value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                            >
-                                            <button type="submit" class="btn-enroll-action">+ Đăng ký</button>
-                                        </form>
+                                        <a href="index.php?route=chi_tiet_lop_hoc_phan.php&id=<?= $lop['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                            Xem chi tiết
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

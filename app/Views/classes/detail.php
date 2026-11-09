@@ -1,117 +1,58 @@
 <?php
-// app/Views/classes/detail.php
-// Module Chi tiết lớp học phần dành cho Sinh viên (Read-only Detail View)
-// Đảm bảo không nảy Warning và tuân thủ chuẩn an toàn dữ liệu PHP 8.x
+/**
+ * app/Views/classes/detail.php
+ * View hiển thị chi tiết lớp học phần dành cho Sinh viên (Read-only Bento Grid)
+ * Kiến trúc: MVC View thuần túy - Dữ liệu ($lop, $class, $enrolledStudents) do Controller truyền sang
+ */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+if (empty($lop)): ?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không tìm thấy lớp học phần - StudentHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/studenthub/assets/css/sinhvien.css?v=<?= time() ?>">
+</head>
+<body class="sh-body">
+    <div class="sh-container">
+        <?php 
+        $sidebarPath = __DIR__ . '/../layouts/sidebar.php';
+        if (file_exists($sidebarPath)) {
+            include $sidebarPath; 
+        } 
+        ?>
+        <main class="sh-main-content">
+            <div style="background:#fff; border-radius:14px; padding:60px 30px; text-align:center; border:1px solid #e2e8f0; margin-top:20px;">
+                <div style="font-size:48px; margin-bottom:12px;">🔍</div>
+                <h2 style="font-size:22px; color:#1e293b; margin-bottom:8px;">Không tìm thấy thông tin lớp học phần</h2>
+                <p style="color:#64748b; margin-bottom:24px;">Lớp học phần bạn đang tìm kiếm không tồn tại hoặc đã được gỡ bỏ khỏi hệ thống.</p>
+                <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php" class="btn-enroll-action" style="padding:10px 22px; background:#2563eb; color:#fff; border-radius:8px; text-decoration:none; font-weight:600; display:inline-block;">
+                    &larr; Quay lại danh sách lớp học phần
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+<?php return; endif; ?>
 
-// 1. Nhận diện phiên đăng nhập sinh viên (chuẩn hóa các khóa Session theo kiến trúc hệ thống)
-// Kiểm tra phiên đăng nhập an toàn
-if (empty($_SESSION['user_id']) && empty($_SESSION['nguoi_dung_id'])) {
-    header('Location: /studenthub/public/index.php');
-    exit;
-}
-$currentUserId = (int)($_SESSION['user_id'] ?? $_SESSION['nguoi_dung_id']);
-$hoTenSv       = (string)($_SESSION['ho_ten'] ?? ($_SESSION['username'] ?? 'Sinh viên'));
-$maSv          = (string)($_SESSION['ten_dang_nhap'] ?? ($_SESSION['username'] ?? ''));
-
-// 2. Nhận ID hoặc Mã lớp học phần từ URL (mặc định lấy lớp 1 nếu không truyền)
-$classId = $_GET['id'] ?? ($_GET['ma_lop'] ?? 1);
-
-// 3. Nạp Model và kết nối CSDL an toàn
-require_once __DIR__ . '/../../Models/LopHocPhanModel.php';
-
-$db = null;
-$configFile = __DIR__ . '/../../../config/database.php';
-if (file_exists($configFile)) {
-    require_once $configFile;
-    if (isset($conn) && $conn instanceof PDO) {
-        $db = $conn;
-    } elseif (isset($pdo) && $pdo instanceof PDO) {
-        $db = $pdo;
-    }
-}
-
-// Kết nối dự phòng an toàn nếu biến kết nối chưa khởi tạo
-if (!$db) {
-    $dbHost = 'localhost';
-    $dbName = 'studenthub';
-    $dbUser = 'root';
-    $dbPass = '';
-
-    try {
-        $db = new PDO("mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4", $dbUser, $dbPass, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false
-        ]);
-    } catch (PDOException $e) {
-        // Ghi log lỗi nội bộ, không phơi bày thông tin nhạy cảm
-        error_log("Detail view DB connection error: " . $e->getMessage());
-    }
-}
-
-// 4. Lấy dữ liệu chi tiết lớp học phần thông qua Model
-$lop = null;
-if ($db instanceof PDO) {
-    $model = new LopHocPhanModel($db);
-    $lop = $model->getChiTietLop($classId, $currentUserId);
-}
-
-// Xử lý trường hợp không tìm thấy lớp học phần
-if (!$lop) {
-    http_response_code(404);
-    ?>
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Không tìm thấy lớp học phần - StudentHub</title>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/studenthub/assets/css/sinhvien.css?v=<?= time() ?>">
-    </head>
-    <body class="sh-body">
-        <div class="sh-container">
-            <?php 
-            $sidebarPath = __DIR__ . '/../layouts/sidebar.php';
-            if (file_exists($sidebarPath)) {
-                include $sidebarPath; 
-            } 
-            ?>
-            <main class="sh-main-content">
-                <div style="background:#fff; border-radius:14px; padding:60px 30px; text-align:center; border:1px solid #e2e8f0; margin-top:20px;">
-                    <div style="font-size:48px; margin-bottom:12px;">🔍</div>
-                    <h2 style="font-size:22px; color:#1e293b; margin-bottom:8px;">Không tìm thấy thông tin lớp học phần</h2>
-                    <p style="color:#64748b; margin-bottom:24px;">Lớp học phần bạn đang tìm kiếm không tồn tại hoặc đã được gỡ bỏ khỏi hệ thống.</p>
-                    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="btn-enroll-action" style="padding:10px 22px; background:#2563eb; color:#fff; border-radius:8px; text-decoration:none; font-weight:600; display:inline-block;">
-                        &larr; Quay lại danh sách lớp học phần
-                    </a>
-                </div>
-            </main>
-        </div>
-    </body>
-    </html>
-    <?php
-    exit;
-}
-
-// 5. Chuẩn hóa dữ liệu bằng toán tử Null Coalescing (??) - chống triệt để mọi PHP Undefined key / NULL Warning
+<?php
+// Chuẩn hóa dữ liệu nhận từ Controller
 $maLop              = (string)($lop['ma_lop'] ?? 'LHP');
 $tenHocPhan         = (string)($lop['ten_hoc_phan'] ?? 'Chưa cập nhật tên');
 $maHocPhan          = (string)($lop['ma_hoc_phan'] ?? 'HP');
 $soTinChi           = (int)($lop['so_tin_chi'] ?? 0);
 $tenHocKy           = (string)($lop['ten_hoc_ky'] ?? 'Học kỳ');
 $trangThaiLop       = (string)($lop['trang_thai_lop'] ?? ($lop['trang_thai'] ?? 'mo'));
-$tenGiangVien       = (string)($lop['ten_giang_vien'] ?? 'ThS Trần Bình Trọng');
-$emailGiangVien     = (string)($lop['email_giang_vien'] ?? 'contact@studenthub.edu.vn');
+$tenGiangVien       = (string)($lop['ten_giang_vien'] ?? ($lop['ho_ten'] ?? 'Chưa phân công'));
+$emailGiangVien     = (string)($lop['email_giang_vien'] ?? ($lop['email'] ?? 'contact@studenthub.edu.vn'));
 $lichHoc            = (string)($lop['lich_hoc'] ?? 'Chưa có lịch học cố định');
 $phongHoc           = (string)($lop['phong_hoc'] ?? 'Chưa cập nhật phòng học');
 $ngayBatDau         = $lop['ngay_bat_dau'] ?? null;
 $ngayKetThuc        = $lop['ngay_ket_thuc'] ?? null;
-$loaiHocPhan        = $class['loai_hoc_phan'] ?? $lop['loai_hoc_phan'] ?? ($classInfo['loai_hoc_phan'] ?? ($hocPhan['loai_hoc_phan'] ?? 'Chuyên ngành'));
+$loaiHocPhan        = $lop['loai_hoc_phan'] ?? 'chuyen_nganh';
 $loaiHocPhanMap     = [
     'dai_cuong'    => 'Đại cương',
     'co_so_nganh'  => 'Cơ sở ngành',
@@ -164,7 +105,7 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
         <header class="sh-top-header">
             <div>
                 <div class="top-breadcrumb">
-                    <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="breadcrumb-back-link">Danh sách lớp</a> 
+                    <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php" class="breadcrumb-back-link">Danh sách lớp</a> 
                     <span style="color:#cbd5e1; margin:0 4px;">/</span> Chi tiết lớp <?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?>
                 </div>
                 <h1>Thông tin chi tiết lớp học phần</h1>
@@ -174,8 +115,8 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
             <div class="profile-pill-box">
                 <div class="profile-avatar-circle">SV</div>
                 <div class="profile-name-role">
-                    <strong><?= htmlspecialchars($hoTenSv, ENT_QUOTES, 'UTF-8') ?></strong>
-                    <span>Sinh viên • <?= htmlspecialchars($maSv, ENT_QUOTES, 'UTF-8') ?></span>
+                    <strong><?= htmlspecialchars($hoTenSv ?? 'Sinh viên', ENT_QUOTES, 'UTF-8') ?></strong>
+                    <span>Sinh viên • <?= htmlspecialchars($maSv ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             </div>
         </header>
@@ -185,8 +126,6 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
             <!-- 1. Header Môn & Trạng thái -->
             <div class="overview-header-flex">
                 <div>
-
-
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                         <span class="code-pill-blue" style="margin-bottom: 0;"><?= htmlspecialchars($maLop, ENT_QUOTES, 'UTF-8') ?></span>
                         <span class="badge-knowledge" style="display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
@@ -202,8 +141,6 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                     </p>
                 </div>
                 <div>
-
-
                     <?php if ($trangThaiLop === 'mo' && $conLai > 0): ?>
                         <span class="badge-status-open">● Đang mở đăng ký</span>
                     <?php elseif ($trangThaiLop === 'mo' && $conLai <= 0): ?>
@@ -275,8 +212,6 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                         <div class="enroll-badge-success">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <div>
-
-
                                 <strong style="display:block; margin-bottom:2px;">Bạn đã đăng ký lớp học phần này thành công!</strong>
                                 <span style="font-size:12.5px;">Thời gian ghi danh: <strong><?= date('d/m/Y \l\ú\c H:i:s', strtotime($ngayDangKyCuaBan)) ?></strong> (Suất học hợp lệ trên hệ thống).</span>
                             </div>
@@ -285,8 +220,6 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                         <div class="enroll-badge-neutral">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                             <div>
-
-
                                 <span>Bạn hiện chưa đăng ký lớp học phần này. Để ghi danh tín chỉ, vui lòng chuyển sang cổng <strong>Đăng ký học phần</strong>.</span>
                             </div>
                         </div>
@@ -299,7 +232,6 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
                 <h3 class="box-title">Đề cương &amp; Yêu cầu học thuật</h3>
                 
                 <div class="syllabus-grid">
-
                     <div class="syl-row">
                         <span class="syl-label">Mục tiêu học phần:</span>
                         <span class="syl-content"><?= nl2br(htmlspecialchars($moTaHocPhan, ENT_QUOTES, 'UTF-8')) ?></span>
@@ -317,10 +249,10 @@ $thoiGianDong       = !empty($thoiGianDongRieng) ? $thoiGianDongRieng : ($thoiGi
 
             <!-- 5. Điều hướng chân trang -->
             <div class="action-buttons-strip">
-                <a href="/studenthub/public/danh_sach_lop_hoc_phan.php" class="btn-back-link">
+                <a href="/studenthub/public/index.php?route=danh_sach_lop_hoc_phan.php" class="btn-back-link">
                     &larr; Quay lại danh sách lớp học phần
                 </a>
-                <a href="/studenthub/public/trang_dang_ky_hoc.php" class="btn-goto-enroll">
+                <a href="/studenthub/public/index.php?route=trang_dang_ky_hoc.php" class="btn-goto-enroll">
                     Đi tới cổng Đăng ký học phần &rarr;
                 </a>
             </div>

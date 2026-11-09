@@ -57,30 +57,30 @@ class AdminLopHocPhanController {
 
         switch ($action) {
             case 'create':
-                $this->create();
+                $this->create(); //Hiện form mới
                 break;
             case 'store':
-                $this->store();
+                $this->store();//Lưu lớp mới vào DB
                 break;
             case 'edit':
-                $this->edit();
+                $this->edit();//Hiện form chỉnh sửa
                 break;
             case 'update':
-                $this->update();
+                $this->update();//Lưu chỉnh sửa vào DB
                 break;
             case 'toggle':
             case 'toggle_status':
-                $this->toggleStatus();
+                $this->toggleStatus(); //Cầu dao Mở / Khóa trạng thái lớp học phần
                 break;
             case 'delete':
-                $this->delete();
+                $this->delete();//Xóa lớp học phần (Ràng buộc an toàn: Chặn nếu đã có sinh viên đăng ký)
                 break;
             case 'export_csv':
                 $this->exportCsv();
                 break;
             case 'index':
             default:
-                $this->index();
+                $this->index();//Hiển thị danh sách lớp học phần kèm bộ lọc và thống kê
                 break;
         }
     }
